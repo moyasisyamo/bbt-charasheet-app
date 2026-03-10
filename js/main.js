@@ -414,7 +414,7 @@ function getSheetState() {
         });
     });
 
-    return {
+    const rawState = {
         profileData,
         builds: {
             style:       document.getElementById('char-style').value,
@@ -434,6 +434,7 @@ function getSheetState() {
         images:  { image: charData.image, image2: charData.image2, faceIcon: charData.faceIcon },
         password: document.getElementById('char-password')?.value || '',
     };
+    return JSON.parse(JSON.stringify(rawState));
 }
 
 // ---- シート状態の復元 ----
@@ -542,6 +543,12 @@ function buildAndShowViewOverlay() {
 
     // bodyスクロール抑止
     document.body.style.overflow = 'hidden';
+
+    // 魔獣化状態の反映（UIカラー用）
+    const vmoBody = ov.querySelector('.vmo-body');
+    if (vmoBody) {
+        vmoBody.classList.toggle('is-beast', !!window.isBeastMode);
+    }
 
     // -- スタイル情報 --
     const style = gVal('char-style') || '';
