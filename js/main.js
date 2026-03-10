@@ -40,9 +40,10 @@ document.addEventListener('DOMContentLoaded', () => {
     function initApp() {
 
         // ---- グローバル状態 ----
-        window.charData    = { mods: {}, image: null, image2: null };
+        window.charData    = { mods: {}, image: null, image2: null, faceIcon: null };
         window.isBeastMode = false;
         window.isEditMode  = true;
+        window.currentCharId = new URLSearchParams(location.search).get('id') || null;
 
         // ---- テーマ切り替え ----
         const themeBtn = document.getElementById('theme-toggle');
@@ -253,7 +254,244 @@ document.addEventListener('DOMContentLoaded', () => {
                 .catch(() => alert('コピーに失敗しました。'));
         });
 
+        // ---- 顔アイコン処理 ----
+        const faceContainer = document.getElementById('face-icon-container');
+        const faceUpload    = document.getElementById('face-icon-upload');
+        const facePlaceholder = document.getElementById('face-icon-placeholder');
+        const facePreview   = document.getElementById('face-icon-preview');
+        const faceView      = document.getElementById('face-icon-view');
+        const faceClearBtn  = document.getElementById('clear-face-icon');
+
+        if (faceContainer) {
+            faceContainer.addEventListener('click', () => faceUpload.click());
+            faceUpload.addEventListener('change', e => {
+                const file = e.target.files[0];
+                if (!file) return;
+                const img = new Image();
+                const url = URL.createObjectURL(file);
+                img.onload = () => {
+                    const SIZE = 54;
+                    const canvas = document.createElement('canvas');
+                    canvas.width = SIZE; canvas.height = SIZE;
+                    const ctx = canvas.getContext('2d');
+                    const sq = Math.min(img.width, img.height);
+                    const sx = (img.width - sq) / 2, sy = (img.height - sq) / 2;
+                    ctx.drawImage(img, sx, sy, sq, sq, 0, 0, SIZE, SIZE);
+                    charData.faceIcon = canvas.toDataURL('image/jpeg', 0.9);
+                    facePreview.src = charData.faceIcon;
+                    facePreview.style.display = 'block';
+                    facePlaceholder.style.display = 'none';
+                    faceClearBtn.style.display = '';
+                    if (faceView) { faceView.src = charData.faceIcon; }
+                    URL.revokeObjectURL(url);
+                };
+                img.src = url;
+            });
+            faceClearBtn.addEventListener('click', e => {
+                e.stopPropagation();
+                charData.faceIcon = null;
+                facePreview.src = ''; facePreview.style.display = 'none';
+                facePlaceholder.style.display = '';
+                faceClearBtn.style.display = 'none';
+                if (faceView) faceView.style.display = 'none';
+                faceUpload.value = '';
+            });
+        }
+
+        // ---- Firebase 保存ボタン ----
+        const saveBtn = document.getElementById('save-firebase-btn');
+        if (saveBtn) {
+            const fbReady = typeof window.bbFirebase !== 'undefined' && window.bbFirebase.init();
+            if (!fbReady) {
+                saveBtn.title = 'Firebase未設定のため無効';
+                saveBtn.style.opacity = '0.4';
+                saveBtn.style.cursor = 'not-allowed';
+            }
+            saveBtn.addEventListener('click', async () => {
+                if (!fbReady) { alert('Firebase が設定されていません。js/firebase-config.js を確認してください。'); return; }
+                saveBtn.textContent = '保存中...';
+                saveBtn.disabled = true;
+                try {
+                    const pRoot = document.getElementById('primary-root').value;
+                    const sRoot = document.getElementById('secondary-root').value;
+                    const tRoot = document.getElementById('tertiary-root').value;
+                    const summary = {
+                        name:          document.getElementById('char-name').value || '名無し',
+                        playerName:    document.getElementById('player-name').value || '',
+                        style:         document.getElementById('char-style').value || '',
+                        primaryRoot:   pRoot,
+                        primaryBlood:  BBTData.getRoot(pRoot)?.['\u30d6\u30e9\u30c3\u30c9\u540d'] || '',
+                        secondaryRoot: sRoot,
+                        secondaryBlood:BBTData.getRoot(sRoot)?.['\u30d6\u30e9\u30c3\u30c9\u540d'] || '',
+                        tertiaryRoot:  tRoot,
+                        tertiaryBlood: BBTData.getRoot(tRoot)?.['\u30d6\u30e9\u30c3\u30c9\u540d'] || '',
+                        xpUsed:        parseInt(document.getElementById('total-xp-used').textContent) || 0,
+                        faceIcon:      charData.faceIcon || null,
+                    };
+                    const sheetData = getSheetState();
+                    const newId = await window.bbFirebase.save(window.currentCharId, summary, sheetData);
+                    if (!window.currentCharId) {
+                        window.currentCharId = newId;
+                        history.replaceState({}, '', `?id=${newId}`);
+                    }
+                    saveBtn.innerHTML = '\u2714 \u4fdd\u5b58\u6e08<br><span style="font-size:0.75rem;">(\u30af\u30e9\u30a6\u30c9)</span>';
+                    saveBtn.style.background = '#388e3c';
+                    setTimeout(() => {
+                        saveBtn.innerHTML = '\u2601 \u4fdd\u5b58<br><span style="font-size:0.75rem;">(\u30af\u30e9\u30a6\u30c9)</span>';
+                        saveBtn.style.background = '#4caf50';
+                        saveBtn.disabled = false;
+                    }, 2000);
+                } catch (err) {
+                    alert('保存に失敗しました: ' + err.message);
+                    saveBtn.innerHTML = '\u2601 \u4fdd\u5b58<br><span style="font-size:0.75rem;">(\u30af\u30e9\u30a6\u30c9)</span>';
+                    saveBtn.disabled = false;
+                }
+            });
+        }
+
+        // ---- URLパラメータでキャラ読み込み ----
+        if (window.currentCharId && typeof window.bbFirebase !== 'undefined' && window.bbFirebase.isReady()) {
+            window.bbFirebase.load(window.currentCharId).then(data => {
+                if (data.sheetData) restoreSheetState(data.sheetData);
+            }).catch(err => console.warn('キャラ読み込みエラー:', err));
+        }
+
         // ---- 初期計算 ----
         calculateStats();
     }
 });
+
+// ---- シート状態の直列化 ----
+function getSheetState() {
+    const profileEls = document.querySelectorAll('.profile-input');
+    const profileData = [];
+    profileEls.forEach(el => profileData.push({ id: el.id || null, name: el.name || null, val: el.value }));
+
+    const growth = {};
+    ['body','tech','emo','div','soc','melee','ranged','dodge','action'].forEach(id => {
+        const el = document.getElementById(`growth-${id}`);
+        if (el) growth[id] = el.value;
+    });
+
+    const mods = {};
+    ['body','tech','emo','div','soc','melee','ranged','dodge','action','armor','fp','humanity'].forEach(stat => {
+        ['normal','beast'].forEach(mode => {
+            const el = document.getElementById(`mod-${stat}-${mode}`);
+            if (el) mods[`${stat}-${mode}`] = el.value;
+        });
+    });
+
+    return {
+        profileData,
+        builds: {
+            style:       document.getElementById('char-style').value,
+            primaryRoot: document.getElementById('primary-root').value,
+            secondaryRoot: document.getElementById('secondary-root').value,
+            tertiaryRoot:  document.getElementById('tertiary-root').value,
+            freeStat:    document.getElementById('free-stat').value,
+            proficiency: document.querySelector('input[name="proficiency-choice"]:checked')?.value || 'primary',
+        },
+        tertiaryVisible: document.getElementById('tertiary-root-container')?.style.display !== 'none',
+        growth,
+        mods,
+        arts:    acquiredArts.map(a => ({...a})),
+        weapons: acquiredWeapons.map(w => ({...w})),
+        armor:   acquiredArmor.map(a  => ({...a})),
+        items:   acquiredItems.map(i  => ({...i})),
+        images:  { image: charData.image, image2: charData.image2, faceIcon: charData.faceIcon },
+        password: document.getElementById('char-password')?.value || '',
+    };
+}
+
+// ---- シート状態の復元 ----
+function restoreSheetState(state) {
+    if (!state) return;
+
+    // プロフィールフィールド復元
+    if (state.profileData) {
+        const els = document.querySelectorAll('.profile-input');
+        state.profileData.forEach((saved, i) => {
+            if (els[i]) els[i].value = saved.val;
+        });
+    }
+
+    // ビルド設定
+    if (state.builds) {
+        const { style, primaryRoot, secondaryRoot, tertiaryRoot, freeStat, proficiency } = state.builds;
+        if (style) document.getElementById('char-style').value = style;
+        if (primaryRoot) document.getElementById('primary-root').value = primaryRoot;
+        if (secondaryRoot) document.getElementById('secondary-root').value = secondaryRoot;
+        if (tertiaryRoot) {
+            document.getElementById('tertiary-root').value = tertiaryRoot;
+            if (state.tertiaryVisible) {
+                document.getElementById('tertiary-root-container').style.display = 'block';
+                document.getElementById('add-tertiary-container').style.display = 'none';
+            }
+        }
+        if (freeStat) document.getElementById('free-stat').value = freeStat;
+        const radio = document.querySelector(`input[name="proficiency-choice"][value="${proficiency || 'primary'}"]`);
+        if (radio) radio.checked = true;
+    }
+
+    // 成長値
+    if (state.growth) {
+        Object.entries(state.growth).forEach(([id, v]) => {
+            const el = document.getElementById(`growth-${id}`);
+            if (el) el.value = v;
+        });
+    }
+
+    // 手動補正
+    if (state.mods) {
+        Object.entries(state.mods).forEach(([key, v]) => {
+            const el = document.getElementById(`mod-${key}`);
+            if (el) el.value = v;
+        });
+    }
+
+    // 画像
+    if (state.images) {
+        if (state.images.faceIcon) {
+            charData.faceIcon = state.images.faceIcon;
+            const fp = document.getElementById('face-icon-preview');
+            const ph = document.getElementById('face-icon-placeholder');
+            const cb = document.getElementById('clear-face-icon');
+            const fv = document.getElementById('face-icon-view');
+            if (fp) { fp.src = charData.faceIcon; fp.style.display = 'block'; }
+            if (ph) ph.style.display = 'none';
+            if (cb) cb.style.display = '';
+            if (fv) { fv.src = charData.faceIcon; fv.style.display = 'block'; }
+        }
+        ['image','image2'].forEach(key => {
+            if (!state.images[key]) return;
+            charData[key] = state.images[key];
+            const sfx = key === 'image' ? '' : '2';
+            const pv = document.getElementById(`char-image-preview${sfx}`);
+            const pl = document.getElementById(`char-image-placeholder${sfx}`);
+            const cl = document.getElementById(`clear-image-btn${sfx}`);
+            if (pv) { pv.src = charData[key]; pv.style.display = 'block'; }
+            if (pl) pl.style.display = 'none';
+            if (cl) cl.style.display = 'block';
+        });
+    }
+
+    // アーツ復元
+    window.acquiredArts = (state.arts || []).map(a => ({...a}));
+    renderArtsTable();
+
+    // 装備復元
+    ['weapons','armor','items'].forEach(type => {
+        (state[type] || []).forEach(item => addEquipToTable(item, type === 'weapons' ? 'weapons' : type === 'armor' ? 'armor' : 'items'));
+    });
+
+    // パスワード
+    if (state.password) {
+        const pw = document.getElementById('char-password');
+        if (pw) pw.value = state.password;
+    }
+
+    calculateStats();
+}
+
+window.getSheetState     = getSheetState;
+window.restoreSheetState = restoreSheetState;
