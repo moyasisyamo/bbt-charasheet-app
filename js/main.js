@@ -1,60 +1,65 @@
 ﻿/**
- * main.js (繧ｨ繝ｳ繝医Μ繝ｼ繝昴う繝ｳ繝・
- * 繧｢繝励Μ蛻晄悄蛹悶・UI繧ｻ繝・ヨ繧｢繝・・繝ｻ繧､繝吶Φ繝医ヰ繧､繝ｳ繝峨ｒ諡・ｽ薙☆繧九・ * 螳滄圀縺ｮ險育ｮ怜・逅・・ stats.js縲√い繝ｼ繝・・ arts.js縲∬｣・ｙ縺ｯ equipment.js 縺ｫ蟋碑ｭｲ縲・ * 繝・・繧ｿ隱ｭ縺ｿ霎ｼ縺ｿ縺ｯ loader.js 縺ｫ蟋碑ｭｲ縲・ */
+ * main.js (エントリーポイント)
+ * アプリ初期化・UIセットアップ・イベントバインドを担当する。
+ * 実際の計算処理は stats.js、アーツは arts.js、装備は equipment.js に委譲。
+ * データ読み込みは loader.js に委譲。
+ */
 document.addEventListener('DOMContentLoaded', () => {
 
-    // ---- 繝ｭ繝ｼ繝・ぅ繝ｳ繧ｰ逕ｻ髱｢陦ｨ遉ｺ ----
+    // ---- ローディング画面表示 ----
     const appContainer = document.querySelector('.app-container');
     const loader = document.createElement('div');
     loader.id = 'app-loader';
     loader.innerHTML = `
         <div style="text-align:center; padding: 60px 20px; color: var(--text-color);">
-            <div style="font-size: 3rem; margin-bottom: 20px;">笞・/div>
-            <div style="font-size: 1.2rem; margin-bottom: 10px;">繝・・繧ｿ繧定ｪｭ縺ｿ霎ｼ繧薙〒縺・∪縺・..</div>
-            <div id="loader-detail" style="font-size: 0.85rem; color: var(--text-muted);">CSV繝輔ぃ繧､繝ｫ繧貞叙蠕嶺ｸｭ</div>
+            <div style="font-size: 3rem; margin-bottom: 20px;">⚔</div>
+            <div style="font-size: 1.2rem; margin-bottom: 10px;">データを読み込んでいます...</div>
+            <div id="loader-detail" style="font-size: 0.85rem; color: var(--text-muted);">CSVファイルを取得中</div>
         </div>`;
     loader.style.cssText = 'position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:var(--bg-color);z-index:9999;';
     document.body.appendChild(loader);
 
-    // ---- 繝・・繧ｿ繝ｭ繝ｼ繝・竊・繧｢繝励Μ蛻晄悄蛹・----
+    // ---- データロード → アプリ初期化 ----
     loadAllData(
-        () => { // 謌仙粥
+        () => { // 成功
             loader.remove();
             initApp();
         },
-        (err) => { // 螟ｱ謨・            const msg = `縲舌お繝ｩ繝ｼ縲代ョ繝ｼ繧ｿCSV縺ｮ隱ｭ縺ｿ霎ｼ縺ｿ縺ｫ螟ｱ謨励＠縺ｾ縺励◆縲・n\n繝ｭ繝ｼ繧ｫ繝ｫ繧ｵ繝ｼ繝舌・邨檎罰縺ｧ繧｢繧ｯ繧ｻ繧ｹ縺励※縺・ｋ縺狗｢ｺ隱阪＠縺ｦ縺上□縺輔＞縲・n  萓・ npx serve .\n\n隧ｳ邏ｰ: ${err.message}`;
+        (err) => { // 失敗
+            const msg = `【エラー】データCSVの読み込みに失敗しました。\n\nローカルサーバー経由でアクセスしているか確認してください。\n  例: npx serve .\n\n詳細: ${err.message}`;
             loader.innerHTML = `<div style="padding:20px;color:#ff5277;max-width:600px;text-align:left;">
-                <h2>笞 繝・・繧ｿ隱ｭ縺ｿ霎ｼ縺ｿ繧ｨ繝ｩ繝ｼ</h2>
+                <h2>⚠ データ読み込みエラー</h2>
                 <pre style="white-space:pre-wrap;line-height:1.6;">${msg}</pre>
             </div>`;
         }
     );
 
     // ====================================================================
-    // 繧｢繝励Μ譛ｬ菴灘・譛溷喧
+    // アプリ本体初期化
     // ====================================================================
     function initApp() {
 
-        // ---- 繧ｰ繝ｭ繝ｼ繝舌Ν迥ｶ諷・----
+        // ---- グローバル状態 ----
         window.charData    = { mods: {}, image: null, image2: null, faceIcon: null };
         window.isBeastMode = false;
         window.isEditMode  = true;
         window.currentCharId = new URLSearchParams(location.search).get('id') || null;
 
-        // ---- 繝・・繝槫・繧頑崛縺・----
+        // ---- テーマ切り替え ----
         const themeBtn = document.getElementById('theme-toggle');
-        // 蛻晄悄繝・・繝槭ｒ localStorage 縺九ｉ蠕ｩ蜈・        const savedTheme = localStorage.getItem('bbt-theme') || 'dark';
+        // 初期テーマを localStorage から復元
+        const savedTheme = localStorage.getItem('bbt-theme') || 'dark';
         document.documentElement.setAttribute('data-theme', savedTheme);
-        themeBtn.textContent = savedTheme === 'dark' ? '笘・・繝ｩ繧､繝医Δ繝ｼ繝・ : '嫌 繝繝ｼ繧ｯ繝｢繝ｼ繝・;
+        themeBtn.textContent = savedTheme === 'dark' ? '☀️ ライトモード' : '🌙 ダークモード';
         themeBtn.addEventListener('click', () => {
             const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
             const next = isDark ? 'light' : 'dark';
             document.documentElement.setAttribute('data-theme', next);
             localStorage.setItem('bbt-theme', next);
-            themeBtn.textContent = next === 'dark' ? '笘・・繝ｩ繧､繝医Δ繝ｼ繝・ : '嫌 繝繝ｼ繧ｯ繝｢繝ｼ繝・;
+            themeBtn.textContent = next === 'dark' ? '☀️ ライトモード' : '🌙 ダークモード';
         });
 
-        // ---- 邱ｨ髮・Δ繝ｼ繝牙・繧頑崛縺・----
+        // ---- 編集モード切り替え ----
         const toggleEditBtn   = document.getElementById('toggle-edit-mode-btn');
         const passwordInput   = document.getElementById('char-password');
 
@@ -71,13 +76,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 const el = document.getElementById(id); if (el) el.style.display = '';
             });
 
-            // 髦ｲ蜈ｷ繝√ぉ繝・け繝懊ャ繧ｯ繧ｹ繧帝夢隕ｧ譎ゅ・謫堺ｽ應ｸ榊庄
+            // 防具チェックボックスを閲覧時は操作不可
             document.querySelectorAll('.normal-equip-check, .beast-equip-check').forEach(cb => {
                 cb.disabled = !edit;
                 cb.style.cursor = edit ? '' : 'not-allowed';
             });
 
-            // 髢ｲ隕ｧ譎ゅ・繧｢繝ｼ繝・悟炎髯､縲阪・陬・ｙ縲梧桃菴懊榊・繝倥ャ繝繝ｼ繧帝撼陦ｨ遉ｺ
+            // 閲覧時はアーツ「削除」・装備「操作」列ヘッダーを非表示
             const artsLastTh = document.querySelector('#arts-table thead tr th:last-child');
             if (artsLastTh) artsLastTh.style.visibility = edit ? '' : 'hidden';
             ['#weapons-table','#armor-table','#items-table'].forEach(sel => {
@@ -86,12 +91,12 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             if (edit) {
-                toggleEditBtn.innerHTML = '白 髢ｲ隕ｧ繝｢繝ｼ繝・br><span style="font-size:0.75rem;">(邱ｨ髮・Ο繝・け)</span>';
+                toggleEditBtn.innerHTML = '🔒 閲覧モード<br><span style="font-size:0.75rem;">(編集ロック)</span>';
                 toggleEditBtn.classList.replace('primary', 'warning');
                 const ov = document.getElementById('view-mode-overlay');
                 if (ov) ov.style.display = 'none';
             } else {
-                toggleEditBtn.innerHTML = '箔 邱ｨ髮・Δ繝ｼ繝・;
+                toggleEditBtn.innerHTML = '🔓 編集モード';
                 toggleEditBtn.classList.replace('warning', 'primary');
                 document.querySelectorAll('.profile-input').forEach(input => {
                     const viewEl = input.parentElement?.querySelector('.view-only-text');
@@ -111,29 +116,29 @@ document.addEventListener('DOMContentLoaded', () => {
 
         toggleEditBtn.addEventListener('click', () => {
             if (window.isEditMode) {
-                if (!passwordInput.value) { alert('邱ｨ髮・ｒ繝ｭ繝・け縺吶ｋ縺ｫ縺ｯ繝代せ繝ｯ繝ｼ繝峨ｒ險ｭ螳壹＠縺ｦ縺上□縺輔＞縲・); return; }
+                if (!passwordInput.value) { alert('編集をロックするにはパスワードを設定してください。'); return; }
                 setEditMode(false);
             } else {
-                const pass = prompt('邱ｨ髮・Δ繝ｼ繝峨↓縺吶ｋ縺溘ａ縺ｮ繝代せ繝ｯ繝ｼ繝峨ｒ蜈･蜉帙＠縺ｦ縺上□縺輔＞:');
+                const pass = prompt('編集モードにするためのパスワードを入力してください:');
                 if (pass === passwordInput.value) { setEditMode(true); }
-                else if (pass !== null) { alert('繝代せ繝ｯ繝ｼ繝峨′驕輔＞縺ｾ縺吶・); }
+                else if (pass !== null) { alert('パスワードが違います。'); }
             }
         });
 
-        // ---- 繧ｻ繝ｬ繧ｯ繧ｿ繝ｼ蛻晄悄蛹・----
+        // ---- セレクター初期化 ----
         const styleSelect         = document.getElementById('char-style');
         const primaryRootSelect   = document.getElementById('primary-root');
         const secondaryRootSelect = document.getElementById('secondary-root');
 
         BBTData.styles.forEach(s => {
-            if (s['繧ｹ繧ｿ繧､繝ｫ蜷・] === '縺ｪ縺・) return;
+            if (s['スタイル名'] === 'なし') return;
             const opt = document.createElement('option');
-            opt.value = opt.textContent = s['繧ｹ繧ｿ繧､繝ｫ蜷・];
+            opt.value = opt.textContent = s['スタイル名'];
             styleSelect.appendChild(opt);
         });
         BBTData.roots.forEach(root => {
-            const rn = root['繝ｫ繝ｼ繝・錐'], bn = root['繝悶Λ繝・ラ蜷・];
-            if (rn === '縺ｪ縺・) return;
+            const rn = root['ルーツ名'], bn = root['ブラッド名'];
+            if (rn === 'なし') return;
             ['primary-root','secondary-root','tertiary-root'].forEach(id => {
                 const opt = document.createElement('option');
                 opt.value = rn; opt.textContent = `[${bn}] ${rn}`;
@@ -141,7 +146,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
 
-        // ---- 鬲皮坤蛹門・繧頑崛縺・----
+        // ---- 魔獣化切り替え ----
         const beastBtn      = document.getElementById('beast-mode-btn');
         const adjLabel      = document.getElementById('adj-state-label');
         const normalAdjGrid = document.getElementById('normal-adj-grid');
@@ -150,28 +155,28 @@ document.addEventListener('DOMContentLoaded', () => {
         beastBtn.addEventListener('click', () => {
             window.isBeastMode = !window.isBeastMode;
             if (window.isBeastMode) {
-                beastBtn.textContent = '閥 騾壼ｸｸ蛻・ｊ譖ｿ縺・;
+                beastBtn.textContent = '🔴 通常切り替え';
                 beastBtn.classList.replace('exception-btn', 'primary');
                 document.documentElement.classList.add('beast-mode-active');
-                adjLabel.textContent = '(鬲皮坤蛹紋ｸｭ)'; adjLabel.style.color = 'var(--primary-color)';
+                adjLabel.textContent = '(魔獣化中)'; adjLabel.style.color = 'var(--primary-color)';
                 normalAdjGrid.style.display = 'none'; beastAdjGrid.style.display = 'block';
             } else {
-                beastBtn.textContent = '声 鬲皮坤蛹門・繧頑崛縺・;
+                beastBtn.textContent = '🐺 魔獣化切り替え';
                 beastBtn.classList.replace('primary', 'exception-btn');
                 document.documentElement.classList.remove('beast-mode-active');
-                adjLabel.textContent = '(騾壼ｸｸ)'; adjLabel.style.color = 'var(--text-muted)';
+                adjLabel.textContent = '(通常)'; adjLabel.style.color = 'var(--text-muted)';
                 normalAdjGrid.style.display = 'block'; beastAdjGrid.style.display = 'none';
             }
             calculateStats();
         });
 
-        // ---- 繧ｿ繝ｼ繧ｷ繝｣繝ｪ繝ｫ繝ｼ繝・ｿｽ蜉繝懊ち繝ｳ ----
+        // ---- ターシャリルーツ追加ボタン ----
         document.getElementById('add-tertiary-btn').addEventListener('click', () => {
             document.getElementById('tertiary-root-container').style.display = 'block';
             document.getElementById('add-tertiary-container').style.display = 'none';
         });
 
-        // ---- 險育ｮ励ヨ繝ｪ繧ｬ繝ｼ ----
+        // ---- 計算トリガー ----
         [styleSelect, primaryRootSelect, secondaryRootSelect,
          document.getElementById('tertiary-root'), document.getElementById('free-stat')
         ].forEach(el => el.addEventListener('change', calculateStats));
@@ -185,7 +190,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        // ---- 繝励Ο繝輔ぅ繝ｼ繝ｫ蜈･蜉・竊・繝薙Η繝ｼ蜷梧悄 ----
+        // ---- プロフィール入力 → ビュー同期 ----
         document.querySelectorAll('.profile-input-grid .edit-only-input').forEach(input => {
             input.addEventListener('input', e => {
                 const view = e.target.nextElementSibling;
@@ -200,11 +205,11 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
 
-        // ---- 繧｢繝ｼ繝・・陬・ｙ繝｢繧ｸ繝･繝ｼ繝ｫ蛻晄悄蛹・----
+        // ---- アーツ・装備モジュール初期化 ----
         initArtsDictionary();
         initEquipDictionary();
 
-        // ---- 逕ｻ蜒上い繝・・繝ｭ繝ｼ繝・----
+        // ---- 画像アップロード ----
         initImageUpload('char-image-placeholder', 'char-image-upload', 'clear-image-btn', 'char-image-preview',  'image');
         initImageUpload('char-image-placeholder2','char-image-upload2','clear-image-btn2','char-image-preview2', 'image2');
 
@@ -235,23 +240,23 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
 
-        // ---- 繧ｳ繧ｳ繝輔か繝ｪ繧｢蜃ｺ蜉・----
+        // ---- ココフォリア出力 ----
         document.getElementById('export-cocofolia-btn').addEventListener('click', () => {
             const getV  = id => parseInt(document.getElementById(id).textContent) || 0;
             const sName = document.getElementById('char-style').value;
             const pName = document.getElementById('primary-root').value;
             const secon = document.getElementById('secondary-root').value;
             const tName = document.getElementById('tertiary-root').value;
-            const charName   = document.getElementById('char-name').value || '蜷咲┌縺・;
+            const charName   = document.getElementById('char-name').value || '名無し';
             const playerName = document.getElementById('player-name').value || '';
 
-            let memo = `PL: ${playerName}\n[繧ｹ繧ｿ繧､繝ｫ] ${sName}\n[繝励Λ繧､繝槭Μ] ${pName} [繧ｻ繧ｫ繝ｳ繝繝ｪ] ${secon}`;
-            if (tName) memo += ` [繧ｿ繝ｼ繧ｷ繝｣繝ｪ] ${tName}`;
-            memo += `\n豸郁ｲｻ邨碁ｨ鍋せ: ${document.getElementById('total-xp-used').textContent}\n\n-- 繧｢繝ｼ繝・--\n`;
-            acquiredArts.forEach(a => { memo += `繝ｻ${a['繧｢繝ｼ繝・錐']} (LV${a._currentLevel||1} / ${a._rt||a['繝ｫ繝ｼ繝・]}) - ${a['蜉ｹ譫・]}\n`; });
-            memo += `\n-- 蛯吝刀 --\n`;
-            acquiredWeapons.forEach(w => memo += `繝ｻ${w._equivalentName || w['陬・ｙ蜷・]} [{${w['遞ｮ蛻･']}} 蜻ｽ:${w['蜻ｽ荳ｭ']} 謾ｻ:${w['謾ｻ謦・鴨']}] ${w['蜉ｹ譫・]}\n`);
-            acquiredArmor.forEach(a  => memo += `繝ｻ${a._equivalentName || a['陬・ｙ蜷・]} [繝峨ャ繧ｸ:${a['繝峨ャ繧ｸ']} 陦悟虚:${a['陦悟虚蛟､']}] ${a['蜉ｹ譫・]}\n`);
+            let memo = `PL: ${playerName}\n[スタイル] ${sName}\n[プライマリ] ${pName} [セカンダリ] ${secon}`;
+            if (tName) memo += ` [ターシャリ] ${tName}`;
+            memo += `\n消費経験点: ${document.getElementById('total-xp-used').textContent}\n\n-- アーツ --\n`;
+            acquiredArts.forEach(a => { memo += `・${a['アーツ名']} (LV${a._currentLevel||1} / ${a._rt||a['ルーツ']}) - ${a['効果']}\n`; });
+            memo += `\n-- 備品 --\n`;
+            acquiredWeapons.forEach(w => memo += `・${w._equivalentName || w['装備名']} [{${w['種別']}} 命:${w['命中']} 攻:${w['攻撃力']}] ${w['効果']}\n`);
+            acquiredArmor.forEach(a  => memo += `・${a._equivalentName || a['装備名']} [ドッジ:${a['ドッジ']} 行動:${a['行動値']}] ${a['効果']}\n`);
 
             const cc = {
                 kind: 'character',
@@ -261,25 +266,25 @@ document.addEventListener('DOMContentLoaded', () => {
                     externalUrl: '',
                     status: [
                         { label: 'FP',   value: getV('stat-fp'),       max: getV('stat-fp') },
-                        { label: '莠ｺ髢捺ｧ', value: getV('stat-humanity'), max: 100 },
-                        { label: '諢・,   value: 0, max: 0 },
-                        { label: '鄂ｪ',   value: 0, max: 0 },
-                        { label: '逋ｽ蜈ｵ', value: String(getV('stat-melee')) },
-                        { label: '蟆・茶', value: String(getV('stat-ranged')) },
-                        { label: '蝗樣∩', value: String(getV('stat-dodge')) },
-                        { label: '陦悟虚', value: String(getV('stat-action')) },
+                        { label: '人間性', value: getV('stat-humanity'), max: 100 },
+                        { label: '愛',   value: 0, max: 0 },
+                        { label: '罪',   value: 0, max: 0 },
+                        { label: '白兵', value: String(getV('stat-melee')) },
+                        { label: '射撃', value: String(getV('stat-ranged')) },
+                        { label: '回避', value: String(getV('stat-dodge')) },
+                        { label: '行動', value: String(getV('stat-action')) },
                     ],
-                    commands: '1D6\n2D6\n\n//---------- 繧｢繝ｼ繝・----------\n' +
-                        acquiredArts.map(a => `${a['繧｢繝ｼ繝・錐']} 縲・{a['繧ｿ繧､繝溘Φ繧ｰ']}縲大ｯｾ雎｡:${a['蟇ｾ雎｡']} / 莉｣蜆・${a['繧ｳ繧ｹ繝・]} / 蛻､螳・${a['蛻､螳壼､']} / ${a['蜉ｹ譫・]}`).join('\n'),
+                    commands: '1D6\n2D6\n\n//---------- アーツ ----------\n' +
+                        acquiredArts.map(a => `${a['アーツ名']} 【${a['タイミング']}】対象:${a['対象']} / 代償:${a['コスト']} / 判定:${a['判定値']} / ${a['効果']}`).join('\n'),
                 },
             };
 
             navigator.clipboard.writeText(JSON.stringify(cc))
-                .then(() => alert('繧ｳ繧ｳ繝輔か繝ｪ繧｢逕ｨ縺ｮ繧ｳ繝槭ョ繝ｼ繧ｿ繧偵け繝ｪ繝・・繝懊・繝峨↓繧ｳ繝斐・縺励∪縺励◆・・))
-                .catch(() => alert('繧ｳ繝斐・縺ｫ螟ｱ謨励＠縺ｾ縺励◆縲・));
+                .then(() => alert('ココフォリア用のコマデータをクリップボードにコピーしました！'))
+                .catch(() => alert('コピーに失敗しました。'));
         });
 
-        // ---- 鬘斐い繧､繧ｳ繝ｳ蜃ｦ逅・----
+        // ---- 顔アイコン処理 ----
         const faceContainer = document.getElementById('face-icon-container');
         const faceUpload    = document.getElementById('face-icon-upload');
         const facePlaceholder = document.getElementById('face-icon-placeholder');
@@ -323,25 +328,25 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
 
-        // ---- Firebase 菫晏ｭ倥・繧ｿ繝ｳ ----
+        // ---- Firebase 保存ボタン ----
         const saveBtn = document.getElementById('save-firebase-btn');
         if (saveBtn) {
             const fbReady = typeof window.bbFirebase !== 'undefined' && window.bbFirebase.init();
             if (!fbReady) {
-                saveBtn.title = 'Firebase譛ｪ險ｭ螳壹・縺溘ａ辟｡蜉ｹ';
+                saveBtn.title = 'Firebase未設定のため無効';
                 saveBtn.style.opacity = '0.4';
                 saveBtn.style.cursor = 'not-allowed';
             }
             saveBtn.addEventListener('click', async () => {
-                if (!fbReady) { alert('Firebase 縺瑚ｨｭ螳壹＆繧後※縺・∪縺帙ｓ縲Ｋs/firebase-config.js 繧堤｢ｺ隱阪＠縺ｦ縺上□縺輔＞縲・); return; }
-                saveBtn.textContent = '菫晏ｭ倅ｸｭ...';
+                if (!fbReady) { alert('Firebase が設定されていません。js/firebase-config.js を確認してください。'); return; }
+                saveBtn.textContent = '保存中...';
                 saveBtn.disabled = true;
                 try {
                     const pRoot = document.getElementById('primary-root').value;
                     const sRoot = document.getElementById('secondary-root').value;
                     const tRoot = document.getElementById('tertiary-root').value;
                     const summary = {
-                        name:          document.getElementById('char-name').value || '蜷咲┌縺・,
+                        name:          document.getElementById('char-name').value || '名無し',
                         playerName:    document.getElementById('player-name').value || '',
                         style:         document.getElementById('char-style').value || '',
                         primaryRoot:   pRoot,
@@ -367,28 +372,29 @@ document.addEventListener('DOMContentLoaded', () => {
                         saveBtn.disabled = false;
                     }, 2000);
                 } catch (err) {
-                    alert('菫晏ｭ倥↓螟ｱ謨励＠縺ｾ縺励◆: ' + err.message);
+                    alert('保存に失敗しました: ' + err.message);
                     saveBtn.innerHTML = '\u2601 \u4fdd\u5b58<br><span style="font-size:0.75rem;">(\u30af\u30e9\u30a6\u30c9)</span>';
                     saveBtn.disabled = false;
                 }
             });
         }
 
-        // ---- URL繝代Λ繝｡繝ｼ繧ｿ縺ｧ繧ｭ繝｣繝ｩ隱ｭ縺ｿ霎ｼ縺ｿ・医Ο繝薙・邨檎罰縺ｪ繧蛾夢隕ｧ繝｢繝ｼ繝峨〒髢九￥・・----
+        // ---- URLパラメータでキャラ読み込み（ロビー経由なら閲覧モードで開く） ----
         if (window.currentCharId && typeof window.bbFirebase !== 'undefined' && window.bbFirebase.isReady()) {
             window.bbFirebase.load(window.currentCharId).then(data => {
                 if (data.sheetData) restoreSheetState(data.sheetData);
-                // 繝ｭ繝薙・縺九ｉ譚･縺溷ｴ蜷医・髢ｲ隕ｧ繝｢繝ｼ繝峨〒髢九￥・医ヱ繧ｹ繝ｯ繝ｼ繝峨メ繧ｧ繝・け荳崎ｦ・ｼ・                // 窶ｻ縲檎ｷｨ髮・＠縺溘＞蝣ｴ蜷医・邱ｨ髮・Δ繝ｼ繝峨・繧ｿ繝ｳ繧呈款縺励※繝代せ繝ｯ繝ｼ繝峨ｒ蜈･蜉帙阪→縺・≧UX
+                // ロビーから来た場合は閲覧モードで開く（パスワードチェック不要）
+                // ※「編集したい場合は編集モードボタンを押してパスワードを入力」というUX
                 setEditMode(false);
-            }).catch(err => console.warn('繧ｭ繝｣繝ｩ隱ｭ縺ｿ霎ｼ縺ｿ繧ｨ繝ｩ繝ｼ:', err));
+            }).catch(err => console.warn('キャラ読み込みエラー:', err));
         }
 
-        // ---- 蛻晄悄險育ｮ・----
+        // ---- 初期計算 ----
         calculateStats();
     }
 });
 
-// ---- 繧ｷ繝ｼ繝育憾諷九・逶ｴ蛻怜喧 ----
+// ---- シート状態の直列化 ----
 function getSheetState() {
     const profileEls = document.querySelectorAll('.profile-input');
     const profileData = [];
@@ -430,18 +436,20 @@ function getSheetState() {
     };
 }
 
-// ---- 繧ｷ繝ｼ繝育憾諷九・蠕ｩ蜈・----
+// ---- シート状態の復元 ----
 function restoreSheetState(state) {
     if (!state) return;
 
-    // 繝励Ο繝輔ぅ繝ｼ繝ｫ繝輔ぅ繝ｼ繝ｫ繝牙ｾｩ蜈・    if (state.profileData) {
+    // プロフィールフィールド復元
+    if (state.profileData) {
         const els = document.querySelectorAll('.profile-input');
         state.profileData.forEach((saved, i) => {
             if (els[i]) els[i].value = saved.val;
         });
     }
 
-    // 繝薙Ν繝芽ｨｭ螳・    if (state.builds) {
+    // ビルド設定
+    if (state.builds) {
         const { style, primaryRoot, secondaryRoot, tertiaryRoot, freeStat, proficiency } = state.builds;
         if (style) document.getElementById('char-style').value = style;
         if (primaryRoot) document.getElementById('primary-root').value = primaryRoot;
@@ -458,7 +466,7 @@ function restoreSheetState(state) {
         if (radio) radio.checked = true;
     }
 
-    // 謌宣聞蛟､
+    // 成長値
     if (state.growth) {
         Object.entries(state.growth).forEach(([id, v]) => {
             const el = document.getElementById(`growth-${id}`);
@@ -466,7 +474,7 @@ function restoreSheetState(state) {
         });
     }
 
-    // 謇句虚陬懈ｭ｣
+    // 手動補正
     if (state.mods) {
         Object.entries(state.mods).forEach(([key, v]) => {
             const el = document.getElementById(`mod-${key}`);
@@ -474,7 +482,8 @@ function restoreSheetState(state) {
         });
     }
 
-    // 逕ｻ蜒・    if (state.images) {
+    // 画像
+    if (state.images) {
         if (state.images.faceIcon) {
             charData.faceIcon = state.images.faceIcon;
             const fp = document.getElementById('face-icon-preview');
@@ -499,14 +508,17 @@ function restoreSheetState(state) {
         });
     }
 
-    // 繧｢繝ｼ繝・ｾｩ蜈・    window.acquiredArts = (state.arts || []).map(a => ({...a}));
+    // アーツ復元
+    window.acquiredArts = (state.arts || []).map(a => ({...a}));
     renderArtsTable();
 
-    // 陬・ｙ蠕ｩ蜈・    ['weapons','armor','items'].forEach(type => {
+    // 装備復元
+    ['weapons','armor','items'].forEach(type => {
         (state[type] || []).forEach(item => addEquipToTable(item, type === 'weapons' ? 'weapons' : type === 'armor' ? 'armor' : 'items'));
     });
 
-    // 繝代せ繝ｯ繝ｼ繝・    if (state.password) {
+    // パスワード
+    if (state.password) {
         const pw = document.getElementById('char-password');
         if (pw) pw.value = state.password;
     }
@@ -518,7 +530,8 @@ window.getSheetState     = getSheetState;
 window.restoreSheetState = restoreSheetState;
 
 // ====================================================================
-// 髢ｲ隕ｧ繝｢繝ｼ繝峨が繝ｼ繝舌・繝ｬ繧､讒狗ｯ・// ====================================================================
+// 閲覧モードオーバーレイ構築
+// ====================================================================
 function buildAndShowViewOverlay() {
     const ov = document.getElementById('view-mode-overlay');
     if (!ov) return;
@@ -527,38 +540,37 @@ function buildAndShowViewOverlay() {
     const gVal = id => { const e = g(id); return e ? e.value || '' : ''; };
     const gTxt = id => { const e = g(id); return e ? (e.textContent || '').trim() : ''; };
 
-    // -- 繝・・繝槫酔譛・& body 繧ｹ繧ｯ繝ｭ繝ｼ繝ｫ謚第ｭ｢ --
-    const currentTheme = document.documentElement.getAttribute('data-theme') || 'dark';
-    document.documentElement.setAttribute('data-theme', currentTheme);
+    // bodyスクロール抑止
     document.body.style.overflow = 'hidden';
 
-    // -- 繧ｹ繧ｿ繧､繝ｫ諠・ｱ --
+    // -- スタイル情報 --
     const style = gVal('char-style') || '';
-    const STYLE_MAP = { '繧｢繧ｿ繝・き繝ｼ': 'ATK', '繝・ぅ繝輔ぉ繝ｳ繝繝ｼ': 'DEF', '繧ｵ繝昴・繧ｿ繝ｼ': 'SUP' };
+    const STYLE_MAP = { 'アタッカー': 'ATK', 'ディフェンダー': 'DEF', 'サポーター': 'SUP' };
     const styleBadge = STYLE_MAP[style] || style.slice(0,3).toUpperCase() || '---';
     ov.setAttribute('data-vmo-style', style);
 
-    // -- 繝舌ャ繧ｸ繝ｻ蜷榊燕 --
+    // -- バッジ --
     const badge = g('vmo-style-badge');
     if (badge) badge.textContent = styleBadge;
 
+    // -- ブラッド名・キャラ名 --
     const pRoot  = gVal('primary-root');
-    const pBlood = (typeof BBTData !== 'undefined') ? (BBTData.getRoot(pRoot)?.['繝悶Λ繝・ラ蜷・] || '') : '';
+    const pBlood = (typeof BBTData !== 'undefined') ? (BBTData.getRoot(pRoot) ? BBTData.getRoot(pRoot)['ブラッド名'] || '' : '') : '';
     const bloodLabel = g('vmo-blood-label');
     if (bloodLabel) bloodLabel.textContent = pBlood;
 
     const nameDisp = g('vmo-char-name-disp');
-    if (nameDisp) nameDisp.textContent = gVal('char-name') || '蜷咲┌縺・;
+    if (nameDisp) nameDisp.textContent = gVal('char-name') || '名無し';
     const demonDisp = g('vmo-demon-name-disp');
-    if (demonDisp) { const dn = gVal('char-demon-name'); demonDisp.textContent = dn ? `縲・{dn}縲疏 : ''; }
+    if (demonDisp) { const dn = gVal('char-demon-name'); demonDisp.textContent = dn ? '\u300c' + dn + '\u300d' : ''; }
     const playerDisp = g('vmo-player-name-disp');
-    if (playerDisp) { const pn = gVal('player-name'); playerDisp.textContent = pn ? `PL: ${pn}` : ''; }
+    if (playerDisp) { const pn = gVal('player-name'); playerDisp.textContent = pn ? 'PL: ' + pn : ''; }
 
-    // -- 邨碁ｨ鍋せ・亥ｷｦ繝代ロ繝ｫ・・-
+    // -- 経験点（左パネル）--
     const xpVal = g('vmo-xp-val');
     if (xpVal) xpVal.textContent = gTxt('total-xp-used') || '0';
 
-    // -- 繧ｭ繝｣繝ｩ逕ｻ蜒・--
+    // -- キャラ画像 --
     const artEl = g('vmo-char-art');
     if (artEl) {
         const src = (window.isBeastMode && charData.image2) ? charData.image2 : charData.image;
@@ -566,217 +578,211 @@ function buildAndShowViewOverlay() {
         artEl.style.display = src ? 'block' : 'none';
     }
 
-    // -- 繝ｫ繝ｼ繝・ヱ繝阪Ν --
+    // -- ルーツパネル --
     const rootsPanel = g('vmo-roots-panel');
     if (rootsPanel) {
         rootsPanel.innerHTML = '';
         const sRoot = gVal('secondary-root');
         const tRoot = gVal('tertiary-root');
-        [[pRoot,'繝励Λ繧､繝槭Μ'],[sRoot,'繧ｻ繧ｫ繝ｳ繝繝ｪ'],[tRoot,'繧ｿ繝ｼ繧ｷ繝｣繝ｪ']].forEach(([r, role]) => {
+        [[pRoot, 'プライマリ'], [sRoot, 'セカンダリ'], [tRoot, 'ターシャリ']].forEach(function(pair) {
+            var r = pair[0], role = pair[1];
             if (!r) return;
-            const blood = (typeof BBTData !== 'undefined') ? (BBTData.getRoot(r)?.['繝悶Λ繝・ラ蜷・] || '') : '';
-            const tag = document.createElement('div');
+            var blood = (typeof BBTData !== 'undefined') ? (BBTData.getRoot(r) ? BBTData.getRoot(r)['ブラッド名'] || '' : '') : '';
+            var tag = document.createElement('div');
             tag.className = 'vmo-root-tag';
-            tag.innerHTML = `<small>${role}</small> <strong>${blood ? blood + '/' : ''}${r}</strong>`;
+            tag.innerHTML = '<small>' + role + '</small> <strong>' + (blood ? blood + '/' : '') + r + '</strong>';
             rootsPanel.appendChild(tag);
         });
     }
 
-    // -- 蝓ｺ譛ｬ諠・ｱ・・D縺ｪ縺・profile-input 繧帝・分縺ｫ蜿門ｾ暦ｼ・-
-    // sheet.html縺ｮ鬆・ 險ｭ螳夂噪遞ｮ譌・蟷ｴ鮨｢,諤ｧ蛻･,繧ｫ繝ｴ繧｡繝ｼ,蜃ｺ閾ｪ,驍る・螟冶ｦ狗噪迚ｹ蠕ｴ,蛻晄悄邨・髢｢菫・螟臥焚隨ｬ荳谿ｵ髫・蛻晄悄邨・髢｢菫・螟臥焚隨ｬ莠梧ｮｵ髫・蛻晄悄繧ｨ繧ｴ,螟臥焚隨ｬ荳画ｮｵ髫・[繧ｭ繝｣繝ｩ險ｭ螳嗾extarea]
-    const profileGrid = g('vmo-profile-grid');
+    // -- 基本情報 --
+    // IDなし .profile-input の順序: 設定的種族[0],年齢[1],性別[2],カヴァー[3],出自[4],邂逅[5],外見的特徴[6],
+    //                               初期絆[7],関係[8],変異第一段階[9],初期絆2[10],関係2[11],変異第二段階[12],
+    //                               初期エゴ[13],変異第三段階[14],キャラ設定(textarea)[15]
+    var profileGrid = g('vmo-profile-grid');
     if (profileGrid) {
         profileGrid.innerHTML = '';
-        const profileEls = Array.from(document.querySelectorAll('.profile-input'))
-            .filter(el => !['char-name','char-demon-name','player-name','char-style',
-                            'primary-root','secondary-root','tertiary-root','free-stat'].includes(el.id));
-
-        const LABELS = [
-            '險ｭ螳夂噪遞ｮ譌・,'蟷ｴ鮨｢','諤ｧ蛻･','繧ｫ繝ｴ繧｡繝ｼ','蜃ｺ閾ｪ','驍る・,'螟冶ｦ狗噪迚ｹ蠕ｴ',
-            '蛻晄悄邨・,'髢｢菫・,'螟臥焚隨ｬ荳谿ｵ髫・,'蛻晄悄邨・ｼ・,'髢｢菫ゑｼ・,'螟臥焚隨ｬ莠梧ｮｵ髫・,
-            '蛻晄悄繧ｨ繧ｴ','螟臥焚隨ｬ荳画ｮｵ髫・
-        ];
-        // 3谿ｵ繧ｰ繝ｪ繝・ラ縺ｧ陦ｨ遉ｺ
-        const LAYOUT = [
-            // [繧､繝ｳ繝・ャ繧ｯ繧ｹ髢句ｧ・ 蛻怜ｹ・け繝ｩ繧ｹ, 繝輔Ν繝ｭ繧ｦ]
-            [0, 3, false], // 險ｭ螳夂噪遞ｮ譌上・蟷ｴ鮨｢繝ｻ諤ｧ蛻･
-            [3, 2, false], // 繧ｫ繝ｴ繧｡繝ｼ繝ｻ螟冶ｦ狗噪迚ｹ蠕ｴ・・,6逡ｪ逶ｮ・・            [7, 3, false], // 蛻晄悄邨・・髢｢菫ゅ・螟臥焚隨ｬ荳谿ｵ髫・            [10,3, false], // 蛻晄悄邨・繝ｻ髢｢菫・繝ｻ螟臥焚隨ｬ莠梧ｮｵ髫・            [13,2, false], // 蛻晄悄繧ｨ繧ｴ繝ｻ螟臥焚隨ｬ荳画ｮｵ髫・        ];
-
-        const addRow = (label, val, full=false) => {
+        var profileEls = Array.from(document.querySelectorAll('.profile-input')).filter(function(el) {
+            return !['char-name','char-demon-name','player-name','char-style',
+                     'primary-root','secondary-root','tertiary-root','free-stat'].includes(el.id);
+        });
+        var addPfRow = function(label, val, fullRow) {
             if (!val) return;
-            const row = document.createElement('div');
-            row.className = 'vmo-pf-row' + (full ? ' full-row' : '');
-            row.innerHTML = `<span class="vmo-pf-label">${label}</span><span class="vmo-pf-val">${val}</span>`;
+            var row = document.createElement('div');
+            row.className = 'vmo-pf-row' + (fullRow ? ' full-row' : '');
+            row.innerHTML = '<span class="vmo-pf-label">' + label + '</span>' +
+                            '<span class="vmo-pf-val">' + val + '</span>';
             profileGrid.appendChild(row);
         };
-
-        // 險ｭ螳夂噪遞ｮ譌上・蟷ｴ鮨｢繝ｻ諤ｧ蛻･
-        addRow('險ｭ螳夂噪遞ｮ譌・, profileEls[0]?.value);
-        addRow('蟷ｴ鮨｢', profileEls[1]?.value);
-        addRow('諤ｧ蛻･', profileEls[2]?.value);
-        // 繧ｫ繝ｴ繧｡繝ｼ繝ｻ螟冶ｦ狗噪迚ｹ蠕ｴ
-        addRow('繧ｫ繝ｴ繧｡繝ｼ', profileEls[3]?.value);
-        addRow('螟冶ｦ狗噪迚ｹ蠕ｴ', profileEls[6]?.value); // 驍る・ｒ繧ｹ繧ｭ繝・・縺励※螟冶ｦ九→縺励※陦ｨ遉ｺ
-        // 螟臥焚谿ｵ髫・        addRow('螟臥焚隨ｬ荳谿ｵ髫・, profileEls[9]?.value);
-        addRow('螟臥焚隨ｬ莠梧ｮｵ髫・, profileEls[12]?.value);
-        addRow('螟臥焚隨ｬ荳画ｮｵ髫・, profileEls[14]?.value);
-        // 邨・・繧ｨ繧ｴ
-        addRow('蛻晄悄邨・ｼ磯未菫ゑｼ・, profileEls[7]?.value && profileEls[8]?.value ? profileEls[7].value + '・・ + profileEls[8].value + '・・ : profileEls[7]?.value);
-        addRow('蛻晄悄邨・ｼ抵ｼ磯未菫ゑｼ・, profileEls[10]?.value && profileEls[11]?.value ? profileEls[10].value + '・・ + profileEls[11].value + '・・ : profileEls[10]?.value);
-        addRow('蛻晄悄繧ｨ繧ｴ', profileEls[13]?.value);
+        addPfRow('設定的種族', profileEls[0] && profileEls[0].value);
+        addPfRow('年齢',       profileEls[1] && profileEls[1].value);
+        addPfRow('性別',       profileEls[2] && profileEls[2].value);
+        addPfRow('カヴァー',   profileEls[3] && profileEls[3].value);
+        addPfRow('外見的特徴', profileEls[6] && profileEls[6].value);
+        addPfRow('変異第一段階', profileEls[9]  && profileEls[9].value);
+        addPfRow('変異第二段階', profileEls[12] && profileEls[12].value);
+        addPfRow('変異第三段階', profileEls[14] && profileEls[14].value);
+        var bond1 = (profileEls[7] && profileEls[7].value) || '';
+        var rel1  = (profileEls[8] && profileEls[8].value) || '';
+        addPfRow('初期絆（関係）', bond1 ? bond1 + (rel1 ? '（' + rel1 + '）' : '') : '');
+        var bond2 = (profileEls[10] && profileEls[10].value) || '';
+        var rel2  = (profileEls[11] && profileEls[11].value) || '';
+        addPfRow('初期絆２（関係）', bond2 ? bond2 + (rel2 ? '（' + rel2 + '）' : '') : '');
+        addPfRow('初期エゴ', profileEls[13] && profileEls[13].value);
     }
 
-    // -- 閭ｽ蜉帛､繝代ロ繝ｫ --
-    // 陦ｨ遉ｺ蠖｢蠑・ 閭ｽ蜉帛､/繝懊・繝翫せ蛟､・・loor(閭ｽ蜉帛､/3)・・    const statsWrap = g('vmo-stats-wrap');
+    // -- 能力値パネル --
+    var statsWrap = g('vmo-stats-wrap');
     if (statsWrap) {
         statsWrap.innerHTML = '';
-
-        const makeRow = (cols, items) => {
-            const row = document.createElement('div');
-            row.className = `vmo-stats-row vmo-stats-row-${cols}`;
-            items.forEach(s => {
-                const rawVal = parseInt(gTxt(s.id)) || 0;
-                const bonus = s.bonus ? Math.floor(rawVal / 3) : null;
-                const card = document.createElement('div');
+        var makeStatRow = function(cols, items) {
+            var row = document.createElement('div');
+            row.className = 'vmo-stats-row vmo-stats-row-' + cols;
+            items.forEach(function(s) {
+                var rawVal = parseInt(gTxt(s.id)) || 0;
+                var card = document.createElement('div');
                 card.className = 'vmo-stat-card' + (s.hi ? ' highlight' : '');
-                const bonusHtml = bonus !== null
-                    ? `<div class="vmo-stat-bonus">繝懊・繝翫せ ${bonus}</div>`
-                    : '';
-                card.innerHTML = `<div class="vmo-stat-name">${s.name}</div><div class="vmo-stat-val">${rawVal}</div>${bonusHtml}`;
+                var bonusHtml = s.bonus ? '<div class="vmo-stat-bonus">ボーナス ' + Math.floor(rawVal / 3) + '</div>' : '';
+                card.innerHTML = '<div class="vmo-stat-name">' + s.name + '</div>' +
+                                 '<div class="vmo-stat-val">' + rawVal + '</div>' + bonusHtml;
                 row.appendChild(card);
             });
             statsWrap.appendChild(row);
         };
-
-        // 陦・: 閧我ｽ薙・謚陦薙・諢滓ュ繝ｻ蜉隴ｷ繝ｻ遉ｾ莨夲ｼ医・繝ｼ繝翫せ蛟､莉倥″・・        makeRow(5, [
-            { id: 'stat-body',  name: '閧我ｽ・,  bonus: true },
-            { id: 'stat-tech',  name: '謚陦・,  bonus: true },
-            { id: 'stat-emo',   name: '諢滓ュ',  bonus: true },
-            { id: 'stat-div',   name: '蜉隴ｷ',  bonus: true },
-            { id: 'stat-soc',   name: '遉ｾ莨・,  bonus: true },
+        // 行1: 肉体・技術・感情・加護・社会（ボーナス付き）
+        makeStatRow(5, [
+            {id:'stat-body', name:'肉体', bonus:true},
+            {id:'stat-tech', name:'技術', bonus:true},
+            {id:'stat-emo',  name:'感情', bonus:true},
+            {id:'stat-div',  name:'加護', bonus:true},
+            {id:'stat-soc',  name:'社会', bonus:true}
         ]);
-        // 陦・: 逋ｽ蜈ｵ蛟､繝ｻ蟆・茶蛟､繝ｻ蝗樣∩蛟､繝ｻ陦悟虚蛟､
-        makeRow(4, [
-            { id: 'stat-melee',  name: '逋ｽ蜈ｵ蛟､'  },
-            { id: 'stat-ranged', name: '蟆・茶蛟､'  },
-            { id: 'stat-dodge',  name: '蝗樣∩蛟､'  },
-            { id: 'stat-action', name: '陦悟虚蛟､'  },
+        // 行2: 白兵値・射撃値・回避値・行動値
+        makeStatRow(4, [
+            {id:'stat-melee',  name:'白兵値'},
+            {id:'stat-ranged', name:'射撃値'},
+            {id:'stat-dodge',  name:'回避値'},
+            {id:'stat-action', name:'行動値'}
         ]);
-        // 陦・: FP繝ｻ莠ｺ髢捺ｧ・・arge highlight・・        makeRow(2, [
-            { id: 'stat-fp',       name: 'FP',   hi: true },
-            { id: 'stat-humanity', name: '莠ｺ髢捺ｧ', hi: true },
+        // 行3: FP・人間性（大きく表示）
+        makeStatRow(2, [
+            {id:'stat-fp',       name:'FP',   hi:true},
+            {id:'stat-humanity', name:'人間性', hi:true}
         ]);
     }
 
-    // -- 繧｢繝ｼ繝・Μ繧ｹ繝・--
-    const artsList = g('vmo-arts-list');
+    // -- アーツリスト --
+    var artsList = g('vmo-arts-list');
     if (artsList) {
         artsList.innerHTML = '';
-        (window.acquiredArts || []).forEach(art => {
-            const row = document.createElement('div');
+        (window.acquiredArts || []).forEach(function(art) {
+            var row = document.createElement('div');
             row.className = 'vmo-art-row';
-            const cost = art._overrideCost !== undefined ? art._overrideCost : (art['繧ｳ繧ｹ繝・] || '-');
-            const lv   = art._currentLevel !== undefined ? art._currentLevel : 1;
-            row.innerHTML = `
-                <div class="vmo-art-header">
-                    <span class="vmo-art-name">${art['繧｢繝ｼ繝・錐']}</span>
-                    <span class="vmo-art-sub">Lv${lv} / ${art['譛螟ｧLv'] || '?'} &nbsp; ${art._rt || art['繝ｫ繝ｼ繝・] || ''} / ${art['遞ｮ蛻･'] || ''}</span>
-                    <span class="vmo-art-cost">繧ｳ繧ｹ繝・ ${cost}</span>
-                </div>
-                <div class="vmo-art-detail">
-                    <span>繧ｿ繧､繝溘Φ繧ｰ: <strong>${art['繧ｿ繧､繝溘Φ繧ｰ'] || '-'}</strong></span>
-                    <span>蛻､螳壼､: <strong>${art['蛻､螳壼､'] || '-'}</strong></span>
-                    <span>蟇ｾ雎｡: <strong>${art['蟇ｾ雎｡'] || '-'}</strong></span>
-                    <span>蟆・ｨ・ <strong>${art['蟆・ｨ・] || '-'}</strong></span>
-                </div>
-                <div class="vmo-art-effect">${art['蜉ｹ譫・] || ''}</div>
-            `;
+            var cost = art._overrideCost !== undefined ? art._overrideCost : (art['\u30b3\u30b9\u30c8'] || '-');
+            var lv   = art._currentLevel !== undefined ? art._currentLevel : 1;
+            var artName  = art['\u30a2\u30fc\u30c4\u540d'] || '';
+            var maxLv    = art['\u6700\u5927Lv'] || '?';
+            var roots    = art._rt || art['\u30eb\u30fc\u30c4'] || '';
+            var type     = art['\u7a2e\u5225'] || '';
+            var timing   = art['\u30bf\u30a4\u30df\u30f3\u30b0'] || '-';
+            var check    = art['\u5224\u5b9a\u5024'] || '-';
+            var target   = art['\u5bfe\u8c61'] || '-';
+            var range    = art['\u5c04\u7a0b'] || '-';
+            var effect   = art['\u52b9\u679c'] || '';
+            row.innerHTML =
+                '<div class="vmo-art-header">' +
+                    '<span class="vmo-art-name">' + artName + '</span>' +
+                    '<span class="vmo-art-sub">Lv' + lv + ' / ' + maxLv + ' \u00a0 ' + roots + ' / ' + type + '</span>' +
+                    '<span class="vmo-art-cost">\u30b3\u30b9\u30c8: ' + cost + '</span>' +
+                '</div>' +
+                '<div class="vmo-art-detail">' +
+                    '<span>\u30bf\u30a4\u30df\u30f3\u30b0: <strong>' + timing + '</strong></span>' +
+                    '<span>\u5224\u5b9a\u5024: <strong>' + check + '</strong></span>' +
+                    '<span>\u5bfe\u8c61: <strong>' + target + '</strong></span>' +
+                    '<span>\u5c04\u7a0b: <strong>' + range + '</strong></span>' +
+                '</div>' +
+                '<div class="vmo-art-effect">' + effect + '</div>';
             artsList.appendChild(row);
         });
-        const artsSection = g('vmo-arts-section');
-        if (artsSection) artsSection.style.display = (window.acquiredArts||[]).length ? '' : 'none';
+        var artsSection = g('vmo-arts-section');
+        if (artsSection) artsSection.style.display = (window.acquiredArts || []).length ? '' : 'none';
     }
 
-    // -- 陬・ｙ繝ｪ繧ｹ繝茨ｼ郁・蜉帛､蜷ｫ繧・・-
-    const equipList = g('vmo-equip-list');
+    // -- 装備リスト（能力値含む）--
+    var equipList = g('vmo-equip-list');
     if (equipList) {
         equipList.innerHTML = '';
-        // 豁ｦ蝎ｨ
-        (window.acquiredWeapons||[]).forEach(w => {
-            const row = document.createElement('div');
+        // 武器
+        (window.acquiredWeapons || []).forEach(function(w) {
+            var row = document.createElement('div');
             row.className = 'vmo-equip-row';
-            const name = w._equivalentName || w['陬・ｙ蜷・] || '-';
-            const stats = [
-                w['遞ｮ蛻･']  ? `遞ｮ蛻･: ${w['遞ｮ蛻･']}`   : '',
-                w['蜻ｽ荳ｭ']  ? `蜻ｽ荳ｭ: ${w['蜻ｽ荳ｭ']}`   : '',
-                w['謾ｻ謦・鴨'] ? `謾ｻ謦・鴨: ${w['謾ｻ謦・鴨']}` : '',
-                w['蟆・ｨ・]  ? `蟆・ｨ・ ${w['蟆・ｨ・]}`   : '',
-            ].filter(Boolean).join(' ・・');
-            row.innerHTML = `
-                <div class="vmo-equip-header">
-                    <span class="vmo-equip-name">${name}</span>
-                    <span class="vmo-equip-type">豁ｦ蝎ｨ</span>
-                </div>
-                ${stats ? `<div class="vmo-equip-stats">${stats}</div>` : ''}
-                ${w['蜉ｹ譫・] ? `<div class="vmo-equip-effect">${w['蜉ｹ譫・]}</div>` : ''}
-            `;
+            var name   = w._equivalentName || w['\u88c5\u5099\u540d'] || '-';
+            var stats  = [
+                w['\u7a2e\u5225']   ? '\u7a2e\u5225: '  + w['\u7a2e\u5225'] : '',
+                w['\u547d\u4e2d']   ? '\u547d\u4e2d: '  + w['\u547d\u4e2d'] : '',
+                w['\u653b\u6483\u529b'] ? '\u653b\u6483\u529b: ' + w['\u653b\u6483\u529b'] : '',
+                w['\u5c04\u7a0b']   ? '\u5c04\u7a0b: '  + w['\u5c04\u7a0b'] : ''
+            ].filter(Boolean).join(' \uff0f ');
+            row.innerHTML =
+                '<div class="vmo-equip-header">' +
+                    '<span class="vmo-equip-name">' + name + '</span>' +
+                    '<span class="vmo-equip-type">\u6b66\u5668</span>' +
+                '</div>' +
+                (stats ? '<div class="vmo-equip-stats">' + stats + '</div>' : '') +
+                (w['\u52b9\u679c'] ? '<div class="vmo-equip-effect">' + w['\u52b9\u679c'] + '</div>' : '');
             equipList.appendChild(row);
         });
-        // 髦ｲ蜈ｷ
-        (window.acquiredArmor||[]).forEach(a => {
-            const row = document.createElement('div');
+        // 防具
+        (window.acquiredArmor || []).forEach(function(a) {
+            var row = document.createElement('div');
             row.className = 'vmo-equip-row';
-            const name = a._equivalentName || a['陬・ｙ蜷・] || '-';
-            const isNorm  = a._normalEquip;
-            const isBeast = a._beastEquip;
-            const equipped = isNorm ? '縲宣壼ｸｸ譎り｣・ｙ縲・ : (isBeast ? '縲宣ｭ皮坤蛹冶｣・ｙ縲・ : '');
-            const stats = [
-                a['繝峨ャ繧ｸ']  ? `蝗樣∩: ${a['繝峨ャ繧ｸ']}` : '',
-                a['陦悟虚蛟､']  ? `陦悟虚: ${a['陦悟虚蛟､']}` : '',
-                a['A蛟､'] && a['A蛟､'] !== '0' ? `A蛟､: ${a['A蛟､']}` : '',
-                a['G蛟､'] && a['G蛟､'] !== '0' ? `G蛟､: ${a['G蛟､']}` : '',
-            ].filter(Boolean).join(' ・・');
-            row.innerHTML = `
-                <div class="vmo-equip-header">
-                    <span class="vmo-equip-name">${name}</span>
-                    <span class="vmo-equip-type">髦ｲ蜈ｷ ${equipped}</span>
-                </div>
-                ${stats ? `<div class="vmo-equip-stats">${stats}</div>` : ''}
-                ${a['蜉ｹ譫・] ? `<div class="vmo-equip-effect">${a['蜉ｹ譫・]}</div>` : ''}
-            `;
+            var name    = a._equivalentName || a['\u88c5\u5099\u540d'] || '-';
+            var equipped = a._normalEquip ? '\u3010\u901a\u5e38\u6642\u88c5\u5099\u3011' : (a._beastEquip ? '\u3010\u9b54\u7345\u5316\u88c5\u5099\u3011' : '');
+            var stats   = [
+                a['\u30c9\u30c3\u30b8']  ? '\u56de\u907f: '  + a['\u30c9\u30c3\u30b8']  : '',
+                a['\u884c\u52d5\u5024']  ? '\u884c\u52d5: '  + a['\u884c\u52d5\u5024']  : '',
+                (a['A\u5024'] && a['A\u5024'] !== '0') ? 'A\u5024: ' + a['A\u5024'] : '',
+                (a['G\u5024'] && a['G\u5024'] !== '0') ? 'G\u5024: ' + a['G\u5024'] : ''
+            ].filter(Boolean).join(' \uff0f ');
+            row.innerHTML =
+                '<div class="vmo-equip-header">' +
+                    '<span class="vmo-equip-name">' + name + '</span>' +
+                    '<span class="vmo-equip-type">\u9632\u5177 ' + equipped + '</span>' +
+                '</div>' +
+                (stats ? '<div class="vmo-equip-stats">' + stats + '</div>' : '') +
+                (a['\u52b9\u679c'] ? '<div class="vmo-equip-effect">' + a['\u52b9\u679c'] + '</div>' : '');
             equipList.appendChild(row);
         });
-        // 驕灘・
-        (window.acquiredItems||[]).forEach(i => {
-            const row = document.createElement('div');
+        // 道具
+        (window.acquiredItems || []).forEach(function(i) {
+            var row = document.createElement('div');
             row.className = 'vmo-equip-row';
-            const name = i._equivalentName || i['陬・ｙ蜷・] || '-';
-            const qty  = i._quantity !== undefined ? ` ﾃ・{i._quantity}` : '';
-            const stats = [
-                i['遞ｮ蛻･']     ? `遞ｮ蛻･: ${i['遞ｮ蛻･']}`      : '',
-                i['繧ｿ繧､繝溘Φ繧ｰ'] ? `繧ｿ繧､繝溘Φ繧ｰ: ${i['繧ｿ繧､繝溘Φ繧ｰ']}` : '',
-                i['蟇ｾ雎｡']     ? `蟇ｾ雎｡: ${i['蟇ｾ雎｡']}`      : '',
-                i['蟆・ｨ・]     ? `蟆・ｨ・ ${i['蟆・ｨ・]}`      : '',
-            ].filter(Boolean).join(' ・・');
-            row.innerHTML = `
-                <div class="vmo-equip-header">
-                    <span class="vmo-equip-name">${name}${qty}</span>
-                    <span class="vmo-equip-type">驕灘・</span>
-                </div>
-                ${stats ? `<div class="vmo-equip-stats">${stats}</div>` : ''}
-                ${i['蜉ｹ譫・] ? `<div class="vmo-equip-effect">${i['蜉ｹ譫・]}</div>` : ''}
-            `;
+            var name = i._equivalentName || i['\u88c5\u5099\u540d'] || '-';
+            var qty  = i._quantity !== undefined ? ' \u00d7' + i._quantity : '';
+            var stats = [
+                i['\u7a2e\u5225']      ? '\u7a2e\u5225: '      + i['\u7a2e\u5225']      : '',
+                i['\u30bf\u30a4\u30df\u30f3\u30b0'] ? '\u30bf\u30a4\u30df\u30f3\u30b0: ' + i['\u30bf\u30a4\u30df\u30f3\u30b0'] : '',
+                i['\u5bfe\u8c61']      ? '\u5bfe\u8c61: '      + i['\u5bfe\u8c61']      : '',
+                i['\u5c04\u7a0b']      ? '\u5c04\u7a0b: '      + i['\u5c04\u7a0b']      : ''
+            ].filter(Boolean).join(' \uff0f ');
+            row.innerHTML =
+                '<div class="vmo-equip-header">' +
+                    '<span class="vmo-equip-name">' + name + qty + '</span>' +
+                    '<span class="vmo-equip-type">\u9053\u5177</span>' +
+                '</div>' +
+                (stats ? '<div class="vmo-equip-stats">' + stats + '</div>' : '') +
+                (i['\u52b9\u679c'] ? '<div class="vmo-equip-effect">' + i['\u52b9\u679c'] + '</div>' : '');
             equipList.appendChild(row);
         });
-        const equipSection = g('vmo-equip-section');
-        const allEquipLen = (window.acquiredWeapons||[]).length + (window.acquiredArmor||[]).length + (window.acquiredItems||[]).length;
-        if (equipSection) equipSection.style.display = allEquipLen ? '' : 'none';
+        var equipSection = g('vmo-equip-section');
+        var allLen = (window.acquiredWeapons||[]).length + (window.acquiredArmor||[]).length + (window.acquiredItems||[]).length;
+        if (equipSection) equipSection.style.display = allLen ? '' : 'none';
     }
 
-    // -- 繧ｭ繝｣繝ｩ險ｭ螳・--
-    const lore = document.querySelector('textarea.profile-input');
-    const loreSection = g('vmo-lore-section');
-    const loreText    = g('vmo-lore-text');
+    // -- キャラ設定 --
+    var lore = document.querySelector('textarea.profile-input');
+    var loreSection = g('vmo-lore-section');
+    var loreText    = g('vmo-lore-text');
     if (lore && loreSection && loreText && lore.value) {
         loreText.textContent = lore.value;
         loreSection.style.display = '';
@@ -784,237 +790,59 @@ function buildAndShowViewOverlay() {
         loreSection.style.display = 'none';
     }
 
-    // -- 繝・・繝槭・繧ｿ繝ｳ險ｭ螳・--
-    const vmoThemeBtn = g('vmo-theme-btn');
+    // -- テーマボタン設定 --
+    var vmoThemeBtn = g('vmo-theme-btn');
     if (vmoThemeBtn) {
-        const curTheme = document.documentElement.getAttribute('data-theme') || 'dark';
-        vmoThemeBtn.textContent = curTheme === 'dark' ? '笘・・繝ｩ繧､繝・ : '嫌 繝繝ｼ繧ｯ';
-        vmoThemeBtn.onclick = () => {
-            g('theme-toggle')?.click();
-            const next = document.documentElement.getAttribute('data-theme') || 'dark';
-            vmoThemeBtn.textContent = next === 'dark' ? '笘・・繝ｩ繧､繝・ : '嫌 繝繝ｼ繧ｯ';
+        var curTheme = document.documentElement.getAttribute('data-theme') || 'dark';
+        vmoThemeBtn.textContent = curTheme === 'dark' ? '\u2600\ufe0f ライト' : '\ud83c\udf19 ダーク';
+        vmoThemeBtn.onclick = function() {
+            var mainThemeBtn = g('theme-toggle');
+            if (mainThemeBtn) mainThemeBtn.click();
+            var next = document.documentElement.getAttribute('data-theme') || 'dark';
+            vmoThemeBtn.textContent = next === 'dark' ? '\u2600\ufe0f ライト' : '\ud83c\udf19 ダーク';
         };
     }
 
-    // -- 邱ｨ髮・・繧ｿ繝ｳ・医ヱ繧ｹ繝ｯ繝ｼ繝芽ｪ崎ｨｼ蠢・茨ｼ・-
-    const vmoEditBtn = g('vmo-edit-btn');
+    // -- 編集ボタン（パスワード認証）--
+    var vmoEditBtn = g('vmo-edit-btn');
     if (vmoEditBtn) {
-        vmoEditBtn.onclick = () => {
-            const passwordInput = document.getElementById('char-password');
-            if (!passwordInput?.value) {
-                // 繝代せ繝ｯ繝ｼ繝画悴險ｭ螳壹・蝣ｴ蜷医・縺昴・縺ｾ縺ｾ邱ｨ髮・Δ繝ｼ繝峨∈
-                setEditMode(true);
+        vmoEditBtn.onclick = function() {
+            var passwordInput = document.getElementById('char-password');
+            if (!passwordInput || !passwordInput.value) {
                 document.body.style.overflow = '';
+                setEditMode(true);
                 return;
             }
-            const pass = prompt('邱ｨ髮・Δ繝ｼ繝峨↓縺吶ｋ縺溘ａ縺ｮ繝代せ繝ｯ繝ｼ繝峨ｒ蜈･蜉帙＠縺ｦ縺上□縺輔＞:');
+            var pass = prompt('編集モードにするためのパスワードを入力してください:');
             if (pass === passwordInput.value) {
-                setEditMode(true);
                 document.body.style.overflow = '';
+                setEditMode(true);
             } else if (pass !== null) {
-                alert('繝代せ繝ｯ繝ｼ繝峨′驕輔＞縺ｾ縺吶・);
+                alert('パスワードが違います。');
             }
         };
     }
 
-    // -- 鬲皮坤蛹悶・繧ｿ繝ｳ --
-    const vmoBeastBtn = g('vmo-beast-btn');
+    // -- 魔獣化ボタン --
+    var vmoBeastBtn = g('vmo-beast-btn');
     if (vmoBeastBtn) {
-        // 蛻晄悄迥ｶ諷九ｒ迴ｾ蝨ｨ縺ｮ繝｢繝ｼ繝峨↓蜷医ｏ縺帙ｋ
         vmoBeastBtn.classList.toggle('vmo-beast-on',  !!window.isBeastMode);
         vmoBeastBtn.classList.toggle('vmo-beast-off', !window.isBeastMode);
-        vmoBeastBtn.textContent = window.isBeastMode ? '誓 鬲皮坤蛹紋ｸｭ' : '誓 鬲皮坤蛹・;
-        vmoBeastBtn.onclick = () => {
-            // 邱ｨ髮・す繝ｼ繝医・鬲皮坤蛹悶・繧ｿ繝ｳ繧貞・驛ｨ逧・↓蜻ｼ縺ｳ蜃ｺ縺・            const mainBeastBtn = document.getElementById('beast-mode-btn');
+        vmoBeastBtn.textContent = window.isBeastMode ? '\ud83d\udc3e 魔獣化中' : '\ud83d\udc3e 魔獣化';
+        vmoBeastBtn.onclick = function() {
+            var mainBeastBtn = document.getElementById('beast-mode-btn');
             if (mainBeastBtn) mainBeastBtn.click();
-            // 陦ｨ遉ｺ譖ｴ譁ｰ
-            const now = !!window.isBeastMode;
+            var now = !!window.isBeastMode;
             vmoBeastBtn.classList.toggle('vmo-beast-on', now);
             vmoBeastBtn.classList.toggle('vmo-beast-off', !now);
-            vmoBeastBtn.textContent = now ? '誓 鬲皮坤蛹紋ｸｭ' : '誓 鬲皮坤蛹・;
-            // 逕ｻ蜒上ｂ蛻・ｊ譖ｿ縺・            const artImgEl = g('vmo-char-art');
+            vmoBeastBtn.textContent = now ? '\ud83d\udc3e 魔獣化中' : '\ud83d\udc3e 魔獣化';
+            var artImgEl = g('vmo-char-art');
             if (artImgEl) {
-                const src = (now && charData.image2) ? charData.image2 : charData.image;
+                var src = (now && charData.image2) ? charData.image2 : charData.image;
                 artImgEl.src = src || '';
                 artImgEl.style.display = src ? 'block' : 'none';
             }
         };
-    }
-
-    ov.style.display = 'flex';
-}
-
-// 髢ｲ隕ｧ繝｢繝ｼ繝峨ｒ髢峨§繧矩圀縺ｯ body overflow 繧呈綾縺・const _origSetEditMode = window.setEditMode;
-window.setEditMode = function(edit) {
-    if (edit) document.body.style.overflow = '';
-    _origSetEditMode(edit);
-};
-
-window.buildAndShowViewOverlay = buildAndShowViewOverlay;
-
-
-
-
-
-    const STYLE_MAP = { '繧｢繧ｿ繝・き繝ｼ': 'ATK', '繝・ぅ繝輔ぉ繝ｳ繝繝ｼ': 'DEF', '繧ｵ繝昴・繧ｿ繝ｼ': 'SUP' };
-    const styleBadge = STYLE_MAP[style] || style.slice(0,3).toUpperCase() || '---';
-    ov.setAttribute('data-vmo-style', style);
-
-    // -- 繝舌ャ繧ｸ繝ｻ蜷榊燕 --
-    const badge = g('vmo-style-badge');
-    if (badge) badge.textContent = styleBadge;
-
-    const pRoot = gVal('primary-root');
-    const pBlood = (typeof BBTData !== 'undefined') ? (BBTData.getRoot(pRoot)?.['繝悶Λ繝・ラ蜷・] || '') : '';
-    const bloodLabel = g('vmo-blood-label');
-    if (bloodLabel) bloodLabel.textContent = pBlood;
-
-    const nameEl = g('vmo-char-name');
-    if (nameEl) nameEl.textContent = gVal('char-name') || '蜷咲┌縺・;
-    const demonEl = g('vmo-demon-name');
-    if (demonEl) { const dn = gVal('char-demon-name'); demonEl.textContent = dn ? `縲・{dn}縲疏 : ''; }
-    const playerEl = g('vmo-player-name');
-    if (playerEl) { const pn = gVal('player-name'); playerEl.textContent = pn ? `PL: ${pn}` : ''; }
-
-    // -- 繧ｭ繝｣繝ｩ逕ｻ蜒・--
-    const artEl = g('vmo-char-art');
-    if (artEl) {
-        const src = (window.isBeastMode && charData.image2) ? charData.image2 : charData.image;
-        artEl.src = src || '';
-        artEl.style.display = src ? 'block' : 'none';
-    }
-
-    // -- 繝ｫ繝ｼ繝・ヱ繝阪Ν --
-    const rootsPanel = g('vmo-roots-panel');
-    if (rootsPanel) {
-        rootsPanel.innerHTML = '';
-        const sRoot = gVal('secondary-root');
-        const tRoot = gVal('tertiary-root');
-        [[pRoot,'繝励Λ繧､繝槭Μ'],[sRoot,'繧ｻ繧ｫ繝ｳ繝繝ｪ'],[tRoot,'繧ｿ繝ｼ繧ｷ繝｣繝ｪ']].forEach(([r, role]) => {
-            if (!r) return;
-            const blood = (typeof BBTData !== 'undefined') ? (BBTData.getRoot(r)?.['繝悶Λ繝・ラ蜷・] || '') : '';
-            const tag = document.createElement('div');
-            tag.className = 'vmo-root-tag';
-            tag.innerHTML = `<small>${role}</small> <strong>${blood ? blood + '/' : ''}${r}</strong>`;
-            rootsPanel.appendChild(tag);
-        });
-    }
-
-    // -- 蝓ｺ譛ｬ諠・ｱ --
-    const profileGrid = g('vmo-profile-grid');
-    if (profileGrid) {
-        profileGrid.innerHTML = '';
-        const PROFILE_FIELDS = [
-            { label: '險ｭ螳夂噪遞ｮ譌・, inputId: null, selector: '#char-race' },
-            { label: '蟷ｴ鮨｢',       inputId: null, selector: '#char-age' },
-            { label: '諤ｧ蛻･',       inputId: null, selector: '#char-gender' },
-            { label: '繧ｫ繝ｴ繧｡繝ｼ',   inputId: null, selector: '#char-cover' },
-            { label: '蜃ｺ閾ｪ',       inputId: null, selector: '#char-origin' },
-            { label: '驍る・,       inputId: null, selector: '#char-encounter' },
-        ];
-        // .profile-input 繧帝・分縺ｫ蜿門ｾ暦ｼ・d莉倥″繧帝勁縺乗ｱ守畑繝輔ぅ繝ｼ繝ｫ繝会ｼ・        const profileEls = Array.from(document.querySelectorAll('.profile-input'))
-            .filter(el => !['char-name','char-demon-name','player-name','char-style',
-                            'primary-root','secondary-root','tertiary-root','free-stat'].includes(el.id));
-        const LABEL_MAP = ['險ｭ螳夂噪遞ｮ譌・,'蟷ｴ鮨｢','諤ｧ蛻･','繧ｫ繝ｴ繧｡繝ｼ','蜃ｺ閾ｪ','驍る・,'螟冶ｦ狗噪迚ｹ蠕ｴ'];
-        profileEls.slice(0, 7).forEach((el, i) => {
-            if (!el.value) return;
-            const row = document.createElement('div');
-            row.className = 'vmo-pf-row';
-            row.innerHTML = `<span class="vmo-pf-label">${LABEL_MAP[i] || ''}</span><span class="vmo-pf-val">${el.value}</span>`;
-            profileGrid.appendChild(row);
-        });
-        // 邨碁ｨ鍋せ
-        const xpRow = document.createElement('div');
-        xpRow.className = 'vmo-pf-row';
-        xpRow.innerHTML = `<span class="vmo-pf-label">豸郁ｲｻ邨碁ｨ鍋せ</span><span class="vmo-pf-val">${gTxt('total-xp-used')}</span>`;
-        profileGrid.appendChild(xpRow);
-    }
-
-    // -- 閭ｽ蜉帛､繝代ロ繝ｫ --
-    const statsWrap = g('vmo-stats-wrap');
-    if (statsWrap) {
-        statsWrap.innerHTML = '';
-        const STATS = [
-            { id: 'stat-fp',       name: 'FP',   hi: true },
-            { id: 'stat-humanity', name: '莠ｺ髢捺ｧ', hi: true },
-            { id: 'stat-body',     name: '閧我ｽ・,  hi: false },
-            { id: 'stat-tech',     name: '謚陦・,  hi: false },
-            { id: 'stat-emo',      name: '諢滓ュ',  hi: false },
-            { id: 'stat-div',      name: '蜉隴ｷ',  hi: false },
-            { id: 'stat-soc',      name: '遉ｾ莨・,  hi: false },
-            { id: 'stat-melee',    name: '逋ｽ蜈ｵ',  hi: false },
-            { id: 'stat-ranged',   name: '蟆・茶',  hi: false },
-            { id: 'stat-dodge',    name: '蝗樣∩',  hi: false },
-            { id: 'stat-action',   name: '陦悟虚蛟､', hi: false },
-            { id: 'stat-armor',    name: '繧｢繝ｼ繝槭・', hi: false },
-        ];
-        STATS.forEach(s => {
-            const val = gTxt(s.id);
-            const card = document.createElement('div');
-            card.className = 'vmo-stat-card' + (s.hi ? ' highlight' : '');
-            card.innerHTML = `<div class="vmo-stat-name">${s.name}</div><div class="vmo-stat-val">${val || '0'}</div>`;
-            statsWrap.appendChild(card);
-        });
-    }
-
-    // -- 繧｢繝ｼ繝・Μ繧ｹ繝・--
-    const artsList = g('vmo-arts-list');
-    if (artsList) {
-        artsList.innerHTML = '';
-        (window.acquiredArts || []).forEach(art => {
-            const row = document.createElement('div');
-            row.className = 'vmo-art-row';
-            const cost = art._overrideCost !== undefined ? art._overrideCost : (art['繧ｳ繧ｹ繝・] || '-');
-            const lv   = art._currentLevel !== undefined ? art._currentLevel : 1;
-            row.innerHTML = `
-                <div>
-                    <div class="vmo-art-name">${art['繧｢繝ｼ繝・錐']} <small class="vmo-art-sub">Lv${lv} / ${art['譛螟ｧLv'] || '?'}</small></div>
-                    <div class="vmo-art-sub">${art._rt || art['繝ｫ繝ｼ繝・] || ''} / ${art['遞ｮ蛻･'] || ''}</div>
-                </div>
-                <div class="vmo-art-timing">${art['繧ｿ繧､繝溘Φ繧ｰ'] || '-'}</div>
-                <div class="vmo-art-cost">莉｣蜆・ ${cost}</div>
-                <div class="vmo-art-effect">${art['蜉ｹ譫・] || ''}</div>
-            `;
-            artsList.appendChild(row);
-        });
-        const artsSection = g('vmo-arts-section');
-        if (artsSection) artsSection.style.display = (window.acquiredArts||[]).length ? '' : 'none';
-    }
-
-    // -- 陬・ｙ繝ｪ繧ｹ繝・--
-    const equipList = g('vmo-equip-list');
-    if (equipList) {
-        equipList.innerHTML = '';
-        const allEquip = [
-            ...(window.acquiredWeapons||[]).map(w => ({ name: w._equivalentName || w['陬・ｙ蜷・], sub: w['遞ｮ蛻･'], eff: w['蜉ｹ譫・] })),
-            ...(window.acquiredArmor||[]).map(a  => ({ name: a._equivalentName || a['陬・ｙ蜷・], sub: '髦ｲ蜈ｷ',       eff: a['蜉ｹ譫・] })),
-            ...(window.acquiredItems||[]).map(i  => ({ name: i._equivalentName || i['陬・ｙ蜷・], sub: i['遞ｮ蛻･'],    eff: i['蜉ｹ譫・] })),
-        ];
-        allEquip.forEach(eq => {
-            const row = document.createElement('div');
-            row.className = 'vmo-equip-row';
-            row.innerHTML = `<span class="vmo-equip-name">${eq.name || '-'}</span><span class="vmo-equip-sub">${eq.sub || ''}</span><span class="vmo-equip-effect">${eq.eff || ''}</span>`;
-            equipList.appendChild(row);
-        });
-        const equipSection = g('vmo-equip-section');
-        if (equipSection) equipSection.style.display = allEquip.length ? '' : 'none';
-    }
-
-    // -- 繧ｭ繝｣繝ｩ險ｭ螳・--
-    const lore = document.querySelector('textarea.profile-input');
-    const loreSection = g('vmo-lore-section');
-    const loreText    = g('vmo-lore-text');
-    if (lore && loreSection && loreText && lore.value) {
-        loreText.textContent = lore.value;
-        loreSection.style.display = '';
-    }
-
-    // 繝・・繝槭・繧ｿ繝ｳ蜷梧悄
-    const vmoThemeBtn = g('vmo-theme-btn');
-    if (vmoThemeBtn) {
-        const mainTheme = g('theme-toggle');
-        vmoThemeBtn.textContent = mainTheme ? mainTheme.textContent : '嫌';
-        vmoThemeBtn.onclick = () => { g('theme-toggle')?.click(); vmoThemeBtn.textContent = g('theme-toggle')?.textContent || ''; };
     }
 
     ov.style.display = 'flex';
