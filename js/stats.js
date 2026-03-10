@@ -122,11 +122,11 @@ function calculateStats() {
     document.getElementById('stat-emo').textContent  = stats.emotion;
     document.getElementById('stat-div').textContent  = stats.divine;
     document.getElementById('stat-soc').textContent  = stats.society;
-    document.getElementById('stat-body-b').textContent = '/' + Math.floor(stats.physical / 3);
-    document.getElementById('stat-tech-b').textContent = '/' + Math.floor(stats.tech     / 3);
-    document.getElementById('stat-emo-b').textContent  = '/' + Math.floor(stats.emotion  / 3);
-    document.getElementById('stat-div-b').textContent  = '/' + Math.floor(stats.divine   / 3);
-    document.getElementById('stat-soc-b').textContent  = '/' + Math.floor(stats.society  / 3);
+    document.getElementById('stat-body-b').textContent = '/' + Math.floor(stats.physical / 2);
+    document.getElementById('stat-tech-b').textContent = '/' + Math.floor(stats.tech     / 2);
+    document.getElementById('stat-emo-b').textContent  = '/' + Math.floor(stats.emotion  / 2);
+    document.getElementById('stat-div-b').textContent  = '/' + Math.floor(stats.divine   / 2);
+    document.getElementById('stat-soc-b').textContent  = '/' + Math.floor(stats.society  / 2);
 
     // ---- 戦闘能力値 ----
     cStats.melee  = (styleData ? styleData['白兵'] || 0 : 0) + (pRootData ? pRootData['白兵'] || 0 : 0) + (charData.mods.melee  || 0);
@@ -195,11 +195,11 @@ function calculateStats() {
     document.getElementById('stat-type').textContent      = stats.type.length > 0 ? stats.type.join(' / ') : '-';
 
     // ---- アーマー値表示 ----
-    document.getElementById('armor-phys').textContent = Math.floor(stats.physical / 3) + activeArmorA;
-    document.getElementById('armor-tech').textContent = Math.floor(stats.tech     / 3) + activeArmorA;
-    document.getElementById('armor-emo').textContent  = Math.floor(stats.emotion  / 3) + activeArmorA;
-    document.getElementById('armor-div').textContent  = Math.floor(stats.divine   / 3) + activeArmorA;
-    document.getElementById('armor-soc').textContent  = Math.floor(stats.society  / 3) + activeArmorA;
+    document.getElementById('armor-phys').textContent = Math.floor(stats.physical / 2) + activeArmorA;
+    document.getElementById('armor-tech').textContent = Math.floor(stats.tech     / 2) + activeArmorA;
+    document.getElementById('armor-emo').textContent  = Math.floor(stats.emotion  / 2) + activeArmorA;
+    document.getElementById('armor-div').textContent  = Math.floor(stats.divine   / 2) + activeArmorA;
+    document.getElementById('armor-soc').textContent  = Math.floor(stats.society  / 2) + activeArmorA;
 
     // ---- 自動取得アーツ更新 ----
     updateAutoArts(pRootName, sRootName, tRootName, styleName);
