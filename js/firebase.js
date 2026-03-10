@@ -22,12 +22,25 @@ function bbFirebaseInit() {
     }
 }
 
+/** undefined を再帰的に null に変換（Firestoreはundefined不可） */
+function sanitizeForFirestore(val) {
+    if (val === undefined) return null;
+    if (val === null || typeof val !== 'object') return val;
+    if (Array.isArray(val)) return val.map(sanitizeForFirestore);
+    const out = {};
+    for (const [k, v] of Object.entries(val)) {
+        out[k] = sanitizeForFirestore(v);
+    }
+    return out;
+}
+
 /** キャラクターをFirestoreに保存する */
 async function bbFirebaseSave(charId, summary, sheetData) {
     if (!_firebaseReady) throw new Error('Firebase未設定');
+    // undefined を null に変換してから timestamp を付与
+    const sanitized = sanitizeForFirestore({ ...summary, sheetData });
     const doc = {
-        ...summary,
-        sheetData,
+        ...sanitized,
         updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
     };
     if (charId) {

@@ -77,10 +77,26 @@ document.addEventListener('DOMContentLoaded', () => {
             } else {
                 toggleEditBtn.textContent = '🔓 編集モード';
                 toggleEditBtn.classList.replace('warning', 'primary');
+                // 全プロフィール入力欄の値を view-only-text へコピー
+                document.querySelectorAll('.profile-input').forEach(input => {
+                    const val = input.value || '-';
+                    // 同じ親要素内の .view-only-text に反映
+                    const viewEl = input.parentElement?.querySelector('.view-only-text');
+                    if (viewEl) viewEl.textContent = val;
+                });
+                // IDで管理されている特殊な view-only-text も更新
                 const nameEl = document.getElementById('char-name');
-                if (nameEl) { document.getElementById('view-char-name').textContent = nameEl.value || '-'; }
+                const vName  = document.getElementById('view-char-name');
+                if (nameEl && vName) vName.textContent = nameEl.value || '-';
                 const playerEl = document.getElementById('player-name');
-                if (playerEl) { document.getElementById('view-player-name').textContent = playerEl.value || '-'; }
+                const vPlayer  = document.getElementById('view-player-name');
+                if (playerEl && vPlayer) vPlayer.textContent = playerEl.value || '-';
+                // 顔アイコンを閲覧用imgに反映
+                const faceView = document.getElementById('face-icon-view');
+                if (faceView && charData.faceIcon) {
+                    faceView.src = charData.faceIcon;
+                    faceView.style.display = 'block';
+                }
             }
         };
 
