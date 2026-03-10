@@ -170,7 +170,7 @@ function buildRow(c) {
         if (isDeleteMode) {
             const pass = prompt(`「${c.name || '名無し'}」を削除しますか？\n実行するにはこのキャラクターの編集パスワード、または管理者パスワードを入力してください:`);
             if (pass !== null) {
-                const charPass = c.password || ''; 
+                const charPass = (c.sheetData && c.sheetData.password) || c.password || ''; 
                 const adminPass = typeof ADMIN_PASSWORD !== 'undefined' ? ADMIN_PASSWORD : null;
                 
                 if (pass === charPass || (adminPass && pass === adminPass)) {
