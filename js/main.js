@@ -866,6 +866,15 @@ function buildAndShowViewOverlay() {
         };
     }
 
+    // -- ココフォリア出力ボタン --
+    var vmoCcfBtn = g('vmo-export-ccf-btn');
+    if (vmoCcfBtn) {
+        vmoCcfBtn.onclick = function() {
+            var mainCcfBtn = document.getElementById('export-cocofolia-btn');
+            if (mainCcfBtn) mainCcfBtn.click();
+        };
+    }
+
     ov.style.display = 'flex';
 }
 
