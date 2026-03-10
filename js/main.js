@@ -1,4 +1,4 @@
-﻿/**
+/**
  * main.js (エントリーポイント)
  * アプリ初期化・UIセットアップ・イベントバインドを担当する。
  * 実際の計算処理は stats.js、アーツは arts.js、装備は equipment.js に委譲。
@@ -606,29 +606,33 @@ function buildAndShowViewOverlay() {
             return !['char-name','char-demon-name','player-name','char-style',
                      'primary-root','secondary-root','tertiary-root','free-stat'].includes(el.id);
         });
-        var addPfRow = function(label, val, fullRow) {
-            if (!val) return;
+        var addPfCell = function(label, val, spanTwo) {
             var row = document.createElement('div');
-            row.className = 'vmo-pf-row' + (fullRow ? ' full-row' : '');
+            row.className = 'vmo-pf-row' + (spanTwo ? ' span2' : '');
+            var dispVal = val || '-';
             row.innerHTML = '<span class="vmo-pf-label">' + label + '</span>' +
-                            '<span class="vmo-pf-val">' + val + '</span>';
+                            '<span class="vmo-pf-val">' + dispVal + '</span>';
             profileGrid.appendChild(row);
         };
-        addPfRow('設定的種族', profileEls[0] && profileEls[0].value);
-        addPfRow('年齢',       profileEls[1] && profileEls[1].value);
-        addPfRow('性別',       profileEls[2] && profileEls[2].value);
-        addPfRow('カヴァー',   profileEls[3] && profileEls[3].value);
-        addPfRow('外見的特徴', profileEls[6] && profileEls[6].value);
-        addPfRow('変異第一段階', profileEls[9]  && profileEls[9].value);
-        addPfRow('変異第二段階', profileEls[12] && profileEls[12].value);
-        addPfRow('変異第三段階', profileEls[14] && profileEls[14].value);
+        // 1行目: 設定的種族・年齢・性別
+        addPfCell('設定的種族', profileEls[0] && profileEls[0].value);
+        addPfCell('年齢',       profileEls[1] && profileEls[1].value);
+        addPfCell('性別',       profileEls[2] && profileEls[2].value);
+        // 2行目: カヴァー（1列）・外見的特徴（2列span）
+        addPfCell('カヴァー',   profileEls[3] && profileEls[3].value);
+        addPfCell('外見的特徴', profileEls[6] && profileEls[6].value, true);
+        // 3行目: 変異第一段階・変異第二段階・変異第三段階
+        addPfCell('変異第一段階', profileEls[9]  && profileEls[9].value);
+        addPfCell('変異第二段階', profileEls[12] && profileEls[12].value);
+        addPfCell('変異第三段階', profileEls[14] && profileEls[14].value);
+        // 4行目: 初期絆（関係）・初期絆2（関係2）・初期エゴ
         var bond1 = (profileEls[7] && profileEls[7].value) || '';
         var rel1  = (profileEls[8] && profileEls[8].value) || '';
-        addPfRow('初期絆（関係）', bond1 ? bond1 + (rel1 ? '（' + rel1 + '）' : '') : '');
+        addPfCell('初期絆（関係）', bond1 ? bond1 + (rel1 ? '（' + rel1 + '）' : '') : '');
         var bond2 = (profileEls[10] && profileEls[10].value) || '';
         var rel2  = (profileEls[11] && profileEls[11].value) || '';
-        addPfRow('初期絆２（関係）', bond2 ? bond2 + (rel2 ? '（' + rel2 + '）' : '') : '');
-        addPfRow('初期エゴ', profileEls[13] && profileEls[13].value);
+        addPfCell('初期絆２（関係）', bond2 ? bond2 + (rel2 ? '（' + rel2 + '）' : '') : '');
+        addPfCell('初期エゴ', profileEls[13] && profileEls[13].value);
     }
 
     // -- 能力値パネル --
@@ -642,20 +646,30 @@ function buildAndShowViewOverlay() {
                 var rawVal = parseInt(gTxt(s.id)) || 0;
                 var card = document.createElement('div');
                 card.className = 'vmo-stat-card' + (s.hi ? ' highlight' : '');
-                var bonusHtml = s.bonus ? '<div class="vmo-stat-bonus">ボーナス ' + Math.floor(rawVal / 3) + '</div>' : '';
+                var valHtml;
+                if (s.bonusId) {
+                    var bonusText = gTxt(s.bonusId).replace('/', '');
+                    var armorText = s.armorId ? gTxt(s.armorId) : '';
+                    var armorPart = armorText ? '<span class="vmo-stat-bonus-inline">（A:' + armorText + '）</span>' : '';
+                    valHtml = rawVal +
+                              '<span class="vmo-stat-bonus-inline">/' + bonusText + '</span>' +
+                              armorPart;
+                } else {
+                    valHtml = rawVal;
+                }
                 card.innerHTML = '<div class="vmo-stat-name">' + s.name + '</div>' +
-                                 '<div class="vmo-stat-val">' + rawVal + '</div>' + bonusHtml;
+                                 '<div class="vmo-stat-val">' + valHtml + '</div>';
                 row.appendChild(card);
             });
             statsWrap.appendChild(row);
         };
-        // 行1: 肉体・技術・感情・加護・社会（ボーナス付き）
+        // 行1: 肉体・技術・感情・加護・社会（ボーナス+アーマー付き）
         makeStatRow(5, [
-            {id:'stat-body', name:'肉体', bonus:true},
-            {id:'stat-tech', name:'技術', bonus:true},
-            {id:'stat-emo',  name:'感情', bonus:true},
-            {id:'stat-div',  name:'加護', bonus:true},
-            {id:'stat-soc',  name:'社会', bonus:true}
+            {id:'stat-body', name:'肉体', bonusId:'stat-body-b', armorId:'armor-phys'},
+            {id:'stat-tech', name:'技術', bonusId:'stat-tech-b', armorId:'armor-tech'},
+            {id:'stat-emo',  name:'感情', bonusId:'stat-emo-b',  armorId:'armor-emo'},
+            {id:'stat-div',  name:'加護', bonusId:'stat-div-b',  armorId:'armor-div'},
+            {id:'stat-soc',  name:'社会', bonusId:'stat-soc-b',  armorId:'armor-soc'}
         ]);
         // 行2: 白兵値・射撃値・回避値・行動値
         makeStatRow(4, [
@@ -831,17 +845,17 @@ function buildAndShowViewOverlay() {
         vmoBeastBtn.textContent = window.isBeastMode ? '\ud83d\udc3e 魔獣化中' : '\ud83d\udc3e 魔獣化';
         vmoBeastBtn.onclick = function() {
             var mainBeastBtn = document.getElementById('beast-mode-btn');
-            if (mainBeastBtn) mainBeastBtn.click();
+            // 魔獣化の切り替えを確実にするため、mainBeastBtn側のチェックを変えず直接処理
+            window.isBeastMode = !window.isBeastMode;
+            if (typeof calculateStats === 'function') calculateStats();
+            
             var now = !!window.isBeastMode;
             vmoBeastBtn.classList.toggle('vmo-beast-on', now);
             vmoBeastBtn.classList.toggle('vmo-beast-off', !now);
             vmoBeastBtn.textContent = now ? '\ud83d\udc3e 魔獣化中' : '\ud83d\udc3e 魔獣化';
-            var artImgEl = g('vmo-char-art');
-            if (artImgEl) {
-                var src = (now && charData.image2) ? charData.image2 : charData.image;
-                artImgEl.src = src || '';
-                artImgEl.style.display = src ? 'block' : 'none';
-            }
+            
+            // 魔獣化状態に応じてオーバーレイ全体を再構築（装備能力値や画像の反映のため）
+            buildAndShowViewOverlay();
         };
     }
 

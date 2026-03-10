@@ -545,13 +545,18 @@
                 <!-- 名前オーバーレイ -->
                 <div class="vmo-name-overlay">
                     <div class="vmo-blood-label" id="vmo-blood-label">ブラッド名</div>
-                    <div class="vmo-char-name-text" id="vmo-char-name-disp">キャラクター名</div>
-                    <div class="vmo-demon-name" id="vmo-demon-name-disp">魔の名</div>
-                    <div class="vmo-player-name" id="vmo-player-name-disp">PL: プレイヤー名</div>
-                    <!-- 経験点 -->
-                    <div class="vmo-xp-display" id="vmo-xp-display">
-                        <span class="vmo-xp-label">経験点/</span>
-                        <span class="vmo-xp-val" id="vmo-xp-val">0</span>
+                    <!-- 名前行と経験点を横並び -->
+                    <div class="vmo-name-xp-row">
+                        <div class="vmo-name-group">
+                            <div class="vmo-char-name-text" id="vmo-char-name-disp">キャラクター名</div>
+                            <div class="vmo-demon-name" id="vmo-demon-name-disp">魔の名</div>
+                            <div class="vmo-player-name" id="vmo-player-name-disp">PL: プレイヤー名</div>
+                        </div>
+                        <!-- 経験点（右寄せ） -->
+                        <div class="vmo-xp-display" id="vmo-xp-display">
+                            <span class="vmo-xp-label">EXP</span>
+                            <span class="vmo-xp-val" id="vmo-xp-val">0</span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -746,18 +751,22 @@
     position: absolute; bottom: 0; left: 0; right: 0;
     padding: 20px 18px 14px;
 }
-.vmo-blood-label { font-size: 0.7rem; color: var(--vmo-accent, #7799ee); letter-spacing: 2px; margin-bottom: 2px; }
+.vmo-blood-label { font-size: 0.7rem; color: var(--vmo-accent, #7799ee); letter-spacing: 2px; margin-bottom: 4px; }
+/* 名前と経験点を横並び */
+.vmo-name-xp-row {
+    display: flex; align-items: flex-end; justify-content: space-between; gap: 8px;
+}
+.vmo-name-group { flex: 1; min-width: 0; }
 .vmo-char-name-text { font-size: 2rem; font-weight: 700; line-height: 1.1; color: #fff; text-shadow: 0 2px 16px rgba(0,0,0,0.9); }
 .vmo-demon-name { font-size: 0.95rem; color: #99aabb; margin-top: 2px; }
 .vmo-player-name { font-size: 0.75rem; color: #667788; margin-top: 4px; }
-
-/* 経験点表示 */
+/* 経験点（右寄せ・名前と同じ高さ） */
 .vmo-xp-display {
-    display: flex; align-items: baseline; gap: 4px;
-    margin-top: 10px;
+    display: flex; flex-direction: column; align-items: flex-end;
+    flex-shrink: 0; padding-bottom: 2px;
 }
-.vmo-xp-label { font-size: 0.9rem; color: #99aabb; }
-.vmo-xp-val { font-size: 2.6rem; font-weight: 900; color: #fff; line-height: 1; text-shadow: 0 0 20px rgba(150,180,255,0.5); }
+.vmo-xp-label { font-size: 0.7rem; letter-spacing: 2px; color: var(--vmo-accent, #7799ee); text-transform: uppercase; }
+.vmo-xp-val { font-size: 2.2rem; font-weight: 900; color: #fff; line-height: 1; text-shadow: 0 0 16px rgba(150,180,255,0.5); }
 
 /* ルーツパネル */
 .vmo-roots-panel {
@@ -794,18 +803,18 @@
 }
 .vmo-section-line { flex: 1; height: 1px; background: var(--vmo-accent, rgba(119,153,238,0.4)); opacity: 0.4; }
 
-/* 基本情報グリッド */
+/* 基本情報グリッド（3列） */
 .vmo-profile-grid {
-    display: grid; grid-template-columns: 1fr 1fr; gap: 2px 14px;
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px 10px;
 }
 .vmo-pf-row {
-    display: flex; gap: 6px; font-size: 0.8rem;
-    padding: 3px 0; border-bottom: 1px solid rgba(255,255,255,0.04);
+    display: flex; flex-direction: column; gap: 1px; font-size: 0.8rem;
+    padding: 4px 6px; border-radius: 4px;
+    background: var(--vmo-card-bg); border: 1px solid var(--vmo-card-border);
 }
-[data-theme="light"] .vmo-pf-row { border-bottom-color: rgba(0,0,0,0.06); }
-.vmo-pf-row.full-row { grid-column: 1 / -1; }
-.vmo-pf-label { color: var(--vmo-pf-label, #667799); min-width: 80px; flex-shrink: 0; }
-.vmo-pf-val { color: var(--vmo-pf-val, #c8d0e8); }
+.vmo-pf-row.span2 { grid-column: span 2; }
+.vmo-pf-label { font-size: 0.65rem; color: var(--vmo-pf-label, #667799); }
+.vmo-pf-val { color: var(--vmo-pf-val, #c8d0e8); font-size: 0.85rem; }
 
 /* 能力値 */
 .vmo-stats-section { margin-bottom: 10px; }
@@ -817,11 +826,11 @@
     background: var(--vmo-card-bg); border: 1px solid var(--vmo-card-border);
     border-radius: 6px; padding: 6px 8px; text-align: center;
 }
-.vmo-stat-name { font-size: 0.65rem; color: var(--vmo-stat-name); margin-bottom: 2px; }
-.vmo-stat-val  { font-size: 1.15rem; font-weight: 700; color: var(--vmo-stat-val); }
-.vmo-stat-bonus { font-size: 0.65rem; color: var(--vmo-pf-label); margin-top: 1px; }
+.vmo-stat-name { font-size: 0.8rem; font-weight: 700; color: var(--vmo-stat-name); margin-bottom: 3px; letter-spacing: 0.5px; }
+.vmo-stat-val  { font-size: 1.3rem; font-weight: 700; color: var(--vmo-stat-val); line-height: 1.1; }
+.vmo-stat-bonus-inline { font-size: 0.72rem; font-weight: 400; color: var(--vmo-pf-label); }
 .vmo-stat-card.highlight { border-color: var(--vmo-accent, #4466cc); background: rgba(80,100,200,0.1); }
-.vmo-stat-card.highlight .vmo-stat-val { color: var(--vmo-accent, #7799ee); font-size: 1.4rem; }
+.vmo-stat-card.highlight .vmo-stat-val { color: var(--vmo-accent, #7799ee); font-size: 1.5rem; }
 
 /* アーツリスト */
 .vmo-art-row {
