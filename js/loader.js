@@ -85,13 +85,18 @@ function equipCSVtoData(rows) {
 // CSV列: [ignore, ルーツ, 道具名, 種別, タイミング, 対象, 射程, 購入, 効果]
 // -------------------------------------------------------------------
 function itemsCSVtoArray(rows) {
-    const startIdx = (rows[0] && (rows[0][2] === '道具名' || rows[0][2] === 'アーツ名')) ? 1 : 0;
+    // 先頭行がヘッダーかどうか：列[2]の値がテキストで構成されていれば（数値や効果文でなければ）スキップ
+    const HEADER_KEYWORDS = ['アーツ名','道具名','装備名','ルーツ','種別','タイミング','対象','射程','購入','効果','名前'];
+    const firstCellV = (rows[0] && rows[0][2]) ? rows[0][2].trim() : '';
+    const startIdx = HEADER_KEYWORDS.includes(firstCellV) ? 1 : 0;
     const items = [];
     for (let i = startIdx; i < rows.length; i++) {
         const r = rows[i];
         if (!r || !r[2] || !r[2].trim()) continue;
         const type = (r[3] || '').trim();
         if (!type) continue;
+        // ヘッダー行が途中に混入していないかチェック
+        if (HEADER_KEYWORDS.includes(r[2].trim())) continue;
         items.push({
             'ルーツ':     (r[1] || '').trim(),
             '装備名':     (r[2] || '').trim(),

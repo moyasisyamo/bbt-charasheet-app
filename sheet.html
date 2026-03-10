@@ -510,6 +510,271 @@
         </div>
     </div>
 
+<!-- ================================================================
+     閲覧モード オーバーレイ（アークナイツ風ゲームUI）
+     main.js の buildAndShowViewOverlay() から制御される
+     ================================================================ -->
+<div id="view-mode-overlay" style="display:none;">
+
+    <!-- ヘッダーバー -->
+    <div class="vmo-header">
+        <a href="index.html" class="vmo-back-btn">&#8249; 一覧</a>
+        <div class="vmo-title-area">
+            <span class="vmo-app-name">BEASTBIND TRINITY</span>
+        </div>
+        <div class="vmo-header-actions">
+            <button id="vmo-edit-btn" onclick="setEditMode(true)" class="vmo-btn">✏ 編集モード</button>
+            <button id="vmo-theme-btn" class="vmo-btn">🌙</button>
+        </div>
+    </div>
+
+    <!-- メインコンテンツ -->
+    <div class="vmo-body">
+
+        <!-- 左パネル: キャラクターイラスト -->
+        <div class="vmo-left">
+            <div class="vmo-art-wrap">
+                <div class="vmo-art-bg" id="vmo-art-bg"></div>
+                <img id="vmo-char-art" class="vmo-char-art" src="" alt="キャラクターイラスト">
+                <div class="vmo-art-gradient"></div>
+
+                <!-- スタイルバッジ -->
+                <div class="vmo-style-badge" id="vmo-style-badge">ATK</div>
+
+                <!-- 名前オーバーレイ -->
+                <div class="vmo-name-overlay">
+                    <div class="vmo-blood-label" id="vmo-blood-label">ブラッド名</div>
+                    <div class="vmo-char-name" id="vmo-char-name">キャラクター名</div>
+                    <div class="vmo-demon-name" id="vmo-demon-name">魔の名</div>
+                    <div class="vmo-player-name" id="vmo-player-name">PL: プレイヤー名</div>
+                </div>
+            </div>
+
+            <!-- ルーツ情報 -->
+            <div class="vmo-roots-panel" id="vmo-roots-panel"></div>
+        </div>
+
+        <!-- 右パネル: ステータス情報 -->
+        <div class="vmo-right">
+
+            <!-- 基本情報 -->
+            <div class="vmo-section">
+                <div class="vmo-section-hd"><span class="vmo-section-line"></span>基本情報<span class="vmo-section-line"></span></div>
+                <div class="vmo-profile-grid" id="vmo-profile-grid"></div>
+            </div>
+
+            <!-- 能力値 -->
+            <div class="vmo-section">
+                <div class="vmo-section-hd"><span class="vmo-section-line"></span>能力値<span class="vmo-section-line"></span></div>
+                <div class="vmo-stats-wrap" id="vmo-stats-wrap"></div>
+            </div>
+
+            <!-- 取得アーツ -->
+            <div class="vmo-section" id="vmo-arts-section">
+                <div class="vmo-section-hd"><span class="vmo-section-line"></span>取得アーツ<span class="vmo-section-line"></span></div>
+                <div id="vmo-arts-list"></div>
+            </div>
+
+            <!-- 所持品・装備 -->
+            <div class="vmo-section" id="vmo-equip-section">
+                <div class="vmo-section-hd"><span class="vmo-section-line"></span>所持品・装備<span class="vmo-section-line"></span></div>
+                <div id="vmo-equip-list"></div>
+            </div>
+
+            <!-- キャラ設定 -->
+            <div class="vmo-section" id="vmo-lore-section" style="display:none;">
+                <div class="vmo-section-hd"><span class="vmo-section-line"></span>キャラ設定<span class="vmo-section-line"></span></div>
+                <div id="vmo-lore-text" class="vmo-lore"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+/* =====================================================
+   閲覧モードオーバーレイ CSS（アークナイツ風）
+   ===================================================== */
+#view-mode-overlay {
+    position: fixed; inset: 0; z-index: 600;
+    background: #0c0e1a;
+    display: flex; flex-direction: column;
+    font-family: 'Noto Sans JP', sans-serif;
+    color: #d0d4e8;
+    overflow: hidden;
+}
+/* ヘッダー */
+.vmo-header {
+    display: flex; align-items: center; gap: 12px;
+    padding: 8px 20px;
+    background: rgba(0,0,0,0.55);
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    min-height: 48px; flex-shrink: 0;
+}
+.vmo-back-btn {
+    color: #8899cc; text-decoration: none; font-size: 1.4rem;
+    padding: 4px 10px; border: 1px solid rgba(136,153,204,0.4);
+    border-radius: 3px; transition: 0.2s;
+    line-height: 1;
+}
+.vmo-back-btn:hover { color: #fff; border-color: #fff; }
+.vmo-title-area { flex: 1; }
+.vmo-app-name { font-size: 0.8rem; letter-spacing: 3px; color: #556688; text-transform: uppercase; }
+.vmo-header-actions { display: flex; gap: 8px; }
+.vmo-btn {
+    background: rgba(255,255,255,0.07); color: #b0bbdd;
+    border: 1px solid rgba(255,255,255,0.12); border-radius: 4px;
+    padding: 5px 12px; cursor: pointer; font-size: 0.82rem;
+    transition: 0.2s;
+}
+.vmo-btn:hover { background: rgba(255,255,255,0.14); color: #fff; }
+
+/* メインボディ */
+.vmo-body {
+    display: grid; grid-template-columns: 42% 58%;
+    flex: 1; overflow: hidden;
+}
+
+/* 左パネル */
+.vmo-left {
+    display: flex; flex-direction: column;
+    background: linear-gradient(160deg, #141726 0%, #0c0e1a 100%);
+    border-right: 1px solid rgba(255,255,255,0.06);
+    overflow: hidden;
+}
+.vmo-art-wrap {
+    position: relative; flex: 1; overflow: hidden;
+    min-height: 250px;
+}
+.vmo-art-bg {
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse at 50% 80%, rgba(80,100,200,0.15) 0%, transparent 70%);
+}
+.vmo-char-art {
+    position: absolute; bottom: 0; left: 50%;
+    transform: translateX(-50%);
+    max-height: 95%; max-width: 130%;
+    object-fit: contain; object-position: bottom center;
+    filter: drop-shadow(0 0 40px rgba(100,120,255,0.3));
+}
+.vmo-art-gradient {
+    position: absolute; inset: 0;
+    background: linear-gradient(to bottom,
+        transparent 40%,
+        rgba(12,14,26,0.5) 75%,
+        rgba(12,14,26,0.95) 100%);
+}
+.vmo-style-badge {
+    position: absolute; top: 14px; left: 14px;
+    font-size: 0.7rem; font-weight: 700; letter-spacing: 2px;
+    padding: 3px 10px;
+    background: var(--vmo-accent, #4466cc);
+    color: #fff; border-radius: 2px;
+    box-shadow: 0 0 12px var(--vmo-accent, #4466cc);
+}
+.vmo-name-overlay {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    padding: 20px 18px 12px;
+}
+.vmo-blood-label { font-size: 0.7rem; color: var(--vmo-accent, #7799ee); letter-spacing: 2px; margin-bottom: 2px; }
+.vmo-char-name { font-size: 2rem; font-weight: 700; line-height: 1.1; color: #fff; text-shadow: 0 2px 12px rgba(0,0,0,0.8); }
+.vmo-demon-name { font-size: 0.95rem; color: #99aabb; margin-top: 2px; }
+.vmo-player-name { font-size: 0.75rem; color: #667788; margin-top: 6px; }
+
+/* ルーツパネル */
+.vmo-roots-panel {
+    padding: 10px 16px 14px;
+    background: rgba(0,0,0,0.3);
+    border-top: 1px solid rgba(255,255,255,0.06);
+    display: flex; flex-wrap: wrap; gap: 8px;
+    flex-shrink: 0;
+}
+.vmo-root-tag {
+    background: rgba(80,100,180,0.2); border: 1px solid rgba(80,100,180,0.4);
+    border-radius: 3px; padding: 3px 10px; font-size: 0.75rem; color: #99aacc;
+}
+.vmo-root-tag strong { color: #ccd4ee; }
+
+/* 右パネル */
+.vmo-right {
+    overflow-y: auto; padding: 16px 20px 40px;
+    background: #0e1020;
+    scrollbar-width: thin; scrollbar-color: #334 #0e1020;
+}
+.vmo-right::-webkit-scrollbar { width: 5px; }
+.vmo-right::-webkit-scrollbar-track { background: #0e1020; }
+.vmo-right::-webkit-scrollbar-thumb { background: #334; border-radius: 3px; }
+
+/* セクション */
+.vmo-section { margin-bottom: 20px; }
+.vmo-section-hd {
+    display: flex; align-items: center; gap: 10px;
+    font-size: 0.78rem; font-weight: 700; letter-spacing: 2px;
+    color: var(--vmo-accent, #7799ee); margin-bottom: 10px;
+    text-transform: uppercase;
+}
+.vmo-section-line { flex: 1; height: 1px; background: rgba(119,153,238,0.3); }
+
+/* 基本情報グリッド */
+.vmo-profile-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 4px 16px;
+}
+.vmo-pf-row { display: flex; gap: 6px; font-size: 0.83rem; padding: 3px 0; border-bottom: 1px solid rgba(255,255,255,0.04); }
+.vmo-pf-label { color: #667799; min-width: 80px; flex-shrink: 0; }
+.vmo-pf-val { color: #c8d0e8; }
+
+/* 能力値 */
+.vmo-stats-wrap {
+    display: grid; grid-template-columns: repeat(3,1fr); gap: 8px;
+}
+.vmo-stat-card {
+    background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 6px; padding: 8px 10px; text-align: center;
+}
+.vmo-stat-name { font-size: 0.7rem; color: #778; margin-bottom: 3px; }
+.vmo-stat-val  { font-size: 1.4rem; font-weight: 700; color: #ccd3ee; }
+.vmo-stat-card.highlight { border-color: var(--vmo-accent, #4466cc); background: rgba(80,100,200,0.12); }
+.vmo-stat-card.highlight .vmo-stat-val { color: var(--vmo-accent, #7799ee); }
+
+/* アーツリスト */
+.vmo-art-row {
+    padding: 7px 10px; margin-bottom: 4px;
+    background: rgba(255,255,255,0.03); border-radius: 4px;
+    border-left: 3px solid var(--vmo-accent, #4466cc);
+    display: grid; grid-template-columns: 1fr auto auto;
+    gap: 6px; align-items: center; font-size: 0.82rem;
+}
+.vmo-art-name { font-weight: 600; color: #ccd4f0; }
+.vmo-art-sub  { font-size: 0.72rem; color: #778; }
+.vmo-art-timing { font-size: 0.72rem; color: #99aacc; background: rgba(80,100,200,0.2); padding: 2px 6px; border-radius: 3px; }
+.vmo-art-cost  { font-size: 0.72rem; color: #cc9944; }
+.vmo-art-effect { grid-column: 1/-1; font-size: 0.75rem; color: #8899bb; margin-top: 2px; }
+
+/* 装備リスト */
+.vmo-equip-row {
+    padding: 6px 10px; margin-bottom: 4px;
+    background: rgba(255,255,255,0.03); border-radius: 4px;
+    display: flex; gap: 10px; align-items: baseline; font-size: 0.82rem;
+}
+.vmo-equip-name { font-weight: 600; color: #ccd4f0; }
+.vmo-equip-sub  { font-size: 0.72rem; color: #778; }
+.vmo-equip-effect { font-size: 0.75rem; color: #8899bb; flex: 1; }
+
+.vmo-lore {
+    font-size: 0.83rem; line-height: 1.7; color: #9aa8c0;
+    white-space: pre-wrap;
+    background: rgba(255,255,255,0.03); border-radius: 4px;
+    padding: 10px 14px;
+}
+
+/* スタイル別カラーテーマ */
+[data-vmo-style="攻撃"] { --vmo-accent: #cc4455; }
+[data-vmo-style="防御"] { --vmo-accent: #4488cc; }
+[data-vmo-style="支援"] { --vmo-accent: #44aa66; }
+[data-vmo-style="アタッカー"] { --vmo-accent: #cc4455; }
+[data-vmo-style="ディフェンダー"] { --vmo-accent: #4488cc; }
+[data-vmo-style="サポーター"] { --vmo-accent: #44aa66; }
+</style>
+
     <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore-compat.js"></script>
     <script src="js/firebase-config.js?v=2"></script>

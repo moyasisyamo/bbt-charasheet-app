@@ -47,10 +47,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // ---- テーマ切り替え ----
         const themeBtn = document.getElementById('theme-toggle');
+        // 初期テーマを localStorage から復元
+        const savedTheme = localStorage.getItem('bbt-theme') || 'dark';
+        document.documentElement.setAttribute('data-theme', savedTheme);
+        themeBtn.textContent = savedTheme === 'dark' ? '☀️ ライトモード' : '🌙 ダークモード';
         themeBtn.addEventListener('click', () => {
             const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-            document.documentElement.setAttribute('data-theme', isDark ? 'light' : 'dark');
-            themeBtn.textContent = isDark ? '🌙 ダークモード' : '☀️ ライトモード';
+            const next = isDark ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', next);
+            localStorage.setItem('bbt-theme', next);
+            themeBtn.textContent = next === 'dark' ? '☀️ ライトモード' : '🌙 ダークモード';
         });
 
         // ---- 編集モード切り替え ----
@@ -66,37 +72,45 @@ document.addEventListener('DOMContentLoaded', () => {
                 'select:not(#arts-filter-category)'
             ).forEach(el => { el.disabled = !edit; el.classList.toggle('locked-input', !edit); });
             document.querySelectorAll('.btn:not(#toggle-edit-mode-btn):not(#theme-toggle):not(#export-cocofolia-btn)').forEach(btn => btn.style.display = edit ? '' : 'none');
-            // 常に表示するボタン
             ['close-arts-dictionary','close-equip-dictionary','beast-mode-btn'].forEach(id => {
-                const el = document.getElementById(id);
-                if (el) el.style.display = '';
+                const el = document.getElementById(id); if (el) el.style.display = '';
             });
+
+            // 防具チェックボックスを閲覧時は操作不可
+            document.querySelectorAll('.normal-equip-check, .beast-equip-check').forEach(cb => {
+                cb.disabled = !edit;
+                cb.style.cursor = edit ? '' : 'not-allowed';
+            });
+
+            // 閲覧時はアーツ「削除」・装備「操作」列ヘッダーを非表示
+            const artsLastTh = document.querySelector('#arts-table thead tr th:last-child');
+            if (artsLastTh) artsLastTh.style.visibility = edit ? '' : 'hidden';
+            ['#weapons-table','#armor-table','#items-table'].forEach(sel => {
+                const th = document.querySelector(sel + ' thead tr th:last-child');
+                if (th) th.style.visibility = edit ? '' : 'hidden';
+            });
+
             if (edit) {
-                toggleEditBtn.textContent = '🔒 閲覧モード（編集ロック）';
+                toggleEditBtn.innerHTML = '🔒 閲覧モード<br><span style="font-size:0.75rem;">(編集ロック)</span>';
                 toggleEditBtn.classList.replace('primary', 'warning');
+                const ov = document.getElementById('view-mode-overlay');
+                if (ov) ov.style.display = 'none';
             } else {
-                toggleEditBtn.textContent = '🔓 編集モード';
+                toggleEditBtn.innerHTML = '🔓 編集モード';
                 toggleEditBtn.classList.replace('warning', 'primary');
-                // 全プロフィール入力欄の値を view-only-text へコピー
                 document.querySelectorAll('.profile-input').forEach(input => {
-                    const val = input.value || '-';
-                    // 同じ親要素内の .view-only-text に反映
                     const viewEl = input.parentElement?.querySelector('.view-only-text');
-                    if (viewEl) viewEl.textContent = val;
+                    if (viewEl) viewEl.textContent = input.value || '-';
                 });
-                // IDで管理されている特殊な view-only-text も更新
                 const nameEl = document.getElementById('char-name');
                 const vName  = document.getElementById('view-char-name');
                 if (nameEl && vName) vName.textContent = nameEl.value || '-';
                 const playerEl = document.getElementById('player-name');
                 const vPlayer  = document.getElementById('view-player-name');
                 if (playerEl && vPlayer) vPlayer.textContent = playerEl.value || '-';
-                // 顔アイコンを閲覧用imgに反映
                 const faceView = document.getElementById('face-icon-view');
-                if (faceView && charData.faceIcon) {
-                    faceView.src = charData.faceIcon;
-                    faceView.style.display = 'block';
-                }
+                if (faceView && charData.faceIcon) { faceView.src = charData.faceIcon; faceView.style.display = 'block'; }
+                buildAndShowViewOverlay();
             }
         };
 
@@ -365,10 +379,13 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
 
-        // ---- URLパラメータでキャラ読み込み ----
+        // ---- URLパラメータでキャラ読み込み（ロビー経由なら閲覧モードで開く） ----
         if (window.currentCharId && typeof window.bbFirebase !== 'undefined' && window.bbFirebase.isReady()) {
             window.bbFirebase.load(window.currentCharId).then(data => {
                 if (data.sheetData) restoreSheetState(data.sheetData);
+                // ロビーから来た場合は閲覧モードで開く（パスワードチェック不要）
+                // ※「編集したい場合は編集モードボタンを押してパスワードを入力」というUX
+                setEditMode(false);
             }).catch(err => console.warn('キャラ読み込みエラー:', err));
         }
 
@@ -511,3 +528,184 @@ function restoreSheetState(state) {
 
 window.getSheetState     = getSheetState;
 window.restoreSheetState = restoreSheetState;
+
+// ====================================================================
+// 閲覧モードオーバーレイ構築
+// ====================================================================
+function buildAndShowViewOverlay() {
+    const ov = document.getElementById('view-mode-overlay');
+    if (!ov) return;
+
+    const g = id => document.getElementById(id);
+    const gVal = id => { const e = g(id); return e ? e.value || '' : ''; };
+    const gTxt = id => { const e = g(id); return e ? (e.textContent || '').trim() : ''; };
+
+    // -- スタイル情報 --
+    const style = gVal('char-style') || '';
+    const STYLE_MAP = { 'アタッカー': 'ATK', 'ディフェンダー': 'DEF', 'サポーター': 'SUP' };
+    const styleBadge = STYLE_MAP[style] || style.slice(0,3).toUpperCase() || '---';
+    ov.setAttribute('data-vmo-style', style);
+
+    // -- バッジ・名前 --
+    const badge = g('vmo-style-badge');
+    if (badge) badge.textContent = styleBadge;
+
+    const pRoot = gVal('primary-root');
+    const pBlood = (typeof BBTData !== 'undefined') ? (BBTData.getRoot(pRoot)?.['ブラッド名'] || '') : '';
+    const bloodLabel = g('vmo-blood-label');
+    if (bloodLabel) bloodLabel.textContent = pBlood;
+
+    const nameEl = g('vmo-char-name');
+    if (nameEl) nameEl.textContent = gVal('char-name') || '名無し';
+    const demonEl = g('vmo-demon-name');
+    if (demonEl) { const dn = gVal('char-demon-name'); demonEl.textContent = dn ? `【${dn}】` : ''; }
+    const playerEl = g('vmo-player-name');
+    if (playerEl) { const pn = gVal('player-name'); playerEl.textContent = pn ? `PL: ${pn}` : ''; }
+
+    // -- キャラ画像 --
+    const artEl = g('vmo-char-art');
+    if (artEl) {
+        const src = (window.isBeastMode && charData.image2) ? charData.image2 : charData.image;
+        artEl.src = src || '';
+        artEl.style.display = src ? 'block' : 'none';
+    }
+
+    // -- ルーツパネル --
+    const rootsPanel = g('vmo-roots-panel');
+    if (rootsPanel) {
+        rootsPanel.innerHTML = '';
+        const sRoot = gVal('secondary-root');
+        const tRoot = gVal('tertiary-root');
+        [[pRoot,'プライマリ'],[sRoot,'セカンダリ'],[tRoot,'ターシャリ']].forEach(([r, role]) => {
+            if (!r) return;
+            const blood = (typeof BBTData !== 'undefined') ? (BBTData.getRoot(r)?.['ブラッド名'] || '') : '';
+            const tag = document.createElement('div');
+            tag.className = 'vmo-root-tag';
+            tag.innerHTML = `<small>${role}</small> <strong>${blood ? blood + '/' : ''}${r}</strong>`;
+            rootsPanel.appendChild(tag);
+        });
+    }
+
+    // -- 基本情報 --
+    const profileGrid = g('vmo-profile-grid');
+    if (profileGrid) {
+        profileGrid.innerHTML = '';
+        const PROFILE_FIELDS = [
+            { label: '設定的種族', inputId: null, selector: '#char-race' },
+            { label: '年齢',       inputId: null, selector: '#char-age' },
+            { label: '性別',       inputId: null, selector: '#char-gender' },
+            { label: 'カヴァー',   inputId: null, selector: '#char-cover' },
+            { label: '出自',       inputId: null, selector: '#char-origin' },
+            { label: '邂逅',       inputId: null, selector: '#char-encounter' },
+        ];
+        // .profile-input を順番に取得（id付きを除く汎用フィールド）
+        const profileEls = Array.from(document.querySelectorAll('.profile-input'))
+            .filter(el => !['char-name','char-demon-name','player-name','char-style',
+                            'primary-root','secondary-root','tertiary-root','free-stat'].includes(el.id));
+        const LABEL_MAP = ['設定的種族','年齢','性別','カヴァー','出自','邂逅','外見的特徴'];
+        profileEls.slice(0, 7).forEach((el, i) => {
+            if (!el.value) return;
+            const row = document.createElement('div');
+            row.className = 'vmo-pf-row';
+            row.innerHTML = `<span class="vmo-pf-label">${LABEL_MAP[i] || ''}</span><span class="vmo-pf-val">${el.value}</span>`;
+            profileGrid.appendChild(row);
+        });
+        // 経験点
+        const xpRow = document.createElement('div');
+        xpRow.className = 'vmo-pf-row';
+        xpRow.innerHTML = `<span class="vmo-pf-label">消費経験点</span><span class="vmo-pf-val">${gTxt('total-xp-used')}</span>`;
+        profileGrid.appendChild(xpRow);
+    }
+
+    // -- 能力値パネル --
+    const statsWrap = g('vmo-stats-wrap');
+    if (statsWrap) {
+        statsWrap.innerHTML = '';
+        const STATS = [
+            { id: 'stat-fp',       name: 'FP',   hi: true },
+            { id: 'stat-humanity', name: '人間性', hi: true },
+            { id: 'stat-body',     name: '肉体',  hi: false },
+            { id: 'stat-tech',     name: '技術',  hi: false },
+            { id: 'stat-emo',      name: '感情',  hi: false },
+            { id: 'stat-div',      name: '加護',  hi: false },
+            { id: 'stat-soc',      name: '社会',  hi: false },
+            { id: 'stat-melee',    name: '白兵',  hi: false },
+            { id: 'stat-ranged',   name: '射撃',  hi: false },
+            { id: 'stat-dodge',    name: '回避',  hi: false },
+            { id: 'stat-action',   name: '行動値', hi: false },
+            { id: 'stat-armor',    name: 'アーマー', hi: false },
+        ];
+        STATS.forEach(s => {
+            const val = gTxt(s.id);
+            const card = document.createElement('div');
+            card.className = 'vmo-stat-card' + (s.hi ? ' highlight' : '');
+            card.innerHTML = `<div class="vmo-stat-name">${s.name}</div><div class="vmo-stat-val">${val || '0'}</div>`;
+            statsWrap.appendChild(card);
+        });
+    }
+
+    // -- アーツリスト --
+    const artsList = g('vmo-arts-list');
+    if (artsList) {
+        artsList.innerHTML = '';
+        (window.acquiredArts || []).forEach(art => {
+            const row = document.createElement('div');
+            row.className = 'vmo-art-row';
+            const cost = art._overrideCost !== undefined ? art._overrideCost : (art['コスト'] || '-');
+            const lv   = art._currentLevel !== undefined ? art._currentLevel : 1;
+            row.innerHTML = `
+                <div>
+                    <div class="vmo-art-name">${art['アーツ名']} <small class="vmo-art-sub">Lv${lv} / ${art['最大Lv'] || '?'}</small></div>
+                    <div class="vmo-art-sub">${art._rt || art['ルーツ'] || ''} / ${art['種別'] || ''}</div>
+                </div>
+                <div class="vmo-art-timing">${art['タイミング'] || '-'}</div>
+                <div class="vmo-art-cost">代償: ${cost}</div>
+                <div class="vmo-art-effect">${art['効果'] || ''}</div>
+            `;
+            artsList.appendChild(row);
+        });
+        const artsSection = g('vmo-arts-section');
+        if (artsSection) artsSection.style.display = (window.acquiredArts||[]).length ? '' : 'none';
+    }
+
+    // -- 装備リスト --
+    const equipList = g('vmo-equip-list');
+    if (equipList) {
+        equipList.innerHTML = '';
+        const allEquip = [
+            ...(window.acquiredWeapons||[]).map(w => ({ name: w._equivalentName || w['装備名'], sub: w['種別'], eff: w['効果'] })),
+            ...(window.acquiredArmor||[]).map(a  => ({ name: a._equivalentName || a['装備名'], sub: '防具',       eff: a['効果'] })),
+            ...(window.acquiredItems||[]).map(i  => ({ name: i._equivalentName || i['装備名'], sub: i['種別'],    eff: i['効果'] })),
+        ];
+        allEquip.forEach(eq => {
+            const row = document.createElement('div');
+            row.className = 'vmo-equip-row';
+            row.innerHTML = `<span class="vmo-equip-name">${eq.name || '-'}</span><span class="vmo-equip-sub">${eq.sub || ''}</span><span class="vmo-equip-effect">${eq.eff || ''}</span>`;
+            equipList.appendChild(row);
+        });
+        const equipSection = g('vmo-equip-section');
+        if (equipSection) equipSection.style.display = allEquip.length ? '' : 'none';
+    }
+
+    // -- キャラ設定 --
+    const lore = document.querySelector('textarea.profile-input');
+    const loreSection = g('vmo-lore-section');
+    const loreText    = g('vmo-lore-text');
+    if (lore && loreSection && loreText && lore.value) {
+        loreText.textContent = lore.value;
+        loreSection.style.display = '';
+    }
+
+    // テーマボタン同期
+    const vmoThemeBtn = g('vmo-theme-btn');
+    if (vmoThemeBtn) {
+        const mainTheme = g('theme-toggle');
+        vmoThemeBtn.textContent = mainTheme ? mainTheme.textContent : '🌙';
+        vmoThemeBtn.onclick = () => { g('theme-toggle')?.click(); vmoThemeBtn.textContent = g('theme-toggle')?.textContent || ''; };
+    }
+
+    ov.style.display = 'flex';
+}
+
+window.buildAndShowViewOverlay = buildAndShowViewOverlay;
+
