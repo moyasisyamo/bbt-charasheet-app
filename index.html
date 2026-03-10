@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="ja" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BBT Character Sheet App</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="app-container">
+        <header style="border-bottom: none; margin-bottom: 20px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                <h1 style="color: #ff3366; text-shadow: 1px 1px 2px #000; font-size: 1.8rem; margin: 0; line-height: 1.2;">BEASTBIND TRINITY<br><span style="font-size: 1.2rem;">キャラクターシート</span></h1>
+                <div class="header-controls" style="display: flex; gap: 15px; align-items: center;">
+                    <div style="display: flex; align-items: center; gap: 5px;">
+                        <span style="font-size: 0.9rem;">編集用パスワード</span>
+                        <input type="password" id="char-password" class="edit-only" style="width: 120px; padding: 5px; background: var(--input-bg); border: 1px solid var(--border-color); color: var(--text-color);">
+                    </div>
+                    <div class="xp-display" style="display: flex; flex-direction: column; align-items: center; justify-content: center; background: rgba(0,0,0,0.3); padding: 5px 15px; border-radius: 4px; line-height: 1;">
+                        <span style="font-size: 0.8rem;">経験点</span>
+                        <span id="total-xp-used" style="font-weight: bold; color: #ffeb3b; font-size: 1.5rem;">0</span>
+                    </div>
+                    <button id="toggle-edit-mode-btn" class="btn warning" style="background:#f59e0b; color:#fff; border:none; padding:8px 12px; border-radius:4px; font-weight:bold; cursor:pointer;">🔒 閲覧モード<br><span style="font-size:0.75rem;">(編集ロック)</span></button>
+                    <button id="export-cocofolia-btn" class="btn primary" style="background:#ff5277; color:#fff; border:none; padding:8px 12px; border-radius:4px; font-weight:bold; cursor:pointer;">🎲 コマ出力<br><span style="font-size:0.75rem;">(ココフォリア)</span></button>
+                    <button id="theme-toggle" class="btn" style="background:#444b6e; color:#fff; border:none; padding:8px 12px; border-radius:4px; font-weight:bold; cursor:pointer;">🌙 ダークモード</button>
+                </div>
+            </div>
+        </header>
+
+        <main>
+            <!-- Top Panel: Basic Info & Profile -->
+            <section class="panel top-profile-panel" style="background-color: var(--panel-bg); border-radius: 8px; padding: 20px; margin-bottom: 20px;">
+                <div style="display: grid; grid-template-columns: 2.5fr 1fr; gap: 20px;">
+                    <!-- Left Side (Text Inputs) -->
+                    <div class="profile-input-grid" style="display: flex; flex-direction: column; gap: 8px;">
+                        <div style="display: flex; gap: 8px;">
+                            <div class="form-group" style="flex: 1;">
+                                <label for="char-name">人の名</label>
+                                <input type="text" id="char-name" class="edit-only-input profile-input">
+                                <div class="view-only-text" id="view-char-name">-</div>
+                            </div>
+                            <div class="form-group" style="flex: 1;">
+                                <label for="char-demon-name">魔の名</label>
+                                <input type="text" id="char-demon-name" class="edit-only-input profile-input">
+                                <div class="view-only-text">-</div>
+                            </div>
+                        </div>
+                        
+                        <div style="display: flex; gap: 8px;">
+                            <div class="form-group" style="flex: 1.5;">
+                                <label>設定的種族</label><input type="text" class="profile-input edit-only-input"><div class="view-only-text">-</div>
+                            </div>
+                            <div class="form-group" style="flex: 0.8;">
+                                <label>年齢</label><input type="text" class="profile-input edit-only-input"><div class="view-only-text">-</div>
+                            </div>
+                            <div class="form-group" style="flex: 0.8;">
+                                <label>性別</label><input type="text" class="profile-input edit-only-input"><div class="view-only-text">-</div>
+                            </div>
+                            <div class="form-group" style="flex: 1.5;">
+                                <label>カヴァー</label><input type="text" class="profile-input edit-only-input"><div class="view-only-text">-</div>
+                            </div>
+                        </div>
+
+                        <div style="display: flex; gap: 8px;">
+                            <div class="form-group" style="flex: 0.8;">
+                                <label>出自</label><input type="text" class="profile-input edit-only-input"><div class="view-only-text">-</div>
+                            </div>
+                            <div class="form-group" style="flex: 0.8;">
+                                <label>邂逅</label><input type="text" class="profile-input edit-only-input"><div class="view-only-text">-</div>
+                            </div>
+                            <div class="form-group" style="flex: 3.4;">
+                                <label>外見的特徴</label><input type="text" class="profile-input edit-only-input"><div class="view-only-text">-</div>
+                            </div>
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: 1.5fr 0.8fr 2.5fr; gap: 8px; margin-bottom: 8px;">
+                            <div class="form-group">
+                                <label>初期絆</label><input type="text" class="profile-input edit-only-input"><div class="view-only-text">-</div>
+                            </div>
+                            <div class="form-group">
+                                <label>関係</label><input type="text" class="profile-input edit-only-input"><div class="view-only-text">-</div>
+                            </div>
+                            <div class="form-group">
+                                <label>変異第一段階</label><input type="text" class="profile-input edit-only-input"><div class="view-only-text">-</div>
+                            </div>
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: 1.5fr 0.8fr 2.5fr; gap: 8px; margin-bottom: 8px;">
+                            <div class="form-group">
+                                <label>初期絆</label><input type="text" class="profile-input edit-only-input"><div class="view-only-text">-</div>
+                            </div>
+                            <div class="form-group">
+                                <label>関係</label><input type="text" class="profile-input edit-only-input"><div class="view-only-text">-</div>
+                            </div>
+                            <div class="form-group">
+                                <label>変異第二段階</label><input type="text" class="profile-input edit-only-input"><div class="view-only-text">-</div>
+                            </div>
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: 1.5fr 0.8fr 2.5fr; gap: 8px;">
+                            <div class="form-group" style="grid-column: 1 / 3;">
+                                <label>初期エゴ</label><input type="text" class="profile-input edit-only-input"><div class="view-only-text">-</div>
+                            </div>
+                            <div class="form-group">
+                                <label>変異第三段階</label><input type="text" class="profile-input edit-only-input"><div class="view-only-text">-</div>
+                            </div>
+                        </div>
+
+                        <div class="form-group" style="margin-top: 5px;">
+                            <label>キャラ設定</label>
+                            <textarea class="profile-input edit-only-input" rows="4" style="resize: vertical;"></textarea>
+                            <div class="view-only-text" style="white-space: pre-wrap;">-</div>
+                        </div>
+                    </div>
+
+                    <!-- Right Side (Player & Images) -->
+                    <div style="display: flex; flex-direction: column;">
+                        <div class="form-group" style="margin-bottom: 20px;">
+                            <label for="player-name">プレイヤー名</label>
+                            <input type="text" id="player-name" class="edit-only-input profile-input">
+                            <div class="view-only-text" id="view-player-name">-</div>
+                        </div>
+                        
+                        <div style="display: flex; gap: 10px; flex: 1;">
+                            <div class="char-illustration box" style="flex: 1; border: 1px dashed var(--border-color); display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; border-radius: 4px; padding: 10px; text-align: center; color: var(--text-muted); cursor: pointer;">
+                                <img id="char-image-preview" src="" alt="キャラクターイラスト" style="display: none; width: 100%; height: auto; border-radius: 4px;">
+                                <div id="char-image-placeholder" class="placeholder-content" style="font-size: 0.9rem;">
+                                    人の姿<br>イラスト設定
+                                </div>
+                                <input type="file" id="char-image-upload" accept="image/*" style="display: none;" class="edit-only">
+                                <button id="clear-image-btn" class="btn warning edit-only" style="width: 100%; margin-top: 5px; display: none; font-size: 0.75rem; padding: 4px;">画像削除</button>
+                            </div>
+
+                            <div class="char-illustration box" style="flex: 1; border: 1px dashed var(--border-color); display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; border-radius: 4px; padding: 10px; text-align: center; color: var(--text-muted); cursor: pointer;">
+                                <img id="char-image-preview2" src="" alt="魔の姿イラスト" style="display: none; width: 100%; height: auto; border-radius: 4px;">
+                                <div id="char-image-placeholder2" class="placeholder-content" style="font-size: 0.9rem;">
+                                    魔の姿<br>イラスト設定
+                                </div>
+                                <input type="file" id="char-image-upload2" accept="image/*" style="display: none;" class="edit-only">
+                                <button id="clear-image-btn2" class="btn warning edit-only" style="width: 100%; margin-top: 5px; display: none; font-size: 0.75rem; padding: 4px;">画像削除</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Stats Panel: Roots & Status -->
+            <section class="panel roots-stats-panel" style="background-color: var(--panel-bg); border-radius: 8px; padding: 20px; margin-bottom: 20px;">
+                <div style="display: grid; grid-template-columns: minmax(300px, 1.2fr) 2fr; gap: 30px;">
+                    
+                    <!-- Left: Roots and Manual Adjusts -->
+                    <div class="roots-section" style="display: flex; flex-direction: column; gap: 15px;">
+                        <div style="display: flex; gap: 10px; align-items: center;">
+                            <div class="form-group" style="flex: 1;">
+                                <label for="char-style" style="font-size: 0.8rem; margin: 0 0 2px 0;">スタイル</label>
+                                <select id="char-style" class="stat-trigger profile-input"><option value="">選択してください</option></select>
+                            </div>
+                            <div class="form-group" style="flex: 1.2;">
+                                <label for="primary-root" style="font-size: 0.8rem; margin: 0 0 2px 0;">プライマリ</label>
+                                <select id="primary-root" class="stat-trigger profile-input"><option value="">選択してください</option></select>
+                            </div>
+                            <div class="form-group" style="display: flex; flex-direction: column; align-items: center; justify-content: center;">
+                                <label style="font-size: 0.8rem; margin: 0;">得意</label>
+                                <input type="radio" name="proficiency-choice" value="primary" class="stat-trigger" checked style="margin: 5px 0 0 0;">
+                            </div>
+                        </div>
+
+                        <div style="display: flex; gap: 10px; align-items: center;">
+                            <div class="form-group" style="flex: 1;">
+                                <label style="font-size: 0.8rem; margin: 0 0 2px 0;">種別</label>
+                                <div id="stat-type" class="profile-input" style="padding: 10px; border: 1px solid var(--border-color); background: var(--bg-color); border-radius: 4px; min-height: 42px; display: flex; align-items: center; color: var(--text-color);">-</div>
+                            </div>
+                            <div class="form-group" style="flex: 1.2;">
+                                <label for="secondary-root" style="font-size: 0.8rem; margin: 0 0 2px 0;">セカンダリ</label>
+                                <select id="secondary-root" class="stat-trigger profile-input"><option value="">選択してください</option></select>
+                            </div>
+                            <div class="form-group" style="display: flex; flex-direction: column; align-items: center; justify-content: center;">
+                                <label style="font-size: 0.8rem; margin: 0; visibility: hidden;">得意</label>
+                                <input type="radio" name="proficiency-choice" value="secondary" class="stat-trigger" style="margin: 5px 0 0 0;">
+                            </div>
+                        </div>
+
+                        <div style="display: flex; gap: 10px; align-items: center;">
+                            <div class="form-group" style="flex: 1;">
+                                <label for="free-stat" style="font-size: 0.8rem; margin: 0 0 2px 0;">能力割り振り <span style="font-size: 0.75rem; font-weight: normal;">(任意)</span></label>
+                                <select id="free-stat" class="stat-trigger profile-input" style="appearance: none; background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23ccc%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E'); background-repeat: no-repeat; background-position: right 10px top 50%; background-size: .65em auto;">
+                                    <option value="肉体">肉体</option>
+                                    <option value="技術">技術</option>
+                                    <option value="感情">感情</option>
+                                    <option value="加護">加護</option>
+                                    <option value="社会">社会</option>
+                                </select>
+                            </div>
+                            <div class="form-group" style="flex: 1.2;" id="tertiary-root-container">
+                                <label for="tertiary-root" style="display: flex; justify-content: space-between; font-size: 0.8rem; margin: 0 0 2px 0;">
+                                    ターシャリ
+                                </label>
+                                <select id="tertiary-root" class="stat-trigger profile-input">
+                                    <option value="">選択しない</option>
+                                </select>
+                            </div>
+                            <div class="form-group" id="add-tertiary-container" style="flex: 1.2; display: none;">
+                                <label style="font-size: 0.8rem; margin: 0 0 2px 0;">ターシャリ</label>
+                                <button id="add-tertiary-btn" class="btn exception-btn edit-only profile-input" style="width: 100%; border-style: dashed;">＋ 追加</button>
+                            </div>
+                            <div class="form-group" style="visibility: hidden; width: 1.2rem;"></div>
+                        </div>
+
+                        <!-- Manual Adjustments Box -->
+                        <div class="manual-adjustments-box" style="border: 1px dashed var(--border-color); border-radius: 8px; padding: 15px; margin-top: 10px; position: relative;">
+                            <div style="position: absolute; bottom: -10px; right: 10px; background: var(--panel-bg); padding: 0 5px; font-size: 0.8rem; color: var(--text-muted);">手動補正 <span id="adj-state-label">(通常)</span></div>
+                            
+                            <!-- Normal Adjustments -->
+                            <div id="normal-adj-grid" style="display: block;">
+                                <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px; margin-bottom: 10px;">
+                                    <div class="form-group"><label style="font-size:0.75rem; text-align:center;">肉体</label><input type="number" id="mod-body-normal" value="0" class="stat-trigger edit-only-input manual-adj-input normal-adj-input"></div>
+                                    <div class="form-group"><label style="font-size:0.75rem; text-align:center;">技術</label><input type="number" id="mod-tech-normal" value="0" class="stat-trigger edit-only-input manual-adj-input normal-adj-input"></div>
+                                    <div class="form-group"><label style="font-size:0.75rem; text-align:center;">感情</label><input type="number" id="mod-emo-normal" value="0" class="stat-trigger edit-only-input manual-adj-input normal-adj-input"></div>
+                                    <div class="form-group"><label style="font-size:0.75rem; text-align:center;">加護</label><input type="number" id="mod-div-normal" value="0" class="stat-trigger edit-only-input manual-adj-input normal-adj-input"></div>
+                                    <div class="form-group"><label style="font-size:0.75rem; text-align:center;">社会</label><input type="number" id="mod-soc-normal" value="0" class="stat-trigger edit-only-input manual-adj-input normal-adj-input"></div>
+                                </div>
+                                <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; width: 80%;">
+                                    <div class="form-group"><label style="font-size:0.75rem; text-align:center;">白兵</label><input type="number" id="mod-melee-normal" value="0" class="stat-trigger edit-only-input manual-adj-input normal-adj-input"></div>
+                                    <div class="form-group"><label style="font-size:0.75rem; text-align:center;">射撃</label><input type="number" id="mod-ranged-normal" value="0" class="stat-trigger edit-only-input manual-adj-input normal-adj-input"></div>
+                                    <div class="form-group"><label style="font-size:0.75rem; text-align:center;">回避</label><input type="number" id="mod-dodge-normal" value="0" class="stat-trigger edit-only-input manual-adj-input normal-adj-input"></div>
+                                    <div class="form-group"><label style="font-size:0.75rem; text-align:center;">行動</label><input type="number" id="mod-action-normal" value="0" class="stat-trigger edit-only-input manual-adj-input normal-adj-input"></div>
+                                </div>
+                                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; width: 60%; margin-top: 10px;">
+                                    <div class="form-group"><label style="font-size:0.75rem; text-align:center;">アーマー</label><input type="number" id="mod-armor-normal" value="0" class="stat-trigger edit-only-input manual-adj-input normal-adj-input"></div>
+                                    <div class="form-group"><label style="font-size:0.75rem; text-align:center;">FP</label><input type="number" id="mod-fp-normal" value="0" class="stat-trigger edit-only-input manual-adj-input normal-adj-input"></div>
+                                    <div class="form-group"><label style="font-size:0.75rem; text-align:center;">人間性</label><input type="number" id="mod-humanity-normal" value="0" class="stat-trigger edit-only-input manual-adj-input normal-adj-input"></div>
+                                </div>
+                            </div>
+
+                            <!-- Beast Adjustments -->
+                            <div id="beast-adj-grid" style="display: none;">
+                                <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px; margin-bottom: 10px;">
+                                    <div class="form-group"><label style="font-size:0.75rem; text-align:center;">肉体</label><input type="number" id="mod-body-beast" value="0" class="stat-trigger edit-only-input manual-adj-input beast-adj-input"></div>
+                                    <div class="form-group"><label style="font-size:0.75rem; text-align:center;">技術</label><input type="number" id="mod-tech-beast" value="0" class="stat-trigger edit-only-input manual-adj-input beast-adj-input"></div>
+                                    <div class="form-group"><label style="font-size:0.75rem; text-align:center;">感情</label><input type="number" id="mod-emo-beast" value="0" class="stat-trigger edit-only-input manual-adj-input beast-adj-input"></div>
+                                    <div class="form-group"><label style="font-size:0.75rem; text-align:center;">加護</label><input type="number" id="mod-div-beast" value="0" class="stat-trigger edit-only-input manual-adj-input beast-adj-input"></div>
+                                    <div class="form-group"><label style="font-size:0.75rem; text-align:center;">社会</label><input type="number" id="mod-soc-beast" value="0" class="stat-trigger edit-only-input manual-adj-input beast-adj-input"></div>
+                                </div>
+                                <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; width: 80%;">
+                                    <div class="form-group"><label style="font-size:0.75rem; text-align:center;">白兵</label><input type="number" id="mod-melee-beast" value="0" class="stat-trigger edit-only-input manual-adj-input beast-adj-input"></div>
+                                    <div class="form-group"><label style="font-size:0.75rem; text-align:center;">射撃</label><input type="number" id="mod-ranged-beast" value="0" class="stat-trigger edit-only-input manual-adj-input beast-adj-input"></div>
+                                    <div class="form-group"><label style="font-size:0.75rem; text-align:center;">回避</label><input type="number" id="mod-dodge-beast" value="0" class="stat-trigger edit-only-input manual-adj-input beast-adj-input"></div>
+                                    <div class="form-group"><label style="font-size:0.75rem; text-align:center;">行動</label><input type="number" id="mod-action-beast" value="0" class="stat-trigger edit-only-input manual-adj-input beast-adj-input"></div>
+                                </div>
+                                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; width: 60%; margin-top: 10px;">
+                                    <div class="form-group"><label style="font-size:0.75rem; text-align:center;">アーマー</label><input type="number" id="mod-armor-beast" value="0" class="stat-trigger edit-only-input manual-adj-input beast-adj-input"></div>
+                                    <div class="form-group"><label style="font-size:0.75rem; text-align:center;">FP</label><input type="number" id="mod-fp-beast" value="0" class="stat-trigger edit-only-input manual-adj-input beast-adj-input"></div>
+                                    <div class="form-group"><label style="font-size:0.75rem; text-align:center;">人間性</label><input type="number" id="mod-humanity-beast" value="0" class="stat-trigger edit-only-input manual-adj-input beast-adj-input"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right: Stats -->
+                    <div class="stats-display-section" style="display: flex; flex-direction: column; gap: 15px;">
+                        <div>
+                            <h4 style="margin:0 0 10px 0; font-size: 0.9rem;">【基本能力値】</h4>
+                            <div class="custom-stats-grid">
+                                <div class="stat-cell"><div class="stat-label">肉体/B</div><div class="stat-val"><span id="stat-body" class="large-val">0</span><span class="small-val" id="stat-body-b">/3</span></div><div class="edit-only">成長: <input type="number" id="growth-body" class="stat-growth stat-trigger edit-only-input" min="0" value="0"></div></div>
+                                <div class="stat-cell"><div class="stat-label">技術/B</div><div class="stat-val"><span id="stat-tech" class="large-val">0</span><span class="small-val" id="stat-tech-b">/3</span></div><div class="edit-only">成長: <input type="number" id="growth-tech" class="stat-growth stat-trigger edit-only-input" min="0" value="0"></div></div>
+                                <div class="stat-cell"><div class="stat-label">感情/B</div><div class="stat-val"><span id="stat-emo" class="large-val">0</span><span class="small-val" id="stat-emo-b">/3</span></div><div class="edit-only">成長: <input type="number" id="growth-emo" class="stat-growth stat-trigger edit-only-input" min="0" value="0"></div></div>
+                                <div class="stat-cell"><div class="stat-label">加護/B</div><div class="stat-val"><span id="stat-div" class="large-val">0</span><span class="small-val" id="stat-div-b">/3</span></div><div class="edit-only">成長: <input type="number" id="growth-div" class="stat-growth stat-trigger edit-only-input" min="0" value="0"></div></div>
+                                <div class="stat-cell"><div class="stat-label">社会/B</div><div class="stat-val"><span id="stat-soc" class="large-val">0</span><span class="small-val" id="stat-soc-b">/3</span></div><div class="edit-only">成長: <input type="number" id="growth-soc" class="stat-growth stat-trigger edit-only-input" min="0" value="0"></div></div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <h4 style="margin:0 0 10px 0; font-size: 0.9rem;">【アーマー値】</h4>
+                            <div class="custom-stats-grid">
+                                <div class="stat-cell armor-cell"><span class="stat-label">肉体</span><span id="armor-phys" class="large-val text-blue">0</span></div>
+                                <div class="stat-cell armor-cell"><span class="stat-label">技術</span><span id="armor-tech" class="large-val text-blue">0</span></div>
+                                <div class="stat-cell armor-cell"><span class="stat-label">感情</span><span id="armor-emo" class="large-val text-blue">0</span></div>
+                                <div class="stat-cell armor-cell"><span class="stat-label">加護</span><span id="armor-div" class="large-val text-blue">0</span></div>
+                                <div class="stat-cell armor-cell"><span class="stat-label">社会</span><span id="armor-soc" class="large-val text-blue">0</span></div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <h4 style="margin:0 0 10px 0; font-size: 0.9rem;">【戦闘能力値】</h4>
+                            <div class="custom-stats-grid combat-grid">
+                                <div class="stat-cell"><div class="stat-label">白兵</div><div class="stat-val"><span id="stat-melee" class="large-val text-yellow">0</span></div><div class="edit-only">成長: <input type="number" id="growth-melee" class="stat-growth stat-trigger edit-only-input" min="0" value="0"></div></div>
+                                <div class="stat-cell"><div class="stat-label">射撃</div><div class="stat-val"><span id="stat-ranged" class="large-val text-yellow">0</span></div><div class="edit-only">成長: <input type="number" id="growth-ranged" class="stat-growth stat-trigger edit-only-input" min="0" value="0"></div></div>
+                                <div class="stat-cell"><div class="stat-label">回避</div><div class="stat-val"><span id="stat-dodge" class="large-val text-yellow">0</span></div><div class="edit-only">成長: <input type="number" id="growth-dodge" class="stat-growth stat-trigger edit-only-input" min="0" value="0"></div></div>
+                                <div class="stat-cell"><div class="stat-label">行動</div><div class="stat-val"><span id="stat-action" class="large-val text-yellow">0</span></div><div class="edit-only">成長: <input type="number" id="growth-action" class="stat-growth stat-trigger edit-only-input" min="0" value="0"></div></div>
+                            </div>
+                        </div>
+
+                        <div style="display: flex; justify-content: space-between; align-items: stretch; margin-top: 10px; gap: 15px;">
+                            <div class="stat-cell" style="flex: 1; display: flex; flex-direction: row; align-items: center; justify-content: space-between; padding: 10px 20px;">
+                                <span class="stat-label" style="font-size: 1.1rem; margin: 0;">FP</span><span id="stat-fp" class="large-val text-green" style="font-size: 1.8rem;">30</span>
+                            </div>
+                            <div class="stat-cell" style="flex: 1.2; display: flex; flex-direction: row; align-items: center; justify-content: space-between; padding: 10px 20px;">
+                                <span class="stat-label" style="font-size: 1.1rem; margin: 0;">初期人間性</span><span id="stat-humanity" class="large-val text-green" style="font-size: 1.8rem;">50</span>
+                            </div>
+                            <div style="flex: 1.2; display: flex; flex-direction: column; justify-content: stretch;">
+                                <button id="beast-mode-btn" class="btn exception-btn" style="height: 100%; border-radius: 6px; font-size: 1rem; flex: 1; background: #ff7675; color: #fff; border: none; font-weight: bold; cursor: pointer;">🌙 魔獣化切り替え</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="arts-info panel">
+                <h2>取得アーツ</h2>
+                <div class="table-container">
+                    <table id="arts-table">
+                        <thead>
+                            <tr>
+                                <th>アーツ名</th>
+                                <th>LV</th>
+                                <th>種別</th>
+                                <th>タイミング</th>
+                                <th>判定値</th>
+                                <th>対象/射程</th>
+                                <th>コスト</th>
+                                <th>効果</th>
+                                <th>削除</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- JavaScriptから追加 -->
+                        </tbody>
+                    </table>
+                </div>
+                <div class="arts-controls" style="margin-top: 15px;">
+                    <button id="open-arts-dictionary-btn" class="btn primary">📚 アーツ辞書から追加</button>
+                </div>
+            </section>
+
+            <!-- Equipment Sections -->
+            <section class="equip-info panel">
+                <h2>所持品・装備</h2>
+                
+                <!-- Weapons / Vehicles -->
+                <h3>武器＆乗り物</h3>
+                <div class="table-container" style="margin-bottom: 20px;">
+                    <table id="weapons-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 15%;">相当品名</th>
+                                <th>ルーツ</th>
+                                <th>武器名</th>
+                                <th>購入</th>
+                                <th>種別</th>
+                                <th>命中</th>
+                                <th>攻撃力</th>
+                                <th>G/A値</th>
+                                <th>射程</th>
+                                <th>効果・条件</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                    <div class="arts-controls" style="margin-top: 10px;">
+                        <button id="open-weapon-dict-btn" class="btn primary">⚔️ 武器・乗り物辞典から追加</button>
+                    </div>
+                </div>
+
+                <!-- Armor -->
+                <h3>防具</h3>
+                <div class="table-container" style="margin-bottom: 20px;">
+                    <table id="armor-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 15%;">相当品名</th>
+                                <th>ルーツ</th>
+                                <th>防具名</th>
+                                <th title="通常時に装備するかどうか">通常時</th>
+                                <th title="魔獣化時に装備するかどうか">魔獣化</th>
+                                <th>購入</th>
+                                <th>ドッジ</th>
+                                <th>行動値</th>
+                                <th>G/A値</th>
+                                <th>効果・条件</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                    <div class="arts-controls" style="margin-top: 10px;">
+                        <button id="open-armor-dict-btn" class="btn primary">🛡️ 防具辞典から追加</button>
+                    </div>
+                </div>
+
+                <!-- Items -->
+                <h3>道具</h3>
+                <div class="table-container">
+                    <table id="items-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 15%;">相当品名</th>
+                                <th>ルーツ</th>
+                                <th>道具名</th>
+                                <th style="width: 50px;">個数</th>
+                                <th>購入</th>
+                                <th>種別</th>
+                                <th>タイミング</th>
+                                <th>対象/射程</th>
+                                <th>効果・条件</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                    <div class="arts-controls" style="margin-top: 10px;">
+                        <button id="open-item-dict-btn" class="btn primary">🎒 道具辞典から追加</button>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Arts Dictionary Modal/Dialog -->
+    <div id="arts-dictionary-modal" class="modal-overlay" style="display: none;">
+        <div class="modal-content panel">
+            <div class="modal-header">
+                <h2>アーツ辞書</h2>
+                <button id="close-arts-dictionary" class="btn exception-btn">✕ 閉じる</button>
+            </div>
+            
+            <div class="arts-filters form-grid" style="margin-bottom: 20px;">
+                <div class="form-group">
+                    <label>フィルター</label>
+                    <select id="arts-filter-category">
+                        <option value="all">すべて</option>
+                        <option selected value="current">現在のスタイル・ルーツのみ</option>
+                        <option value="basic">基本アーツ・共通アーツ</option>
+                        <option value="attacker">アタッカー</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>検索</label>
+                    <input type="text" id="arts-search-input" placeholder="アーツ名や効果で検索...">
+                </div>
+            </div>
+
+            <div class="table-container" style="flex: 1; overflow-y: auto;">
+                <table id="dictionary-table">
+                    <thead>
+                        <tr>
+                            <th>分類</th>
+                            <th>アーツ名</th>
+                            <th>種別</th>
+                            <th>最大Lv</th>
+                            <th>タイミング</th>
+                            <th>判定値</th>
+                            <th>対象/射程</th>
+                            <th>コスト</th>
+                            <th style="width: 25%;">効果</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Populated by JS -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Equip/Item Dictionary Modal -->
+    <div id="equip-dictionary-modal" class="modal-overlay" style="display: none;">
+        <div class="modal-content panel">
+            <div class="modal-header">
+                <h2 id="equip-dict-title">装備辞典</h2>
+                <button id="close-equip-dictionary" class="btn exception-btn">✕ 閉じる</button>
+            </div>
+            
+            <div class="arts-filters form-grid" style="margin-bottom: 20px;">
+                <div class="form-group">
+                    <label>検索</label>
+                    <input type="text" id="equip-search-input" placeholder="名前や効果で検索...">
+                </div>
+            </div>
+
+            <div class="table-container" style="flex: 1; overflow-y: auto;">
+                <table id="equip-dict-table">
+                    <thead id="equip-dict-thead">
+                        <!-- Dynamic headers -->
+                    </thead>
+                    <tbody id="equip-dict-tbody">
+                        <!-- Populated by JS -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/data.js"></script>
+    <script src="js/loader.js"></script>
+    <script src="js/stats.js"></script>
+    <script src="js/arts.js"></script>
+    <script src="js/equipment.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,9 @@
+# 旧巨大データファイル（CSVに移行済みなので除外）
+js/arts_data.js
+js/equipment_data.js
+
+# OS・エディタ系
+.DS_Store
+Thumbs.db
+*.swp
+.vscode/
