@@ -16,3 +16,6 @@ const FIREBASE_CONFIG = {
     messagingSenderId: "796364269135",
     appId: "1:796364269135:web:a56ce898308f818705ac3a"
 };
+
+// ↓任意の管理者用パスワードに変更してください（全キャラクターの強制削除が可能になります）
+const ADMIN_PASSWORD = "master";

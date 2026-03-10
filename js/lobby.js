@@ -9,6 +9,7 @@ let filteredChars = [];
 let sortField = 'updatedAt';
 let sortDir   = 'desc';
 let activeFilters = {}; // { type: 'style'|'player'|'blood'|'root', value: '...' }[]
+let isDeleteMode = false;
 
 const STYLE_ABBR  = { 'アタッカー':'ATK', 'ディフェンダー':'DEF', 'サポーター':'SUP' };
 const STYLE_CLASS = { 'ATK':'style-atk', 'DEF':'style-def', 'SUP':'style-sup' };
@@ -31,6 +32,18 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('new-char-btn').addEventListener('click', () => {
         window.location.href = 'sheet.html';
     });
+
+    // 削除モード
+    const delBtn = document.getElementById('delete-mode-btn');
+    if (delBtn) {
+        delBtn.addEventListener('click', () => {
+            isDeleteMode = !isDeleteMode;
+            document.body.classList.toggle('delete-mode-active', isDeleteMode);
+            delBtn.classList.toggle('warning', !isDeleteMode);
+            delBtn.classList.toggle('primary', isDeleteMode);
+            delBtn.textContent = isDeleteMode ? '⚠ 削除モード中 (クリックで解除)' : '🗑 削除モード切替';
+        });
+    }
 
     // Firebase 初期化
     const fbReady = window.bbFirebase.init();
@@ -153,8 +166,30 @@ function buildRow(c) {
     `;
 
     // イベントバインド
-    tr.querySelector('.name-cell').addEventListener('click', () => {
-        window.location.href = `sheet.html?id=${c.id}`;
+    tr.querySelector('.name-cell').addEventListener('click', async () => {
+        if (isDeleteMode) {
+            const pass = prompt(`「${c.name || '名無し'}」を削除しますか？\n実行するにはこのキャラクターの編集パスワード、または管理者パスワードを入力してください:`);
+            if (pass !== null) {
+                const charPass = c.password || ''; 
+                const adminPass = typeof ADMIN_PASSWORD !== 'undefined' ? ADMIN_PASSWORD : null;
+                
+                if (pass === charPass || (adminPass && pass === adminPass)) {
+                    if (confirm(`本当に「${c.name || '名無し'}」を削除しますか？\nこの操作は取り消せません。`)) {
+                        try {
+                            await window.bbFirebase.delete(c.id);
+                            alert('削除しました。');
+                            loadCharacters();
+                        } catch (e) {
+                            alert('削除に失敗しました: ' + e.message);
+                        }
+                    }
+                } else {
+                    alert('パスワードが違います。');
+                }
+            }
+        } else {
+            window.location.href = `sheet.html?id=${c.id}`;
+        }
     });
     tr.querySelectorAll('.style-badge[data-style]').forEach(el => {
         el.addEventListener('click', e => { e.stopPropagation(); addFilter('style', el.dataset.style); });

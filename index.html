@@ -59,6 +59,11 @@
         .xp-cell { font-weight:600; color:#ffeb3b; }
         [data-theme="light"] .xp-cell { color:#d86c00; }
 
+        /* 削除モード */
+        .delete-mode-active .lobby-header { background: rgba(255, 30, 30, 0.15); border-color: #ff3366; }
+        .delete-mode-active .name-cell { color: #ff3366; }
+        .delete-mode-active .char-name-text::before { content: "🗑 "; }
+
         /* ルーツポップアップ */
         .popup-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.7); z-index:1000; display:flex; align-items:center; justify-content:center; }
         .popup-box { background:var(--panel-bg); border:1px solid var(--border-color); border-radius:12px; padding:24px; width:360px; max-height:70vh; display:flex; flex-direction:column; gap:12px; }
@@ -91,6 +96,7 @@
             <h1>BEASTBIND TRINITY<br><span>キャラクター一覧</span></h1>
         </div>
         <div class="lobby-controls">
+            <button id="delete-mode-btn" class="btn warning" style="padding:8px 12px; font-weight:bold;">🗑 削除モード切替</button>
             <button id="new-char-btn" class="btn primary" style="padding:8px 16px; font-weight:bold;">
                 ＋ 新規キャラクター作成
             </button>
