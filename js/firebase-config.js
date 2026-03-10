@@ -9,10 +9,10 @@
  * 4. 表示された firebaseConfig の値をコピーしてここに貼り付ける
  */
 const FIREBASE_CONFIG = {
-    apiKey:            "YOUR_API_KEY",
-    authDomain:        "YOUR_PROJECT_ID.firebaseapp.com",
-    projectId:         "YOUR_PROJECT_ID",
-    storageBucket:     "YOUR_PROJECT_ID.appspot.com",
-    messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-    appId:             "YOUR_APP_ID"
+    apiKey: "AIzaSyCfw35kiF5jwEDrLdXMiUQFp6A-fMhUAZ0",
+    authDomain: "bbt-charasheet.firebaseapp.com",
+    projectId: "bbt-charasheet",
+    storageBucket: "bbt-charasheet.firebasestorage.app",
+    messagingSenderId: "796364269135",
+    appId: "1:796364269135:web:a56ce898308f818705ac3a"
 };
