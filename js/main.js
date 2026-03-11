@@ -646,50 +646,69 @@ function buildAndShowViewOverlay() {
     var statsWrap = g('vmo-stats-wrap');
     if (statsWrap) {
         statsWrap.innerHTML = '';
-        var makeStatRow = function(cols, items) {
-            var row = document.createElement('div');
-            row.className = 'vmo-stats-row vmo-stats-row-' + cols;
-            items.forEach(function(s) {
-                var rawVal = parseInt(gTxt(s.id)) || 0;
-                var card = document.createElement('div');
-                card.className = 'vmo-stat-card' + (s.hi ? ' highlight' : '');
-                var valHtml;
-                if (s.bonusId) {
-                    var bonusText = gTxt(s.bonusId).replace('/', '');
-                    var armorText = s.armorId ? gTxt(s.armorId) : '';
-                    var armorPart = armorText ? '<span class="vmo-stat-bonus-inline">（A:' + armorText + '）</span>' : '';
-                    valHtml = rawVal +
-                              '<span class="vmo-stat-bonus-inline">/' + bonusText + '</span>' +
-                              armorPart;
-                } else {
-                    valHtml = rawVal;
-                }
-                card.innerHTML = '<div class="vmo-stat-name">' + s.name + '</div>' +
-                                 '<div class="vmo-stat-val">' + valHtml + '</div>';
-                row.appendChild(card);
-            });
-            statsWrap.appendChild(row);
+        var makeBadge = function(s) {
+            var rawVal = parseInt(gTxt(s.id)) || 0;
+            var badge = document.createElement('div');
+            badge.className = 'vmo-stat-badge' + (s.hi ? ' highlight' : '');
+
+            var nameEl = document.createElement('div');
+            nameEl.className = 'vmo-stat-name';
+            nameEl.textContent = s.name;
+            badge.appendChild(nameEl);
+
+            var valEl = document.createElement('div');
+            valEl.className = 'vmo-stat-val';
+            
+            var valInner = '<span>' + rawVal + '</span>';
+            if (s.bonusId) {
+                var bonusText = gTxt(s.bonusId).replace('/', '');
+                valInner += '<span class="vmo-stat-bonus">/' + bonusText + '</span>';
+            }
+            valEl.innerHTML = valInner;
+            badge.appendChild(valEl);
+
+            if (s.armorId) {
+                var armorText = gTxt(s.armorId) || '0';
+                var armorEl = document.createElement('div');
+                armorEl.className = 'vmo-stat-armor';
+                armorEl.textContent = 'A:' + armorText;
+                badge.appendChild(armorEl);
+            }
+            return badge;
         };
-        // 行1: 肉体・技術・感情・加護・社会（ボーナス+アーマー付き）
-        makeStatRow(5, [
+
+        // 行1: 肉体・技術・感情・加護・社会
+        var row1 = document.createElement('div');
+        row1.className = 'vmo-stats-row';
+        [
             {id:'stat-body', name:'肉体', bonusId:'stat-body-b', armorId:'armor-phys'},
             {id:'stat-tech', name:'技術', bonusId:'stat-tech-b', armorId:'armor-tech'},
             {id:'stat-emo',  name:'感情', bonusId:'stat-emo-b',  armorId:'armor-emo'},
             {id:'stat-div',  name:'加護', bonusId:'stat-div-b',  armorId:'armor-div'},
             {id:'stat-soc',  name:'社会', bonusId:'stat-soc-b',  armorId:'armor-soc'}
-        ]);
-        // 行2: 白兵値・射撃値・回避値・行動値
-        makeStatRow(4, [
-            {id:'stat-melee',  name:'白兵値'},
-            {id:'stat-ranged', name:'射撃値'},
-            {id:'stat-dodge',  name:'回避値'},
-            {id:'stat-action', name:'行動値'}
-        ]);
-        // 行3: FP・人間性（大きく表示）
-        makeStatRow(2, [
+        ].forEach(function(s) { row1.appendChild(makeBadge(s)); });
+        statsWrap.appendChild(row1);
+
+        // 行2: 白兵・射撃・回避・行動 + FP・人間性
+        var row2 = document.createElement('div');
+        row2.className = 'vmo-stats-row';
+        [
+            {id:'stat-melee',  name:'白兵'},
+            {id:'stat-ranged', name:'射撃'},
+            {id:'stat-dodge',  name:'回避'},
+            {id:'stat-action', name:'行動'}
+        ].forEach(function(s) { row2.appendChild(makeBadge(s)); });
+        
+        var spacer = document.createElement('div');
+        spacer.style.flex = '1';
+        row2.appendChild(spacer);
+
+        [
             {id:'stat-fp',       name:'FP',   hi:true},
             {id:'stat-humanity', name:'人間性', hi:true}
-        ]);
+        ].forEach(function(s) { row2.appendChild(makeBadge(s)); });
+
+        statsWrap.appendChild(row2);
     }
 
     // -- アーツリスト --

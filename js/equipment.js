@@ -123,14 +123,14 @@ function addEquipToTable(item, type) {
     } else if (type === 'armor') {
         tbody = document.querySelector('#armor-table tbody');
         arr   = acquiredArmor;
-        cItem._normalEquip = false;
-        cItem._beastEquip  = false;
+        cItem._normalEquip = item._normalEquip || false;
+        cItem._beastEquip  = item._beastEquip || false;
         row.innerHTML = `
             <td>${eqInput}</td>
             <td><small>${cItem['ルーツ'] || '-'}</small></td>
             <td><strong>${cItem['装備名']}</strong></td>
-            <td><input type="checkbox" class="normal-equip-check"></td>
-            <td><input type="checkbox" class="beast-equip-check"></td>
+            <td><input type="checkbox" class="normal-equip-check" ${cItem._normalEquip ? 'checked' : ''}></td>
+            <td><input type="checkbox" class="beast-equip-check" ${cItem._beastEquip ? 'checked' : ''}></td>
             <td>${cItem['購入']}</td>
             <td>${cItem['ドッジ']}</td>
             <td>${cItem['行動値']}</td>
@@ -157,12 +157,12 @@ function addEquipToTable(item, type) {
     } else if (type === 'items') {
         tbody = document.querySelector('#items-table tbody');
         arr   = acquiredItems;
-        cItem._quantity = 1;
+        cItem._quantity = item._quantity !== undefined ? item._quantity : 1;
         row.innerHTML = `
             <td>${eqInput}</td>
             <td><small>${cItem['ルーツ'] || '-'}</small></td>
             <td><strong>${cItem['装備名']}</strong></td>
-            <td><input type="number" class="item-quantity-input" value="1" min="0" style="width:50px;"></td>
+            <td><input type="number" class="item-quantity-input" value="${cItem._quantity}" min="0" style="width:50px;"></td>
             <td>${cItem['購入']}</td>
             <td><small>${cItem['種別']}</small></td>
             <td><small>${cItem['タイミング']}</small></td>

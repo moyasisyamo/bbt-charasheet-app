@@ -846,15 +846,37 @@
 .vmo-stats-row-5 { grid-template-columns: repeat(5,1fr); }
 .vmo-stats-row-4 { grid-template-columns: repeat(4,1fr); }
 .vmo-stats-row-2 { grid-template-columns: repeat(2,1fr); }
-.vmo-stat-card {
-    background: var(--vmo-card-bg); border: 1px solid var(--vmo-card-border);
-    border-radius: 6px; padding: 6px 8px; text-align: center;
+#vmo-stats-wrap { display: flex; flex-direction: column; gap: 10px; }
+.vmo-stat-badge {
+    display: flex; border-radius: 3px; overflow: hidden; height: 26px; align-items: stretch;
+    background: #4a5060; box-shadow: 0 2px 5px rgba(0,0,0,0.2);
 }
-.vmo-stat-name { font-size: 0.8rem; font-weight: 700; color: var(--vmo-stat-name); margin-bottom: 3px; letter-spacing: 0.5px; }
-.vmo-stat-val  { font-size: 1.3rem; font-weight: 700; color: var(--vmo-stat-val); line-height: 1.1; }
-.vmo-stat-bonus-inline { font-size: 0.72rem; font-weight: 400; color: var(--vmo-pf-label); }
-.vmo-stat-card.highlight { border-color: var(--vmo-accent, #4466cc); background: rgba(80,100,200,0.1); }
-.vmo-stat-card.highlight .vmo-stat-val { color: var(--vmo-accent, #7799ee); font-size: 1.5rem; }
+.vmo-stat-badge .vmo-stat-name {
+    background: var(--vmo-accent, #cc4455);
+    color: rgba(255,255,255,0.95); padding: 0 12px; font-size: 0.8rem; font-weight: 600;
+    display: flex; align-items: center; justify-content: center; letter-spacing: 1px;
+}
+.vmo-stat-badge .vmo-stat-val {
+    color: #fff; padding: 0 10px; font-size: 1.1rem; font-weight: bold;
+    display: flex; align-items: baseline; gap: 2px; line-height: 26px; justify-content: center; min-width: 40px;
+}
+.vmo-stat-badge.highlight .vmo-stat-name,
+.vmo-stat-badge.highlight .vmo-stat-val {
+    background: var(--vmo-accent, #cc4455);
+}
+.vmo-stat-badge .vmo-stat-bonus {
+    font-size: 0.8rem; font-weight: normal; color: rgba(255,255,255,0.7);
+}
+.vmo-stat-badge .vmo-stat-armor {
+    background: #383c4a;
+    color: #ccc; padding: 0 10px; font-size: 0.85rem;
+    display: flex; align-items: center; justify-content: center;
+}
+[data-theme="light"] .vmo-stat-badge { background: #e4e7eb; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+[data-theme="light"] .vmo-stat-badge .vmo-stat-val { color: #334; }
+[data-theme="light"] .vmo-stat-badge .vmo-stat-bonus { color: #556; }
+[data-theme="light"] .vmo-stat-badge.highlight .vmo-stat-val { color: #fff; }
+[data-theme="light"] .vmo-stat-badge .vmo-stat-armor { background: rgba(0,0,0,0.06); color: #556; }
 
 /* アーツリスト */
 .vmo-art-row {
