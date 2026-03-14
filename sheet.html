@@ -329,7 +329,13 @@
             </section>
 
             <section class="arts-info panel">
-                <h2>取得アーツ</h2>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                    <h2 style="margin: 0;">取得アーツ <span style="font-size: 0.9rem; font-weight: normal; color: var(--text-muted);" id="arts-xp-display">（経験点：0消費）</span></h2>
+                    <div class="edit-only" style="display: flex; align-items: center; gap: 8px;">
+                        <label for="arts-xp-adj" style="font-size: 0.8rem;">経験点補正:</label>
+                        <input type="number" id="arts-xp-adj" value="0" class="stat-trigger edit-only-input" style="width: 70px; padding: 4px 8px; background: var(--input-bg); border: 1px solid var(--border-color); color: var(--text-color); border-radius: 4px;">
+                    </div>
+                </div>
                 <div class="table-container">
                     <table id="arts-table">
                         <thead>
@@ -357,7 +363,13 @@
 
             <!-- Equipment Sections -->
             <section class="equip-info panel">
-                <h2>所持品・装備</h2>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                    <h2 style="margin: 0;">所持品・装備 <span style="font-size: 0.9rem; font-weight: normal; color: var(--text-muted);" id="equip-xp-display">（経験点：0消費）</span></h2>
+                    <div class="edit-only" style="display: flex; align-items: center; gap: 8px;">
+                        <label for="equip-xp-adj" style="font-size: 0.8rem;">経験点補正:</label>
+                        <input type="number" id="equip-xp-adj" value="0" class="stat-trigger edit-only-input" style="width: 70px; padding: 4px 8px; background: var(--input-bg); border: 1px solid var(--border-color); color: var(--text-color); border-radius: 4px;">
+                    </div>
+                </div>
                 
                 <!-- Weapons / Vehicles -->
                 <h3>武器＆乗り物</h3>
@@ -588,13 +600,13 @@
 
             <!-- 取得アーツ -->
             <div class="vmo-section" id="vmo-arts-section">
-                <div class="vmo-section-hd"><span class="vmo-section-line"></span>取得アーツ<span class="vmo-section-line"></span></div>
+                <div class="vmo-section-hd"><span class="vmo-section-line"></span>取得アーツ <small id="vmo-arts-xp-label"></small><span class="vmo-section-line"></span></div>
                 <div id="vmo-arts-list"></div>
             </div>
 
             <!-- 所持品・装備 -->
             <div class="vmo-section" id="vmo-equip-section">
-                <div class="vmo-section-hd"><span class="vmo-section-line"></span>所持品・装備<span class="vmo-section-line"></span></div>
+                <div class="vmo-section-hd"><span class="vmo-section-line"></span>所持品・装備 <small id="vmo-equip-xp-label"></small><span class="vmo-section-line"></span></div>
                 <div id="vmo-equip-list"></div>
             </div>
 

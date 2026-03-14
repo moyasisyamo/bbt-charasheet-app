@@ -423,6 +423,8 @@ function getSheetState() {
             tertiaryRoot:  document.getElementById('tertiary-root').value,
             freeStat:    document.getElementById('free-stat').value,
             proficiency: document.querySelector('input[name="proficiency-choice"]:checked')?.value || 'primary',
+            artsXPAdj:   document.getElementById('arts-xp-adj').value,
+            equipXPAdj:  document.getElementById('equip-xp-adj').value,
         },
         tertiaryVisible: document.getElementById('tertiary-root-container')?.style.display !== 'none',
         growth,
@@ -465,6 +467,8 @@ function restoreSheetState(state) {
         if (freeStat) document.getElementById('free-stat').value = freeStat;
         const radio = document.querySelector(`input[name="proficiency-choice"][value="${proficiency || 'primary'}"]`);
         if (radio) radio.checked = true;
+        if (state.builds.artsXPAdj !== undefined)  document.getElementById('arts-xp-adj').value = state.builds.artsXPAdj;
+        if (state.builds.equipXPAdj !== undefined) document.getElementById('equip-xp-adj').value = state.builds.equipXPAdj;
     }
 
     // 成長値
@@ -746,9 +750,14 @@ function buildAndShowViewOverlay() {
         });
         var artsSection = g('vmo-arts-section');
         if (artsSection) artsSection.style.display = (window.acquiredArts || []).length ? '' : 'none';
+        const artsXPLabel = g('vmo-arts-xp-label');
+        if (artsXPLabel) artsXPLabel.textContent = gTxt('arts-xp-display');
     }
 
     // -- 装備リスト（能力値含む）--
+    const equipXPLabel = g('vmo-equip-xp-label');
+    if (equipXPLabel) equipXPLabel.textContent = gTxt('equip-xp-display');
+    
     var equipList = g('vmo-equip-list');
     if (equipList) {
         equipList.innerHTML = '';

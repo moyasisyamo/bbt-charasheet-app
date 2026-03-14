@@ -259,7 +259,18 @@ function calculateStats() {
 
     const rootsXP  = tRootName ? 15 : 0;
     const eqCostXP = Math.max(0, equipCost - 30);
-    document.getElementById('total-xp-used').textContent = rootsXP + growthXP + artsXP + eqCostXP;
+    
+    // 経験点補正の読み取り
+    const artsXPAdj  = parseInt(document.getElementById('arts-xp-adj').value) || 0;
+    const equipXPAdj = parseInt(document.getElementById('equip-xp-adj').value) || 0;
+
+    // 各セクションの消費経験点表示
+    const totalArtsXP  = artsXP + artsXPAdj;
+    const totalEquipXP = eqCostXP + equipXPAdj;
+    document.getElementById('arts-xp-display').textContent  = `（経験点：${totalArtsXP}消費）`;
+    document.getElementById('equip-xp-display').textContent = `（経験点：${totalEquipXP}消費）`;
+
+    document.getElementById('total-xp-used').textContent = rootsXP + growthXP + totalArtsXP + totalEquipXP;
 }
 
 // グローバル公開
