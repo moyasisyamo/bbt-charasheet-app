@@ -8,13 +8,13 @@
 window.acquiredArts = [];
 
 // ---- テーブルに行を追加 ----
-function addArtToTable(art, unshift = false) {
+function addArtToTable(art, unshift = false, skipCalc = false) {
     if (acquiredArts.some(a => a['アーツ名'] === art['アーツ名'])) return;
     art._currentLevel = art._currentLevel !== undefined ? art._currentLevel : 1;
     if (unshift) { window.acquiredArts.unshift({ ...art }); }
     else         { window.acquiredArts.push({ ...art }); }
     renderArtsTable();
-    calculateStats();
+    if (!skipCalc) calculateStats();
 }
 
 // ---- テーブル全体を再描画 ----
@@ -127,7 +127,7 @@ function updateAutoArts(pRoot, sRoot, tRoot, style) {
                 }
                 if (matchRoot) {
                     const newArt = { ...art, _originCat: cat, _rt: art['ルーツ'] || cat, _currentLevel: 1 };
-                    addArtToTable(newArt);
+                    addArtToTable(newArt, false, true); // 無限再帰防止のため skipCalc=true
                 }
             }
         });
@@ -139,7 +139,7 @@ function updateAutoArts(pRoot, sRoot, tRoot, style) {
         const req = commonList.find(a => a['アーツ名'] === name);
         if (req && !acquiredArts.some(a => a['アーツ名'] === name)) {
             const newArt = { ...req, _originCat: '共通アーツ', _rt: req['ルーツ'] || '共通アーツ', _currentLevel: 1 };
-            addArtToTable(newArt, true);
+            addArtToTable(newArt, true, true); // 無限再帰防止のため skipCalc=true
         }
     });
 }
