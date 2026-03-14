@@ -445,13 +445,13 @@ body.view-mode .stat-trigger {
     vertical-align: top;
 }
 #dictionary-table td strong, #equip-dict-tbody td strong {
-    display: inline-block;
-    margin-bottom: 0px;
-    line-height: 1.2;
+    display: block;
+    margin-bottom: -2px;
+    line-height: 1.1;
 }
 
 /* Root distinction markers */
-.dict-row-marker {
+.dict-row-marker, .dict-header-marker {
     position: relative;
     padding-left: 12px !important;
 }
@@ -459,12 +459,13 @@ body.view-mode .stat-trigger {
     content: "";
     position: absolute;
     left: 0;
-    top: 5px;
-    bottom: 5px;
+    top: 3px;
+    bottom: 3px;
     width: 4px;
     border-radius: 2px;
     background-color: var(--border-color);
 }
+
 
 /* Category colors */
 .cat-atk::before { background-color: #ef4444; } /* Red */

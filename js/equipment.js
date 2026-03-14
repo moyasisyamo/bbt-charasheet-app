@@ -32,11 +32,11 @@ function initEquipDictionary() {
         searchInput.value = '';
 
         if (type === 'weapons') {
-            theadEl.innerHTML = `<tr><th>装備名</th><th style="width:80px;">種別</th><th>命中</th><th>攻撃</th><th>射程</th><th style="width:45%;">効果</th><th>操作</th></tr>`;
+            theadEl.innerHTML = `<tr><th class="dict-header-marker">装備名</th><th style="width:70px;">種別</th><th style="width:40px;">命中</th><th style="width:40px;">攻撃</th><th style="width:50px;">射程</th><th style="width:45%;">効果</th><th>操作</th></tr>`;
         } else if (type === 'armor') {
-            theadEl.innerHTML = `<tr><th>防具名</th><th style="width:50px;">回避</th><th style="width:50px;">行動</th><th>G/A値</th><th style="width:45%;">効果</th><th>操作</th></tr>`;
+            theadEl.innerHTML = `<tr><th class="dict-header-marker">防具名</th><th style="width:40px;">回避</th><th style="width:40px;">行動</th><th style="width:80px;">G/A値</th><th style="width:45%;">効果</th><th>操作</th></tr>`;
         } else if (type === 'items') {
-            theadEl.innerHTML = `<tr><th>道具名</th><th style="width:80px;">種別</th><th>タイミング</th><th>対象/射程</th><th style="width:45%;">効果</th><th>操作</th></tr>`;
+            theadEl.innerHTML = `<tr><th class="dict-header-marker">道具名</th><th style="width:70px;">種別</th><th>タイミング</th><th>対象/射程</th><th style="width:45%;">効果</th><th>操作</th></tr>`;
         }
 
         modal.style.display = 'flex';
@@ -66,30 +66,30 @@ function initEquipDictionary() {
 
             if (currentDictType === 'weapons') {
                 row.innerHTML = `
-                    <td><strong>${item['装備名']}</strong><br><span class="root-badge">${rt}</span><br><small style="color:var(--text-muted);font-size:0.7rem;">購入:${item['購入']}</small></td>
+                    <td><strong>${item['装備名']}</strong><br><span class="root-badge">${rt}</span><br><small style="color:var(--text-muted);font-size:0.65rem;">購入:${item['購入']}</small></td>
                     <td><small>${item['種別']}</small></td>
-                    <td style="text-align:center;">${item['命中']}</td>
-                    <td style="text-align:center;">${item['攻撃力']}</td>
+                    <td style="text-align:center;"><small>${item['命中']}</small></td>
+                    <td style="text-align:center;"><small>${item['攻撃力']}</small></td>
                     <td style="text-align:center;"><small>${item['射程']}</small></td>
-                    <td><small style="font-size:0.8rem; line-height:1.25; display:block;">${item['効果']}</small></td>
+                    <td><small style="font-size:0.8rem; line-height:1.2; display:block;">${item['効果']}</small></td>
                     <td><button class="btn primary add-equip-btn" style="padding:4px 8px;font-size:0.75rem;white-space:nowrap;">追加</button></td>
                 `;
             } else if (currentDictType === 'armor') {
                 row.innerHTML = `
-                    <td><strong>${item['装備名']}</strong><br><span class="root-badge">${rt}</span><br><small style="color:var(--text-muted);font-size:0.7rem;">購入:${item['購入']}</small></td>
-                    <td style="text-align:center;">${item['ドッジ']}</td>
-                    <td style="text-align:center;">${item['行動値']}</td>
+                    <td><strong>${item['装備名']}</strong><br><span class="root-badge">${rt}</span><br><small style="color:var(--text-muted);font-size:0.65rem;">購入:${item['購入']}</small></td>
+                    <td style="text-align:center;"><small>${item['ドッジ']}</small></td>
+                    <td style="text-align:center;"><small>${item['行動値']}</small></td>
                     <td style="white-space:nowrap;"><small>G:${item['G値']||0}/A:${item['A値']||0}</small></td>
-                    <td><small style="font-size:0.8rem; line-height:1.25; display:block;">${item['効果']}</small></td>
+                    <td><small style="font-size:0.8rem; line-height:1.2; display:block;">${item['効果']}</small></td>
                     <td><button class="btn primary add-equip-btn" style="padding:4px 8px;font-size:0.75rem;white-space:nowrap;">追加</button></td>
                 `;
             } else if (currentDictType === 'items') {
                 row.innerHTML = `
-                    <td><strong>${item['装備名']}</strong><br><span class="root-badge">${rt}</span><br><small style="color:var(--text-muted);font-size:0.7rem;">購入:${item['購入']}</small></td>
+                    <td><strong>${item['装備名']}</strong><br><span class="root-badge">${rt}</span><br><small style="color:var(--text-muted);font-size:0.65rem;">購入:${item['購入']}</small></td>
                     <td><small>${item['種別']}</small></td>
                     <td style="white-space:nowrap;"><small>${item['タイミング']}</small></td>
                     <td style="white-space:nowrap;"><small>${item['対象']}/${item['射程']}</small></td>
-                    <td><small style="font-size:0.8rem; line-height:1.25; display:block;">${item['効果']}</small></td>
+                    <td><small style="font-size:0.8rem; line-height:1.2; display:block;">${item['効果']}</small></td>
                     <td><button class="btn primary add-equip-btn" style="padding:4px 8px;font-size:0.75rem;white-space:nowrap;">追加</button></td>
                 `;
             }

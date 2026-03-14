@@ -231,16 +231,19 @@ function initArtsDictionary() {
                 catClass = BBTData.getRoot(art._rt) ? 'cat-root' : 'cat-blood';
             }
 
+            let displayCat = art._rt;
+            if (['アタッカー','ディフェンダー','サポーター'].includes(art._cat)) displayCat = art._cat;
+
             row.className = `dict-row-marker ${catClass}`;
             row.innerHTML = `
                 <td><strong>${art['アーツ名']}</strong><br><span class="root-badge">${displayCat}</span></td>
                 <td style="white-space:nowrap;"><small>${art['種別'] || '-'}</small></td>
-                <td style="text-align:center;">${art['最大Lv'] || '-'}</td>
+                <td style="text-align:center;"><small>${art['最大Lv'] || '-'}</small></td>
                 <td style="white-space:nowrap;"><small>${art['タイミング']}</small></td>
                 <td style="white-space:nowrap;"><small>${art['判定値'] || '-'}</small></td>
                 <td style="white-space:nowrap;"><small>${art['対象'] || '-'}/${art['射程'] || '-'}</small></td>
-                <td style="text-align:center;">${art['コスト']}</td>
-                <td><small style="font-size:0.8rem; line-height:1.25; display:block;">${art['効果']}</small></td>
+                <td style="text-align:center;"><small>${art['コスト']}</small></td>
+                <td><small style="font-size:0.8rem; line-height:1.2; display:block;">${art['効果']}</small></td>
                 <td><button class="btn primary add-art-btn" style="padding:4px 8px;font-size:0.75rem;white-space:nowrap;">追加</button></td>
             `;
             row.querySelector('.add-art-btn').addEventListener('click', () => {
