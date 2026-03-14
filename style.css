@@ -439,6 +439,11 @@ body.view-mode .stat-trigger {
     white-space: nowrap;
     padding: 8px 5px;
     font-size: 0.85rem;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background-color: var(--panel-bg);
+    box-shadow: inset 0 -1px 0 var(--border-color);
 }
 /* 装備名列の幅を制限 */
 #dictionary-table th:first-child,
