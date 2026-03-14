@@ -444,7 +444,7 @@ body.view-mode .stat-trigger {
     padding: 8px 5px;
     vertical-align: top;
 }
-#dictionary-table td强, #equip-dict-tbody td强 {
+#dictionary-table td strong, #equip-dict-tbody td strong {
     display: block;
     margin-bottom: 2px;
 }
