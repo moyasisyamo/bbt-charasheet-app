@@ -242,40 +242,78 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // ---- ココフォリア出力 ----
         document.getElementById('export-cocofolia-btn').addEventListener('click', () => {
-            const getV  = id => parseInt(document.getElementById(id).textContent) || 0;
-            const sName = document.getElementById('char-style').value;
-            const pName = document.getElementById('primary-root').value;
-            const secon = document.getElementById('secondary-root').value;
-            const tName = document.getElementById('tertiary-root').value;
-            const charName   = document.getElementById('char-name').value || '名無し';
-            const playerName = document.getElementById('player-name').value || '';
+            const gVal = id => document.getElementById(id)?.value || '';
+            const gTxt = id => document.getElementById(id)?.textContent || '0';
+            const getV = id => parseInt(gTxt(id)) || 0;
 
-            let memo = `PL: ${playerName}\n[スタイル] ${sName}\n[プライマリ] ${pName} [セカンダリ] ${secon}`;
-            if (tName) memo += ` [ターシャリ] ${tName}`;
-            memo += `\n消費経験点: ${document.getElementById('total-xp-used').textContent}\n\n-- アーツ --\n`;
-            acquiredArts.forEach(a => { memo += `・${a['アーツ名']} (LV${a._currentLevel||1} / ${a._rt||a['ルーツ']}) - ${a['効果']}\n`; });
-            memo += `\n-- 備品 --\n`;
-            acquiredWeapons.forEach(w => memo += `・${w._equivalentName || w['装備名']} [{${w['種別']}} 命:${w['命中']} 攻:${w['攻撃力']}] ${w['効果']}\n`);
-            acquiredArmor.forEach(a  => memo += `・${a._equivalentName || a['装備名']} [ドッジ:${a['ドッジ']} 行動:${a['行動値']}] ${a['効果']}\n`);
+            const charName = gVal('char-name') || '名無し';
+            const playerName = gVal('player-name') || '';
+            const sName  = gVal('char-style');
+            const pRoot  = gVal('primary-root');
+            const sRoot  = gVal('secondary-root');
+            const tRoot  = gVal('tertiary-root');
 
+            // --- キャラクターメモ構築 ---
+            let memo = `${gVal('char-race') || '-'}/${gVal('char-age') || '-'}/${gVal('char-gender') || '-'}/${gVal('char-cover') || '-'}\n`;
+            memo += `スタイル：${sName}\nプライマリ：${pRoot}\nセカンダリ：${sRoot}`;
+            if (tRoot) memo += `\nターシャリ：${tRoot}`;
+            
+            memo += `\n\n▼絆\n${gVal('char-bond-1') || '-'}(${gVal('char-bond-rel-1') || '-'})\n`;
+            memo += `${gVal('char-bond-2') || '-'}(${gVal('char-bond-rel-2') || '-'})\n`;
+            
+            memo += `\n▼エゴ\n${gVal('char-ego') || '-'}\n\n`;
+            memo += `${gVal('char-memo') || ''}`;
+
+            // --- チャットパレット構築 ---
+            let cp = `1D6 [人間性減少]\nEMO [邂逅表]\n\n//判定\n`;
+            cp += `2BB+{肉体}%{人間性} 判定[肉体]\n`;
+            cp += `2BB+{技術}%{人間性} 判定[技術]\n`;
+            cp += `2BB+{感情}%{人間性} 判定[感情]\n`;
+            cp += `2BB+{加護}%{人間性} 判定[加護]\n`;
+            cp += `2BB+{社会}%{人間性} 判定[社会]\n\n`;
+            
+            cp += `//戦闘判定\n`;
+            cp += `2BB+{白兵}%{人間性} 判定[白兵]\n`;
+            cp += `2BB+{射撃}%{人間性} 判定[射撃]\n`;
+            cp += `2BB+{回避}%{人間性} 判定[回避]\n`;
+            cp += `2BB+{行動}%{人間性} 判定[行動]\n\n`;
+
+            cp += `//武器メモ欄\n`;
+            acquiredWeapons.forEach(w => {
+                const name = w._equivalentName || w['装備名'];
+                cp += `(${w['攻撃力']}) ${name}(${w['射程']})\n`;
+            });
+
+            cp += `\n//アーツメモ欄\n`;
+            acquiredArts.forEach(a => {
+                cp += `[${a['アーツ名']}] (${a['タイミング']}/${a['判定値']}/${a['対象']}/${a['射程']}/コスト:${a['コスト']}) ${a['効果']}\n`;
+            });
+
+            const currentHumanity = getV('stat-humanity');
             const cc = {
                 kind: 'character',
                 data: {
-                    name: charName, memo,
+                    name: charName,
+                    memo: memo,
                     initiative: getV('stat-action'),
                     externalUrl: '',
                     status: [
                         { label: 'FP',   value: getV('stat-fp'),       max: getV('stat-fp') },
-                        { label: '人間性', value: getV('stat-humanity'), max: 100 },
+                        { label: '人間性', value: currentHumanity,      max: currentHumanity },
                         { label: '愛',   value: 0, max: 0 },
                         { label: '罪',   value: 0, max: 0 },
-                        { label: '白兵', value: String(getV('stat-melee')) },
-                        { label: '射撃', value: String(getV('stat-ranged')) },
-                        { label: '回避', value: String(getV('stat-dodge')) },
-                        { label: '行動', value: String(getV('stat-action')) },
+                        { label: '財産点', value: getV('stat-soc'),     max: getV('stat-soc') },
+                        { label: '肉体', value: getV('stat-body') },
+                        { label: '技術', value: getV('stat-tech') },
+                        { label: '感情', value: getV('stat-emo') },
+                        { label: '加護', value: getV('stat-div') },
+                        { label: '社会', value: getV('stat-soc') },
+                        { label: '白兵', value: getV('stat-melee') },
+                        { label: '射撃', value: getV('stat-ranged') },
+                        { label: '回避', value: getV('stat-dodge') },
+                        { label: '行動', value: getV('stat-action') },
                     ],
-                    commands: '1D6\n2D6\n\n//---------- アーツ ----------\n' +
-                        acquiredArts.map(a => `${a['アーツ名']} 【${a['タイミング']}】対象:${a['対象']} / 代償:${a['コスト']} / 判定:${a['判定値']} / ${a['効果']}`).join('\n'),
+                    commands: cp,
                 },
             };
 

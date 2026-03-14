@@ -53,58 +53,58 @@
                         
                         <div style="display: flex; gap: 8px;">
                             <div class="form-group" style="flex: 1.5;">
-                                <label>設定的種族</label><input type="text" class="profile-input edit-only-input"><div class="view-only-text">-</div>
+                                <label>設定的種族</label><input type="text" id="char-race" class="profile-input edit-only-input"><div class="view-only-text">-</div>
                             </div>
                             <div class="form-group" style="flex: 0.8;">
-                                <label>年齢</label><input type="text" class="profile-input edit-only-input"><div class="view-only-text">-</div>
+                                <label>年齢</label><input type="text" id="char-age" class="profile-input edit-only-input"><div class="view-only-text">-</div>
                             </div>
                             <div class="form-group" style="flex: 0.8;">
-                                <label>性別</label><input type="text" class="profile-input edit-only-input"><div class="view-only-text">-</div>
+                                <label>性別</label><input type="text" id="char-gender" class="profile-input edit-only-input"><div class="view-only-text">-</div>
                             </div>
                             <div class="form-group" style="flex: 1.5;">
-                                <label>カヴァー</label><input type="text" class="profile-input edit-only-input"><div class="view-only-text">-</div>
+                                <label>カヴァー</label><input type="text" id="char-cover" class="profile-input edit-only-input"><div class="view-only-text">-</div>
                             </div>
                         </div>
 
                         <div style="display: flex; gap: 8px;">
                             <div class="form-group" style="flex: 0.8;">
-                                <label>出自</label><input type="text" class="profile-input edit-only-input"><div class="view-only-text">-</div>
+                                <label>出自</label><input type="text" id="char-origin" class="profile-input edit-only-input"><div class="view-only-text">-</div>
                             </div>
                             <div class="form-group" style="flex: 0.8;">
-                                <label>邂逅</label><input type="text" class="profile-input edit-only-input"><div class="view-only-text">-</div>
+                                <label>邂逅</label><input type="text" id="char-encounter" class="profile-input edit-only-input"><div class="view-only-text">-</div>
                             </div>
                             <div class="form-group" style="flex: 3.4;">
-                                <label>外見的特徴</label><input type="text" class="profile-input edit-only-input"><div class="view-only-text">-</div>
+                                <label>外見的特徴</label><input type="text" id="char-appearance" class="profile-input edit-only-input"><div class="view-only-text">-</div>
                             </div>
                         </div>
 
-                        <div style="display: grid; grid-template-columns: 1.5fr 0.8fr 2.5fr; gap: 8px; margin-bottom: 8px;">
+                        <div style="grid-template-columns: 1.5fr 0.8fr 2.5fr; gap: 8px; margin-bottom: 8px; display: grid;">
                             <div class="form-group">
-                                <label>初期絆</label><input type="text" class="profile-input edit-only-input"><div class="view-only-text">-</div>
+                                <label>初期絆</label><input type="text" id="char-bond-1" class="profile-input edit-only-input"><div class="view-only-text">-</div>
                             </div>
                             <div class="form-group">
-                                <label>関係</label><input type="text" class="profile-input edit-only-input"><div class="view-only-text">-</div>
+                                <label>関係</label><input type="text" id="char-bond-rel-1" class="profile-input edit-only-input"><div class="view-only-text">-</div>
                             </div>
                             <div class="form-group">
                                 <label>変異第一段階</label><input type="text" class="profile-input edit-only-input"><div class="view-only-text">-</div>
                             </div>
                         </div>
 
-                        <div style="display: grid; grid-template-columns: 1.5fr 0.8fr 2.5fr; gap: 8px; margin-bottom: 8px;">
+                        <div style="grid-template-columns: 1.5fr 0.8fr 2.5fr; gap: 8px; margin-bottom: 8px; display: grid;">
                             <div class="form-group">
-                                <label>初期絆</label><input type="text" class="profile-input edit-only-input"><div class="view-only-text">-</div>
+                                <label>初期絆</label><input type="text" id="char-bond-2" class="profile-input edit-only-input"><div class="view-only-text">-</div>
                             </div>
                             <div class="form-group">
-                                <label>関係</label><input type="text" class="profile-input edit-only-input"><div class="view-only-text">-</div>
+                                <label>関係</label><input type="text" id="char-bond-rel-2" class="profile-input edit-only-input"><div class="view-only-text">-</div>
                             </div>
                             <div class="form-group">
                                 <label>変異第二段階</label><input type="text" class="profile-input edit-only-input"><div class="view-only-text">-</div>
                             </div>
                         </div>
 
-                        <div style="display: grid; grid-template-columns: 1.5fr 0.8fr 2.5fr; gap: 8px;">
+                        <div style="grid-template-columns: 1.5fr 0.8fr 2.5fr; gap: 8px; display: grid;">
                             <div class="form-group" style="grid-column: 1 / 3;">
-                                <label>初期エゴ</label><input type="text" class="profile-input edit-only-input"><div class="view-only-text">-</div>
+                                <label>初期エゴ</label><input type="text" id="char-ego" class="profile-input edit-only-input"><div class="view-only-text">-</div>
                             </div>
                             <div class="form-group">
                                 <label>変異第三段階</label><input type="text" class="profile-input edit-only-input"><div class="view-only-text">-</div>
@@ -113,7 +113,7 @@
 
                         <div class="form-group" style="margin-top: 5px;">
                             <label>キャラ設定</label>
-                            <textarea class="profile-input edit-only-input" rows="4" style="resize: vertical;"></textarea>
+                            <textarea id="char-memo" class="profile-input edit-only-input" rows="4" style="resize: vertical;"></textarea>
                             <div class="view-only-text" style="white-space: pre-wrap;">-</div>
                         </div>
                     </div>
