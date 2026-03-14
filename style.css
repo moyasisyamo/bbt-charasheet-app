@@ -433,3 +433,27 @@ body.view-mode .stat-trigger {
     border-radius: 4px;
     color: var(--text-color);
 }
+
+/* Dictionary specific adjustments */
+#dictionary-table th, #equip-dict-thead th {
+    white-space: nowrap;
+    padding: 8px 5px;
+    font-size: 0.85rem;
+}
+#dictionary-table td, #equip-dict-tbody td {
+    padding: 8px 5px;
+    vertical-align: top;
+}
+#dictionary-table td强, #equip-dict-tbody td强 {
+    display: block;
+    margin-bottom: 2px;
+}
+#dictionary-table td small, #equip-dict-tbody td small {
+    line-height: 1.2;
+}
+
+.modal-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0 20px 20px;
+}

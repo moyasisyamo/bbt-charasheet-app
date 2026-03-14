@@ -32,11 +32,11 @@ function initEquipDictionary() {
         searchInput.value = '';
 
         if (type === 'weapons') {
-            theadEl.innerHTML = `<tr><th>ルーツ</th><th>装備名</th><th>種別</th><th>命中</th><th>攻撃力</th><th>射程</th><th>効果</th><th>操作</th></tr>`;
+            theadEl.innerHTML = `<tr><th>装備名</th><th style="width:80px;">種別</th><th>命中</th><th>攻撃</th><th>射程</th><th style="width:45%;">効果</th><th>操作</th></tr>`;
         } else if (type === 'armor') {
-            theadEl.innerHTML = `<tr><th>ルーツ</th><th>防具名</th><th>ドッジ</th><th>行動値</th><th>G/A値</th><th>効果</th><th>操作</th></tr>`;
+            theadEl.innerHTML = `<tr><th>防具名</th><th style="width:50px;">回避</th><th style="width:50px;">行動</th><th>G/A値</th><th style="width:45%;">効果</th><th>操作</th></tr>`;
         } else if (type === 'items') {
-            theadEl.innerHTML = `<tr><th>ルーツ</th><th>道具名</th><th>種別</th><th>タイミング</th><th>対象/射程</th><th>効果</th><th>操作</th></tr>`;
+            theadEl.innerHTML = `<tr><th>道具名</th><th style="width:80px;">種別</th><th>タイミング</th><th>対象/射程</th><th style="width:45%;">効果</th><th>操作</th></tr>`;
         }
 
         modal.style.display = 'flex';
@@ -58,34 +58,31 @@ function initEquipDictionary() {
             const row = document.createElement('tr');
             if (currentDictType === 'weapons') {
                 row.innerHTML = `
-                    <td><small>${item['ルーツ'] || '-'}</small></td>
-                    <td><strong>${item['装備名']}</strong><br><small>購入:${item['購入']}</small></td>
+                    <td><strong>${item['装備名']}</strong><br><small style="color:var(--text-muted);">${item['ルーツ'] || '-'}</small><br><small>購入:${item['購入']}</small></td>
                     <td><small>${item['種別']}</small></td>
-                    <td>${item['命中']}</td>
-                    <td><small>${item['攻撃力']}</small></td>
-                    <td><small>${item['射程']}</small></td>
-                    <td><small style="font-size:0.75rem;">${item['効果']}</small></td>
-                    <td><button class="btn primary add-equip-btn" style="padding:4px 8px;">追加</button></td>
+                    <td style="text-align:center;">${item['命中']}</td>
+                    <td style="text-align:center;">${item['攻撃力']}</td>
+                    <td style="text-align:center;"><small>${item['射程']}</small></td>
+                    <td><small style="font-size:0.8rem; line-height:1.3; display:block;">${item['効果']}</small></td>
+                    <td><button class="btn primary add-equip-btn" style="padding:4px 8px;font-size:0.75rem;white-space:nowrap;">追加</button></td>
                 `;
             } else if (currentDictType === 'armor') {
                 row.innerHTML = `
-                    <td><small>${item['ルーツ'] || '-'}</small></td>
-                    <td><strong>${item['装備名']}</strong><br><small>購入:${item['購入']}</small></td>
-                    <td>${item['ドッジ']}</td>
-                    <td>${item['行動値']}</td>
-                    <td><small>G:${item['G値']||0}/A:${item['A値']||0}</small></td>
-                    <td><small style="font-size:0.75rem;">${item['効果']}</small></td>
-                    <td><button class="btn primary add-equip-btn" style="padding:4px 8px;">追加</button></td>
+                    <td><strong>${item['装備名']}</strong><br><small style="color:var(--text-muted);">${item['ルーツ'] || '-'}</small><br><small>購入:${item['購入']}</small></td>
+                    <td style="text-align:center;">${item['ドッジ']}</td>
+                    <td style="text-align:center;">${item['行動値']}</td>
+                    <td style="white-space:nowrap;"><small>G:${item['G値']||0}/A:${item['A値']||0}</small></td>
+                    <td><small style="font-size:0.8rem; line-height:1.3; display:block;">${item['効果']}</small></td>
+                    <td><button class="btn primary add-equip-btn" style="padding:4px 8px;font-size:0.75rem;white-space:nowrap;">追加</button></td>
                 `;
             } else if (currentDictType === 'items') {
                 row.innerHTML = `
-                    <td><small>${item['ルーツ'] || '-'}</small></td>
-                    <td><strong>${item['装備名']}</strong><br><small>購入:${item['購入']}</small></td>
+                    <td><strong>${item['装備名']}</strong><br><small style="color:var(--text-muted);">${item['ルーツ'] || '-'}</small><br><small>購入:${item['購入']}</small></td>
                     <td><small>${item['種別']}</small></td>
-                    <td><small>${item['タイミング']}</small></td>
-                    <td><small>${item['対象']}/${item['射程']}</small></td>
-                    <td><small style="font-size:0.75rem;">${item['効果']}</small></td>
-                    <td><button class="btn primary add-equip-btn" style="padding:4px 8px;">追加</button></td>
+                    <td style="white-space:nowrap;"><small>${item['タイミング']}</small></td>
+                    <td style="white-space:nowrap;"><small>${item['対象']}/${item['射程']}</small></td>
+                    <td><small style="font-size:0.8rem; line-height:1.3; display:block;">${item['効果']}</small></td>
+                    <td><button class="btn primary add-equip-btn" style="padding:4px 8px;font-size:0.75rem;white-space:nowrap;">追加</button></td>
                 `;
             }
             row.querySelector('.add-equip-btn').addEventListener('click', () => {
