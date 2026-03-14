@@ -446,7 +446,7 @@ body.view-mode .stat-trigger {
 }
 #dictionary-table td strong, #equip-dict-tbody td strong {
     display: block;
-    margin-bottom: -1px;
+    margin-bottom: -5px; /* スペースを詰める */
     line-height: 1.1;
 }
 
@@ -472,13 +472,13 @@ body.view-mode .stat-trigger {
 
 
 
-/* Category colors */
-.cat-atk::before { background-color: #ef4444; } /* Red */
-.cat-def::before { background-color: #3b82f6; } /* Blue */
-.cat-sup::before { background-color: #10b981; } /* Green */
-.cat-blood::before { background-color: #a855f7; } /* Purple */
-.cat-root::before { background-color: #f59e0b; } /* Amber */
-.cat-common::before { background-color: #6b7280; } /* Gray */
+/* Category colors for markers - fix selector to target the marker on the td */
+.cat-atk .dict-row-marker::before { background-color: #ef4444; }
+.cat-def .dict-row-marker::before { background-color: #3b82f6; }
+.cat-sup .dict-row-marker::before { background-color: #10b981; }
+.cat-blood .dict-row-marker::before { background-color: #a855f7; }
+.cat-root .dict-row-marker::before { background-color: #f59e0b; }
+.cat-common .dict-row-marker::before { background-color: #94a3b8; }
 
 /* Root Badge */
 .root-badge {
@@ -496,6 +496,7 @@ body.view-mode .stat-trigger {
 .cat-sup .root-badge { background: rgba(16, 185, 129, 0.2); color: #10b981; }
 .cat-blood .root-badge { background: rgba(168, 85, 247, 0.2); color: #a855f7; }
 .cat-root .root-badge { background: rgba(245, 158, 11, 0.2); color: #f59e0b; }
+.cat-common .root-badge { background: rgba(148, 163, 184, 0.2); color: #94a3b8; }
 
 #dictionary-table td small, #equip-dict-tbody td small {
     line-height: 1.2;

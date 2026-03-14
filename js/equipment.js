@@ -32,15 +32,26 @@ function initEquipDictionary() {
         searchInput.value = '';
 
         if (type === 'weapons') {
-            theadEl.innerHTML = `<tr><th class="dict-header-marker">装備名</th><th style="width:70px;">種別</th><th style="width:40px;">命中</th><th style="width:40px;">攻撃</th><th style="width:50px;">射程</th><th style="width:45%;">効果</th><th>操作</th></tr>`;
+            theadEl.innerHTML = `<tr><th class="dict-header-marker">装備名</th><th style="width:60px;">購入</th><th style="width:70px;">種別</th><th style="width:40px;">命中</th><th style="width:40px;">攻撃</th><th style="width:50px;">射程</th><th style="width:45%;">効果</th><th>操作</th></tr>`;
         } else if (type === 'armor') {
-            theadEl.innerHTML = `<tr><th class="dict-header-marker">防具名</th><th style="width:40px;">回避</th><th style="width:40px;">行動</th><th style="width:80px;">G/A値</th><th style="width:45%;">効果</th><th>操作</th></tr>`;
+            theadEl.innerHTML = `<tr><th class="dict-header-marker">防具名</th><th style="width:60px;">購入</th><th style="width:40px;">回避</th><th style="width:40px;">行動</th><th style="width:80px;">G/A値</th><th style="width:45%;">効果</th><th>操作</th></tr>`;
         } else if (type === 'items') {
-            theadEl.innerHTML = `<tr><th class="dict-header-marker">道具名</th><th style="width:70px;">種別</th><th>タイミング</th><th>対象/射程</th><th style="width:45%;">効果</th><th>操作</th></tr>`;
+            theadEl.innerHTML = `<tr><th class="dict-header-marker">道具名</th><th style="width:60px;">購入</th><th style="width:70px;">種別</th><th>タイミング</th><th>対象/射程</th><th style="width:45%;">効果</th><th>操作</th></tr>`;
         }
 
         modal.style.display = 'flex';
         renderEquipDictionary();
+    }
+
+    // 文字列から色を生成するヘルパー
+    function getRootColorStyle(rt) {
+        if (!rt || rt === '-' || rt === '共通') return '';
+        let hash = 0;
+        for (let i = 0; i < rt.length; i++) {
+            hash = rt.charCodeAt(i) + ((hash << 5) - hash);
+        }
+        const h = Math.abs(hash % 360);
+        return `background:hsla(${h}, 70%, 50%, 0.15); color:hsl(${h}, 80%, 65%); border:1px solid hsla(${h}, 70%, 50%, 0.3);`;
     }
 
     function renderEquipDictionary() {
@@ -64,9 +75,14 @@ function initEquipDictionary() {
 
             row.className = catClass;
 
+            const badgeStyle = getRootColorStyle(rt);
+            const badgeHTML  = `<span class="root-badge" style="${badgeStyle}">${rt}</span>`;
+            const buyHTML    = `<td><small style="color:var(--text-muted);">${item['購入']}</small></td>`;
+
             if (currentDictType === 'weapons') {
                 row.innerHTML = `
-                    <td class="dict-row-marker"><strong>${item['装備名']}</strong><br><span class="root-badge">${rt}</span><br><small style="color:var(--text-muted);font-size:0.65rem;">購入:${item['購入']}</small></td>
+                    <td class="dict-row-marker"><strong>${item['装備名']}</strong><br>${badgeHTML}</td>
+                    ${buyHTML}
                     <td><small>${item['種別']}</small></td>
                     <td style="text-align:center;"><small>${item['命中']}</small></td>
                     <td style="text-align:center;"><small>${item['攻撃力']}</small></td>
@@ -76,7 +92,8 @@ function initEquipDictionary() {
                 `;
             } else if (currentDictType === 'armor') {
                 row.innerHTML = `
-                    <td class="dict-row-marker"><strong>${item['装備名']}</strong><br><span class="root-badge">${rt}</span><br><small style="color:var(--text-muted);font-size:0.65rem;">購入:${item['購入']}</small></td>
+                    <td class="dict-row-marker"><strong>${item['装備名']}</strong><br>${badgeHTML}</td>
+                    ${buyHTML}
                     <td style="text-align:center;"><small>${item['ドッジ']}</small></td>
                     <td style="text-align:center;"><small>${item['行動値']}</small></td>
                     <td style="white-space:nowrap;"><small>G:${item['G値']||0}/A:${item['A値']||0}</small></td>
@@ -85,7 +102,8 @@ function initEquipDictionary() {
                 `;
             } else if (currentDictType === 'items') {
                 row.innerHTML = `
-                    <td class="dict-row-marker"><strong>${item['装備名']}</strong><br><span class="root-badge">${rt}</span><br><small style="color:var(--text-muted);font-size:0.65rem;">購入:${item['購入']}</small></td>
+                    <td class="dict-row-marker"><strong>${item['装備名']}</strong><br>${badgeHTML}</td>
+                    ${buyHTML}
                     <td><small>${item['種別']}</small></td>
                     <td style="white-space:nowrap;"><small>${item['タイミング']}</small></td>
                     <td style="white-space:nowrap;"><small>${item['対象']}/${item['射程']}</small></td>
