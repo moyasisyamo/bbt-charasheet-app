@@ -138,8 +138,7 @@ function addEquipToTable(item, type) {
         arr   = acquiredWeapons;
         row.innerHTML = `
             <td>${eqInput}</td>
-            <td><small>${item['ルーツ'] || '-'}</small></td>
-            <td><strong>${item['装備名']}</strong><br><small>購入:${item['購入']}</small></td>
+            <td><strong>${item['装備名']}</strong><br><small>${item['ルーツ'] || '-'}</small></td>
             <td>${item['購入']}</td>
             <td><small>${item['種別']}</small></td>
             <td>${item['命中']}</td>
@@ -156,8 +155,7 @@ function addEquipToTable(item, type) {
         cItem._beastEquip  = item._beastEquip || false;
         row.innerHTML = `
             <td>${eqInput}</td>
-            <td><small>${cItem['ルーツ'] || '-'}</small></td>
-            <td><strong>${cItem['装備名']}</strong></td>
+            <td><strong>${cItem['装備名']}</strong><br><small>${cItem['ルーツ'] || '-'}</small></td>
             <td><input type="checkbox" class="normal-equip-check" ${cItem._normalEquip ? 'checked' : ''}></td>
             <td><input type="checkbox" class="beast-equip-check" ${cItem._beastEquip ? 'checked' : ''}></td>
             <td>${cItem['購入']}</td>
@@ -189,8 +187,7 @@ function addEquipToTable(item, type) {
         cItem._quantity = item._quantity !== undefined ? item._quantity : 1;
         row.innerHTML = `
             <td>${eqInput}</td>
-            <td><small>${cItem['ルーツ'] || '-'}</small></td>
-            <td><strong>${cItem['装備名']}</strong></td>
+            <td><strong>${cItem['装備名']}</strong><br><small>${cItem['ルーツ'] || '-'}</small></td>
             <td><input type="number" class="item-quantity-input" value="${cItem._quantity}" min="0" style="width:50px;"></td>
             <td>${cItem['購入']}</td>
             <td><small>${cItem['種別']}</small></td>
