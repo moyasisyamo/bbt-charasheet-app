@@ -202,8 +202,8 @@ function calculateStats() {
         
         let isAlways = false;
         
-        // 常時・効果参照かつ「自動」種別を含まない、かつ「解放状態」を含まない
-        if ((timing.includes('常時') || timing.includes('効果参照')) && !type.includes('自動') && !timing.includes('解放状態')) {
+        // 常時かつ「自動」種別を含まない、かつ「解放状態」を含まない
+        if (timing.includes('常時') && !type.includes('自動') && !timing.includes('解放状態')) {
             isAlways = true;
         } 
         // あるいは「自動」種別を含み、かつ「常時」タイミングを含む場合
