@@ -171,18 +171,47 @@ function calculateStats() {
     document.getElementById('stat-action').innerHTML = activeActionMod !== 0 ? `${finalAction} <small>(${cStats.action} ${activeActionMod >= 0 ? '+' : ''}${activeActionMod})</small>` : finalAction;
 
     // ---- 常時アーツのコスト（人間性計算用）----
+    function parseArtCost(art) {
+        let costStr = String(art['コスト'] || '0').trim();
+        let level = parseInt(art._currentLevel) || 1;
+
+        if (costStr.includes('Lv')) {
+            // "Lv+n" or "Lv*n" or just "Lv"
+            try {
+                // 安全な評価のために正規表現でチェック
+                if (/^Lv\s*[\+\-\*\/]\s*\d+$/.test(costStr)) {
+                    let expression = costStr.replace(/Lv/g, level);
+                    return eval(expression);
+                } else if (costStr === 'Lv') {
+                    return level;
+                }
+            } catch (e) {
+                console.error("Failed to parse art cost:", costStr, e);
+            }
+        }
+
+        let val = parseInt(costStr);
+        return isNaN(val) ? 0 : val;
+    }
+
     let alwaysArtsCost = 0;
     acquiredArts.forEach(a => {
         const timing = a['タイミング'] || '';
-        const cost   = parseInt(a['コスト']) || 0;
-        if (timing.includes('常時') || timing.includes('効果参照')) {
-            if (!String(a['種別']).includes('自動') && !String(timing).includes('解放状態')) {
-                alwaysArtsCost += cost;
-            }
-        } else if (String(a['種別']).includes('自動') && timing.includes('常時')) {
-            alwaysArtsCost += cost;
+        const type   = a['種別'] || '';
+        const cost   = parseArtCost(a);
+        
+        let isAlways = false;
+        
+        // 常時・効果参照かつ「自動」種別を含まない、かつ「解放状態」を含まない
+        if ((timing.includes('常時') || timing.includes('効果参照')) && !type.includes('自動') && !timing.includes('解放状態')) {
+            isAlways = true;
+        } 
+        // あるいは「自動」種別を含み、かつ「常時」タイミングを含む場合
+        else if (type.includes('自動') && timing.includes('常時')) {
+            isAlways = true;
         }
-        if (timing.includes('常時') && !String(a['種別']).includes('自動')) {
+
+        if (isAlways) {
             alwaysArtsCost += cost;
         }
     });
