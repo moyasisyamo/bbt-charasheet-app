@@ -62,11 +62,11 @@ function initEquipDictionary() {
             else if (rt === '-' || rt === '共通') catClass = 'cat-common';
             else catClass = 'cat-blood';
 
-            row.className = `dict-row-marker ${catClass}`;
+            row.className = catClass;
 
             if (currentDictType === 'weapons') {
                 row.innerHTML = `
-                    <td><strong>${item['装備名']}</strong><br><span class="root-badge">${rt}</span><br><small style="color:var(--text-muted);font-size:0.65rem;">購入:${item['購入']}</small></td>
+                    <td class="dict-row-marker"><strong>${item['装備名']}</strong><br><span class="root-badge">${rt}</span><br><small style="color:var(--text-muted);font-size:0.65rem;">購入:${item['購入']}</small></td>
                     <td><small>${item['種別']}</small></td>
                     <td style="text-align:center;"><small>${item['命中']}</small></td>
                     <td style="text-align:center;"><small>${item['攻撃力']}</small></td>
@@ -76,7 +76,7 @@ function initEquipDictionary() {
                 `;
             } else if (currentDictType === 'armor') {
                 row.innerHTML = `
-                    <td><strong>${item['装備名']}</strong><br><span class="root-badge">${rt}</span><br><small style="color:var(--text-muted);font-size:0.65rem;">購入:${item['購入']}</small></td>
+                    <td class="dict-row-marker"><strong>${item['装備名']}</strong><br><span class="root-badge">${rt}</span><br><small style="color:var(--text-muted);font-size:0.65rem;">購入:${item['購入']}</small></td>
                     <td style="text-align:center;"><small>${item['ドッジ']}</small></td>
                     <td style="text-align:center;"><small>${item['行動値']}</small></td>
                     <td style="white-space:nowrap;"><small>G:${item['G値']||0}/A:${item['A値']||0}</small></td>
@@ -85,7 +85,7 @@ function initEquipDictionary() {
                 `;
             } else if (currentDictType === 'items') {
                 row.innerHTML = `
-                    <td><strong>${item['装備名']}</strong><br><span class="root-badge">${rt}</span><br><small style="color:var(--text-muted);font-size:0.65rem;">購入:${item['購入']}</small></td>
+                    <td class="dict-row-marker"><strong>${item['装備名']}</strong><br><span class="root-badge">${rt}</span><br><small style="color:var(--text-muted);font-size:0.65rem;">購入:${item['購入']}</small></td>
                     <td><small>${item['種別']}</small></td>
                     <td style="white-space:nowrap;"><small>${item['タイミング']}</small></td>
                     <td style="white-space:nowrap;"><small>${item['対象']}/${item['射程']}</small></td>

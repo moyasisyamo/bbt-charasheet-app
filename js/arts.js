@@ -234,9 +234,12 @@ function initArtsDictionary() {
             let displayCat = art._rt;
             if (['アタッカー','ディフェンダー','サポーター'].includes(art._cat)) displayCat = art._cat;
 
-            row.className = `dict-row-marker ${catClass}`;
+            let displayCat = art._rt;
+            if (['アタッカー','ディフェンダー','サポーター'].includes(art._cat)) displayCat = art._cat;
+
+            row.className = catClass; // 色管理用にクラスはTRに残す
             row.innerHTML = `
-                <td><strong>${art['アーツ名']}</strong><br><span class="root-badge">${displayCat}</span></td>
+                <td class="dict-row-marker"><strong>${art['アーツ名']}</strong><br><span class="root-badge">${displayCat}</span></td>
                 <td style="white-space:nowrap;"><small>${art['種別'] || '-'}</small></td>
                 <td style="text-align:center;"><small>${art['最大Lv'] || '-'}</small></td>
                 <td style="white-space:nowrap;"><small>${art['タイミング']}</small></td>
