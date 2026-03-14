@@ -32,11 +32,11 @@ function initEquipDictionary() {
         searchInput.value = '';
 
         if (type === 'weapons') {
-            theadEl.innerHTML = `<tr><th class="dict-header-marker" style="width:150px;">装備名</th><th style="width:60px;">購入</th><th style="width:70px;">種別</th><th style="width:40px;">命中</th><th style="width:40px;">攻撃</th><th style="width:50px;">射程</th><th style="width:45%;">効果</th><th>操作</th></tr>`;
+            theadEl.innerHTML = `<tr><th class="dict-header-marker" style="width:180px;">装備名</th><th style="width:60px;">購入</th><th style="width:70px;">種別</th><th style="width:40px;">命中</th><th style="width:40px;">攻撃</th><th style="width:50px;">射程</th><th>効果</th><th>操作</th></tr>`;
         } else if (type === 'armor') {
-            theadEl.innerHTML = `<tr><th class="dict-header-marker" style="width:150px;">防具名</th><th style="width:60px;">購入</th><th style="width:40px;">回避</th><th style="width:40px;">行動</th><th style="width:80px;">G/A値</th><th style="width:45%;">効果</th><th>操作</th></tr>`;
+            theadEl.innerHTML = `<tr><th class="dict-header-marker" style="width:180px;">防具名</th><th style="width:60px;">購入</th><th style="width:40px;">回避</th><th style="width:40px;">行動</th><th style="width:80px;">G/A値</th><th>効果</th><th>操作</th></tr>`;
         } else if (type === 'items') {
-            theadEl.innerHTML = `<tr><th class="dict-header-marker" style="width:150px;">道具名</th><th style="width:60px;">購入</th><th style="width:70px;">種別</th><th>タイミング</th><th>対象/射程</th><th style="width:45%;">効果</th><th>操作</th></tr>`;
+            theadEl.innerHTML = `<tr><th class="dict-header-marker" style="width:180px;">道具名</th><th style="width:60px;">購入</th><th style="width:70px;">種別</th><th>タイミング</th><th>対象/射程</th><th>効果</th><th>操作</th></tr>`;
         }
 
         modal.style.display = 'flex';
