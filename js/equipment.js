@@ -32,7 +32,7 @@ function initEquipDictionary() {
         searchInput.value = '';
 
         if (type === 'weapons') {
-            theadEl.innerHTML = `<tr><th class="dict-header-marker" style="width:180px;">装備名</th><th style="width:60px;">購入</th><th style="width:70px;">種別</th><th style="width:40px;">命中</th><th style="width:40px;">攻撃</th><th style="width:50px;">射程</th><th>効果</th><th>操作</th></tr>`;
+            theadEl.innerHTML = `<tr><th class="dict-header-marker" style="width:180px;">装備名</th><th style="width:60px;">購入</th><th style="width:70px;">種別</th><th style="width:40px;">命中</th><th style="width:40px;">行動</th><th style="width:40px;">攻撃</th><th style="width:50px;">射程</th><th>効果</th><th>操作</th></tr>`;
         } else if (type === 'armor') {
             theadEl.innerHTML = `<tr><th class="dict-header-marker" style="width:180px;">防具名</th><th style="width:60px;">購入</th><th style="width:40px;">回避</th><th style="width:40px;">行動</th><th style="width:80px;">G/A値</th><th>効果</th><th>操作</th></tr>`;
         } else if (type === 'items') {
@@ -91,6 +91,7 @@ function initEquipDictionary() {
                     ${buyHTML}
                     <td><small>${item['種別']}</small></td>
                     <td style="text-align:center;"><small>${item['命中']}</small></td>
+                    <td style="text-align:center;"><small>${item['行動値']}</small></td>
                     <td style="text-align:center;"><small>${item['攻撃力']}</small></td>
                     <td style="text-align:center;"><small>${item['射程']}</small></td>
                     <td><small style="font-size:0.8rem; line-height:1.2; display:block;">${item['効果']}</small></td>
@@ -142,6 +143,7 @@ function addEquipToTable(item, type) {
             <td>${item['購入']}</td>
             <td><small>${item['種別']}</small></td>
             <td>${item['命中']}</td>
+            <td><small>${item['行動値']}</small></td>
             <td><small>${item['攻撃力']}</small></td>
             <td><small>G:${item['G値']||0} A:${item['A値']||0}</small></td>
             <td><small>${item['射程']}</small></td>

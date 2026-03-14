@@ -153,7 +153,14 @@ function calculateStats() {
     }
 
     let equipCost = 0;
-    acquiredWeapons.forEach(w  => equipCost += parseEqCost(w['購入']));
+    acquiredWeapons.forEach(w  => {
+        equipCost += parseEqCost(w['購入']);
+        // 種別に「乗り物」を含まない場合のみ、行動値を加算する
+        const type = w['種別'] || '';
+        if (!type.includes('乗り物')) {
+            activeActionMod += Number(w['行動値']) || 0;
+        }
+    });
     acquiredArmor.forEach(armor => {
         equipCost += parseEqCost(armor['購入']);
         if ((window.isBeastMode && armor._beastEquip) || (!window.isBeastMode && armor._normalEquip)) {
