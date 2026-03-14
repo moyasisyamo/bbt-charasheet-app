@@ -56,32 +56,40 @@ function initEquipDictionary() {
             return name.includes(query) || type.includes(query) || effect.includes(query);
         }).forEach(item => {
             const row = document.createElement('tr');
+            const rt = item['ルーツ'] || '-';
+            let catClass = 'cat-root';
+            if (BBTData.getRoot(rt)) catClass = 'cat-root';
+            else if (rt === '-' || rt === '共通') catClass = 'cat-common';
+            else catClass = 'cat-blood';
+
+            row.className = `dict-row-marker ${catClass}`;
+
             if (currentDictType === 'weapons') {
                 row.innerHTML = `
-                    <td><strong>${item['装備名']}</strong><br><small style="color:var(--text-muted);">${item['ルーツ'] || '-'}</small><br><small>購入:${item['購入']}</small></td>
+                    <td><strong>${item['装備名']}</strong><br><span class="root-badge">${rt}</span><br><small style="color:var(--text-muted);font-size:0.7rem;">購入:${item['購入']}</small></td>
                     <td><small>${item['種別']}</small></td>
                     <td style="text-align:center;">${item['命中']}</td>
                     <td style="text-align:center;">${item['攻撃力']}</td>
                     <td style="text-align:center;"><small>${item['射程']}</small></td>
-                    <td><small style="font-size:0.8rem; line-height:1.3; display:block;">${item['効果']}</small></td>
+                    <td><small style="font-size:0.8rem; line-height:1.25; display:block;">${item['効果']}</small></td>
                     <td><button class="btn primary add-equip-btn" style="padding:4px 8px;font-size:0.75rem;white-space:nowrap;">追加</button></td>
                 `;
             } else if (currentDictType === 'armor') {
                 row.innerHTML = `
-                    <td><strong>${item['装備名']}</strong><br><small style="color:var(--text-muted);">${item['ルーツ'] || '-'}</small><br><small>購入:${item['購入']}</small></td>
+                    <td><strong>${item['装備名']}</strong><br><span class="root-badge">${rt}</span><br><small style="color:var(--text-muted);font-size:0.7rem;">購入:${item['購入']}</small></td>
                     <td style="text-align:center;">${item['ドッジ']}</td>
                     <td style="text-align:center;">${item['行動値']}</td>
                     <td style="white-space:nowrap;"><small>G:${item['G値']||0}/A:${item['A値']||0}</small></td>
-                    <td><small style="font-size:0.8rem; line-height:1.3; display:block;">${item['効果']}</small></td>
+                    <td><small style="font-size:0.8rem; line-height:1.25; display:block;">${item['効果']}</small></td>
                     <td><button class="btn primary add-equip-btn" style="padding:4px 8px;font-size:0.75rem;white-space:nowrap;">追加</button></td>
                 `;
             } else if (currentDictType === 'items') {
                 row.innerHTML = `
-                    <td><strong>${item['装備名']}</strong><br><small style="color:var(--text-muted);">${item['ルーツ'] || '-'}</small><br><small>購入:${item['購入']}</small></td>
+                    <td><strong>${item['装備名']}</strong><br><span class="root-badge">${rt}</span><br><small style="color:var(--text-muted);font-size:0.7rem;">購入:${item['購入']}</small></td>
                     <td><small>${item['種別']}</small></td>
                     <td style="white-space:nowrap;"><small>${item['タイミング']}</small></td>
                     <td style="white-space:nowrap;"><small>${item['対象']}/${item['射程']}</small></td>
-                    <td><small style="font-size:0.8rem; line-height:1.3; display:block;">${item['効果']}</small></td>
+                    <td><small style="font-size:0.8rem; line-height:1.25; display:block;">${item['効果']}</small></td>
                     <td><button class="btn primary add-equip-btn" style="padding:4px 8px;font-size:0.75rem;white-space:nowrap;">追加</button></td>
                 `;
             }

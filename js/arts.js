@@ -220,17 +220,27 @@ function initArtsDictionary() {
 
         resultSet.forEach(art => {
             const row = document.createElement('tr');
-            let displayCat = art._rt;
-            if (['アタッカー','ディフェンダー','サポーター'].includes(art._cat)) displayCat = art._cat;
+            let catClass = 'cat-root';
+            if (['アタッカー','ディフェンダー','サポーター'].includes(art._cat)) {
+                catClass = art._cat === 'アタッカー' ? 'cat-atk' : (art._cat === 'ディフェンダー' ? 'cat-def' : 'cat-sup');
+            } else if (art._rt === '共通アーツ' || art._rt === '基本' || art._rt === '基本アーツ') {
+                catClass = 'cat-common';
+            } else {
+                // ブラッド名かどうかを簡易判定（ここではデフォルトでblood色、あるいはルーツ色。
+                // 実際にはBBTDataを参照する方が正確だが、辞書のcatは既に整理されている。）
+                catClass = BBTData.getRoot(art._rt) ? 'cat-root' : 'cat-blood';
+            }
+
+            row.className = `dict-row-marker ${catClass}`;
             row.innerHTML = `
-                <td><strong>${art['アーツ名']}</strong><br><small style="color:var(--text-muted);">${displayCat}</small></td>
+                <td><strong>${art['アーツ名']}</strong><br><span class="root-badge">${displayCat}</span></td>
                 <td style="white-space:nowrap;"><small>${art['種別'] || '-'}</small></td>
                 <td style="text-align:center;">${art['最大Lv'] || '-'}</td>
                 <td style="white-space:nowrap;"><small>${art['タイミング']}</small></td>
                 <td style="white-space:nowrap;"><small>${art['判定値'] || '-'}</small></td>
                 <td style="white-space:nowrap;"><small>${art['対象'] || '-'}/${art['射程'] || '-'}</small></td>
                 <td style="text-align:center;">${art['コスト']}</td>
-                <td><small style="font-size:0.8rem; line-height:1.3; display:block;">${art['効果']}</small></td>
+                <td><small style="font-size:0.8rem; line-height:1.25; display:block;">${art['効果']}</small></td>
                 <td><button class="btn primary add-art-btn" style="padding:4px 8px;font-size:0.75rem;white-space:nowrap;">追加</button></td>
             `;
             row.querySelector('.add-art-btn').addEventListener('click', () => {
