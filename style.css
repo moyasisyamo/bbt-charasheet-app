@@ -440,14 +440,28 @@ body.view-mode .stat-trigger {
     padding: 8px 5px;
     font-size: 0.85rem;
 }
+/* 装備名列の幅を制限 */
+#dictionary-table th:first-child,
+#equip-dict-thead th:first-child {
+    max-width: 150px;
+    min-width: 150px;
+    width: 150px;
+    white-space: normal;
+}
 #dictionary-table td, #equip-dict-tbody td {
     padding: 8px 5px;
     vertical-align: top;
 }
 #dictionary-table td strong, #equip-dict-tbody td strong {
     display: block;
-    margin-bottom: -5px; /* スペースを詰める */
+    margin-bottom: -4px;
     line-height: 1.1;
+    word-break: break-all; /* 長い名称の折り返し */
+}
+#dictionary-table td:first-child,
+#equip-dict-tbody td:first-child {
+    max-width: 150px;
+    width: 150px;
 }
 
 /* Root distinction markers */
@@ -463,7 +477,7 @@ body.view-mode .stat-trigger {
     bottom: 4px;
     width: 4px;
     border-radius: 2px;
-    background-color: var(--border-color);
+    background-color: var(--marker-color, var(--border-color));
 }
 /* By default header marker has no color bar but takes space */
 .dict-header-marker::before {
@@ -472,13 +486,13 @@ body.view-mode .stat-trigger {
 
 
 
-/* Category colors for markers - fix selector to target the marker on the td */
-.cat-atk .dict-row-marker::before { background-color: #ef4444; }
-.cat-def .dict-row-marker::before { background-color: #3b82f6; }
-.cat-sup .dict-row-marker::before { background-color: #10b981; }
-.cat-blood .dict-row-marker::before { background-color: #a855f7; }
-.cat-root .dict-row-marker::before { background-color: #f59e0b; }
-.cat-common .dict-row-marker::before { background-color: #94a3b8; }
+/* Category colors for markers - uses specific variables or fallbacks */
+.cat-atk { --marker-color: #ef4444; --badge-bg: rgba(239, 68, 68, 0.15); --badge-text: #f87171; }
+.cat-def { --marker-color: #3b82f6; --badge-bg: rgba(59, 130, 246, 0.15); --badge-text: #60a5fa; }
+.cat-sup { --marker-color: #10b981; --badge-bg: rgba(16, 185, 129, 0.15); --badge-text: #34d399; }
+.cat-blood { --marker-color: #a855f7; --badge-bg: rgba(168, 85, 247, 0.15); --badge-text: #c084fc; }
+.cat-root { --marker-color: #f59e0b; --badge-bg: rgba(245, 158, 11, 0.15); --badge-text: #fbbf24; }
+.cat-common { --marker-color: #94a3b8; --badge-bg: rgba(148, 163, 184, 0.15); --badge-text: #cbd5e1; }
 
 /* Root Badge */
 .root-badge {
@@ -486,17 +500,13 @@ body.view-mode .stat-trigger {
     padding: 1px 6px;
     border-radius: 4px;
     font-size: 0.7rem;
-    background: var(--btn-bg);
-    color: var(--btn-text);
-    margin-top: 2px;
+    background: var(--badge-override-bg, var(--badge-bg, var(--btn-bg)));
+    color: var(--badge-override-text, var(--badge-text, var(--btn-text)));
+    border: 1px solid var(--badge-override-border, transparent);
+    margin-top: 1px;
     font-weight: 500;
 }
-.cat-atk .root-badge { background: rgba(239, 68, 68, 0.2); color: #ef4444; }
-.cat-def .root-badge { background: rgba(59, 130, 246, 0.2); color: #3b82f6; }
-.cat-sup .root-badge { background: rgba(16, 185, 129, 0.2); color: #10b981; }
-.cat-blood .root-badge { background: rgba(168, 85, 247, 0.2); color: #a855f7; }
-.cat-root .root-badge { background: rgba(245, 158, 11, 0.2); color: #f59e0b; }
-.cat-common .root-badge { background: rgba(148, 163, 184, 0.2); color: #94a3b8; }
+/* The specific category badges are now handled by variables in .cat-xxx classes above */
 
 #dictionary-table td small, #equip-dict-tbody td small {
     line-height: 1.2;
