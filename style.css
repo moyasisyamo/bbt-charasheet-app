@@ -582,3 +582,90 @@ body.view-mode .stat-trigger {
     color: var(--primary-color);
     font-weight: bold;
 }
+
+/* Pie Chart */
+.pie-chart-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 20px 0;
+}
+.pie-chart {
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    position: relative;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+}
+.pie-legend {
+    margin-top: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.85rem;
+}
+.legend-color {
+    width: 12px;
+    height: 12px;
+    border-radius: 2px;
+}
+
+/* Ranking List */
+.ranking-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+.ranking-item {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    background: var(--input-bg);
+    border-radius: 6px;
+    border: 1px solid var(--border-color);
+}
+.ranking-rank {
+    font-weight: bold;
+    font-size: 1.2rem;
+    color: #ff3366;
+    margin-right: 15px;
+    width: 25px;
+}
+.ranking-name {
+    flex: 1;
+    font-weight: 500;
+}
+.ranking-count {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+}
+
+/* Max Holder */
+.max-holder {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 5px;
+    padding-top: 8px;
+    border-top: 1px dashed var(--border-color);
+}
+.max-holder-label {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+.max-holder-icon {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1px solid var(--border-color);
+}
+.max-holder-name {
+    font-size: 0.8rem;
+    font-weight: 600;
+}
