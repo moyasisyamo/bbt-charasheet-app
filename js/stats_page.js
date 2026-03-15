@@ -420,18 +420,28 @@ function renderRankings(chars) {
         const validEntries = Object.entries(counts)
             .filter(([name]) => name !== 'なし' && name !== '-' && name !== '不明');
         
-        const sorted = [...validEntries].sort((a, b) => b[1] - a[1]).slice(0, 5);
+        const sorted = [...validEntries].sort((a, b) => b[1] - a[1]);
 
         if (sorted.length === 0) {
             div.innerHTML = '<p style="padding:10px;color:var(--text-muted);">データなし</p>';
             return;
         }
 
+        // 順位計算(競技順位方式)
+        let currentRank = 1;
+        let lastCount = -1;
         sorted.forEach(([name, count], i) => {
+            if (i >= 5) return; // TOP5のみ描画
+
+            if (count !== lastCount) {
+                currentRank = i + 1;
+            }
+            lastCount = count;
+
             const item = document.createElement('div');
             item.className = 'ranking-item';
             item.innerHTML = `
-                <div class="ranking-rank">${i + 1}</div>
+                <div class="ranking-rank">${currentRank}</div>
                 <div class="ranking-name">${escHtml(name)}</div>
                 <div class="ranking-count">${count}人</div>
             `;
@@ -476,12 +486,19 @@ function showRankingModal(title, counts) {
     const wrapper = document.createElement('div');
     wrapper.className = 'ranking-list';
     
+    let currentRank = 1;
+    let lastCount = -1;
     sorted.forEach(([name, count], i) => {
+        if (count !== lastCount) {
+            currentRank = i + 1;
+        }
+        lastCount = count;
+
         const item = document.createElement('div');
         item.className = 'ranking-item';
         item.style.padding = '12px';
         item.innerHTML = `
-            <div class="ranking-rank">${i + 1}</div>
+            <div class="ranking-rank">${currentRank}</div>
             <div class="ranking-name" style="font-size: 1rem;">${escHtml(name)}</div>
             <div class="ranking-count" style="font-size: 0.9rem;">${count}人</div>
         `;
