@@ -131,8 +131,9 @@ function initEquipDictionary() {
 function addEquipToTable(item, type) {
     let tbody, arr;
     const row    = document.createElement('tr');
-    const eqInput = `<input type="text" class="edit-only-input" placeholder="名前を自由に入力" style="width:100%;"><div class="view-only-text">-</div>`;
-    const cItem  = { ...item, _equivalentName: '' };
+    const val    = item._equivalentName || '';
+    const eqInput = `<input type="text" class="edit-only-input" placeholder="名前を自由に入力" style="width:100%;" value="${val}"><div class="view-only-text">${val || '-'}</div>`;
+    const cItem  = { ...item, _equivalentName: val };
 
     if (type === 'weapons') {
         tbody = document.querySelector('#weapons-table tbody');

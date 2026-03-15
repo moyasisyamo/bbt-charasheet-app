@@ -474,6 +474,17 @@ function getSheetState() {
         armor:   acquiredArmor.map(a  => ({...a})),
         items:   acquiredItems.map(i  => ({...i})),
         images:  { image: charData.image, image2: charData.image2, faceIcon: charData.faceIcon },
+        stats: {
+            physical: parseInt(document.getElementById('stat-body').textContent) || 0,
+            tech:     parseInt(document.getElementById('stat-tech').textContent) || 0,
+            emotion:  parseInt(document.getElementById('stat-emo').textContent) || 0,
+            divine:   parseInt(document.getElementById('stat-div').textContent) || 0,
+            society:  parseInt(document.getElementById('stat-soc').textContent) || 0,
+            melee:    parseInt(document.getElementById('stat-melee').textContent) || 0,
+            ranged:   parseInt(document.getElementById('stat-ranged').textContent) || 0,
+            dodge:    parseInt(document.getElementById('stat-dodge').textContent) || 0,
+            action:   parseInt(document.getElementById('stat-action').textContent) || 0,
+        },
         password: document.getElementById('char-password')?.value || '',
     };
     return JSON.parse(JSON.stringify(rawState));
