@@ -407,10 +407,18 @@ function renderRankings(chars) {
         uniqueArts.forEach(a => { artsCounts[a] = (artsCounts[a] || 0) + 1; });
     });
 
+    // 人気アーツのみ、1人しか持っていないものは除外する
+    const filteredArtsCounts = {};
+    Object.entries(artsCounts).forEach(([name, count]) => {
+        if (count > 1) {
+            filteredArtsCounts[name] = count;
+        }
+    });
+
     // 次回ポップアップ用に記録
     lastAggregatedData.blood = bloodCounts;
     lastAggregatedData.root = rootCounts;
-    lastAggregatedData.arts = artsCounts;
+    lastAggregatedData.arts = filteredArtsCounts;
 
     const renderList = (containerId, counts, typeName) => {
         const div = document.getElementById(containerId);
@@ -465,7 +473,7 @@ function renderRankings(chars) {
 
     renderList('blood-rankings', bloodCounts, '人気ブラッド');
     renderList('root-rankings', rootCounts, '人気ルーツ');
-    renderList('arts-rankings', artsCounts, '人気アーツ');
+    renderList('arts-rankings', filteredArtsCounts, '人気アーツ');
 }
 
 /** ランキング全件表示モーダル */
@@ -481,7 +489,8 @@ function showRankingModal(title, counts) {
 
     const sorted = Object.entries(counts)
         .filter(([name]) => name !== 'なし' && name !== '-' && name !== '不明')
-        .sort((a, b) => b[1] - a[1]);
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 30); // 上位30位まで表示
 
     const wrapper = document.createElement('div');
     wrapper.className = 'ranking-list';
