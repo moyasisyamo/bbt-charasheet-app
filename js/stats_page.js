@@ -16,15 +16,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.documentElement.setAttribute('data-theme', savedTheme);
 
     // テーマ切り替えイベント
-    const themeBtn = document.getElementById('theme-toggle');
+    const themeBtn = document.getElementById('theme-toggle-fixed');
     if (themeBtn) {
-        themeBtn.textContent = savedTheme === 'dark' ? '☀️ ライトモード' : '🌙 ダークモード';
         themeBtn.addEventListener('click', () => {
             const current = document.documentElement.getAttribute('data-theme');
             const next = current === 'dark' ? 'light' : 'dark';
             document.documentElement.setAttribute('data-theme', next);
             localStorage.setItem('bbt-theme', next);
-            themeBtn.textContent = next === 'dark' ? '☀️ ライトモード' : '🌙 ダークモード';
         });
     }
 

@@ -15,7 +15,6 @@
                 <h1>BEASTBIND TRINITY<br><span>統計情報</span></h1>
             </div>
             <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
-                <button id="theme-toggle" class="btn" title="テーマ切り替え">🌓 テーマ</button>
                 <div style="display: flex; gap: 5px; align-items: center; margin-left: 10px;">
                     <label for="player-filter" style="font-size: 0.85rem; font-weight: bold;">プレイヤー:</label>
                     <select id="player-filter" class="btn" style="padding: 4px 8px; font-size: 0.85rem; background: var(--input-bg); color: var(--text-color); border: 1px solid var(--border-color); cursor: pointer;">
@@ -111,8 +110,10 @@
 <!-- Firebase SDK (compat) -->
 <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore-compat.js"></script>
-<script src="js/firebase-config.js?v=3"></script>
-<script src="js/firebase.js?v=3"></script>
-<script src="js/stats_page.js?v=7"></script>
+    <button id="theme-toggle-fixed" class="theme-toggle-fixed" title="テーマ切り替え">🌓</button>
+
+    <script src="js/firebase-config.js?v=3"></script>
+    <script src="js/firebase.js?v=3"></script>
+    <script src="js/stats_page.js?v=7"></script>
 </body>
 </html>

@@ -46,18 +46,16 @@ document.addEventListener('DOMContentLoaded', () => {
         window.currentCharId = new URLSearchParams(location.search).get('id') || null;
 
         // ---- テーマ切り替え ----
-        const themeBtn = document.getElementById('theme-toggle');
+        const themeBtn = document.getElementById('theme-toggle-fixed');
         // 初期テーマを localStorage から復元
         const savedTheme = localStorage.getItem('bbt-theme') || 'dark';
         document.documentElement.setAttribute('data-theme', savedTheme);
         if (themeBtn) {
-            themeBtn.textContent = savedTheme === 'dark' ? '☀️ ライトモード' : '🌙 ダークモード';
             themeBtn.addEventListener('click', () => {
                 const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
                 const next = isDark ? 'light' : 'dark';
                 document.documentElement.setAttribute('data-theme', next);
                 localStorage.setItem('bbt-theme', next);
-                themeBtn.textContent = next === 'dark' ? '☀️ ライトモード' : '🌙 ダークモード';
             });
         }
 

@@ -16,17 +16,17 @@ const STYLE_CLASS = { 'ATK':'style-atk', 'DEF':'style-def', 'SUP':'style-sup' };
 
 document.addEventListener('DOMContentLoaded', async () => {
     // テーマ
-    const themeBtn = document.getElementById('theme-toggle');
+    const themeBtn = document.getElementById('theme-toggle-fixed');
     const html     = document.documentElement;
     const saved    = localStorage.getItem('bbt-theme') || 'dark';
     html.setAttribute('data-theme', saved);
-    themeBtn.textContent = saved === 'dark' ? '☀️ ライトモード' : '🌙 ダークモード';
-    themeBtn.addEventListener('click', () => {
-        const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-        html.setAttribute('data-theme', next);
-        localStorage.setItem('bbt-theme', next);
-        themeBtn.textContent = next === 'dark' ? '☀️ ライトモード' : '🌙 ダークモード';
-    });
+    if (themeBtn) {
+        themeBtn.addEventListener('click', () => {
+            const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+            html.setAttribute('data-theme', next);
+            localStorage.setItem('bbt-theme', next);
+        });
+    }
 
     // 統計ページ
     document.getElementById('stats-page-btn').addEventListener('click', () => {

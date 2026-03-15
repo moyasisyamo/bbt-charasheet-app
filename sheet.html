@@ -16,7 +16,6 @@
                     <h1 style="color: #ff3366; text-shadow: 1px 1px 2px #000; font-size: 1.8rem; margin: 0; line-height: 1.2;">BEASTBIND TRINITY<br><span style="font-size: 1.2rem;">キャラクターシート</span></h1>
                 </div>
                 <div class="header-controls" style="display: flex; gap: 15px; align-items: center;">
-                    <button id="theme-toggle" class="btn" style="background:#444b6e; color:#fff; border:none; padding:8px 12px; border-radius:4px; font-weight:bold; cursor:pointer;">🌙 ダークモード</button>
                     <div style="display: flex; align-items: center; gap: 5px;">
                         <span style="font-size: 0.9rem;">編集用パスワード</span>
                         <input type="password" id="char-password" class="edit-only" style="width: 120px; padding: 5px; background: var(--input-bg); border: 1px solid var(--border-color); color: var(--text-color);">
@@ -941,11 +940,13 @@
     <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore-compat.js"></script>
     <script src="js/firebase-config.js?v=2"></script>
     <script src="js/firebase.js"></script>
-    <script src="js/data.js?v=3"></script>
-    <script src="js/loader.js?v=3"></script>
-    <script src="js/stats.js?v=3"></script>
-    <script src="js/arts.js?v=3"></script>
-    <script src="js/equipment.js?v=3"></script>
-    <script src="js/main.js?v=3"></script>
+    <button id="theme-toggle-fixed" class="theme-toggle-fixed" title="テーマ切り替え">🌓</button>
+
+    <script src="js/firebase-config.js"></script>
+    <script src="js/loader.js"></script>
+    <script src="js/stats.js"></script>
+    <script src="js/arts.js"></script>
+    <script src="js/equipment.js"></script>
+    <script src="js/main.js"></script>
 </body>
 </html>
