@@ -31,7 +31,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     try {
         allChars = await window.bbFirebase.loadAll();
         initFilter(allChars);
-        renderStats(allChars);
+        
+        // レイアウト確定を待ってからレンダリング
+        setTimeout(() => {
+            renderStats(allChars);
+        }, 100);
     } catch (e) {
         document.getElementById('loading-msg').innerHTML = `<p style="color:red;">エラー: ${e.message}</p>`;
     }
@@ -85,7 +89,7 @@ function renderStats(chars) {
     renderAgeLineGraph(chars);
     renderGenderBandGraph(chars);
     renderStylePieChart(chars);
-    renderRankings(chars); // ブラッド、ルーツ、アーツを一括で呼び出すように内部で調整されている
+    renderRankings(chars);
     renderAbilityStats(chars);
 }
 
@@ -113,7 +117,7 @@ function renderAgeLineGraph(chars) {
     chars.forEach(c => {
         const ageVal = getProfileValue(c, 'char-age');
         if (!ageVal) { unknownCount++; return; }
-        const match = ageVal.match(/\d+/);
+        const match = String(ageVal).match(/\d+/);
         if (!match) { unknownCount++; return; }
         const age = parseInt(match[0]);
         const bIndex = buckets.findIndex(b => age >= b.min && age <= b.max);
@@ -122,31 +126,47 @@ function renderAgeLineGraph(chars) {
     });
 
     const container = document.getElementById('age-distribution');
+    if (!container) return;
     container.innerHTML = '';
 
-    const width = container.clientWidth || 800;
+    // 幅を動的に取得。0ならフォールバック
+    const width = Math.max(container.clientWidth, 600);
     const height = 250;
-    const padding = { top: 30, right: 40, bottom: 40, left: 40 };
+    const padding = { top: 40, right: 40, bottom: 50, left: 50 };
 
-    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-    svg.setAttribute('viewBox', `0 0 ${width} ${height + 50}`);
-    svg.className.baseVal = 'line-graph-svg';
+    const ns = 'http://www.w3.org/2000/svg';
+    const svg = document.createElementNS(ns, 'svg');
+    svg.setAttribute('viewBox', `0 0 ${width} ${height + 20}`);
+    svg.setAttribute('class', 'line-graph-svg');
+    svg.setAttribute('xmlns', ns);
 
     const maxVal = Math.max(...counts, 1);
     const xStep = (width - padding.left - padding.right) / (buckets.length - 1);
     
     // 背景の補助線
-    for (let i = 0; i <= maxVal; i++) {
-        const y = padding.top + (height - padding.top - padding.bottom) * (1 - i / maxVal);
-        const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    const gridCount = 5;
+    for (let i = 0; i <= gridCount; i++) {
+        const val = Math.round((maxVal / gridCount) * i);
+        const y = padding.top + (height - padding.top - padding.bottom) * (1 - i / gridCount);
+        
+        const line = document.createElementNS(ns, 'line');
         line.setAttribute('x1', padding.left);
         line.setAttribute('y1', y);
         line.setAttribute('x2', width - padding.right);
         line.setAttribute('y2', y);
         line.setAttribute('stroke', 'var(--border-color)');
-        line.setAttribute('stroke-dasharray', '4 4');
-        line.setAttribute('opacity', '0.3');
+        line.setAttribute('stroke-dasharray', '4 2');
+        line.setAttribute('opacity', '0.2');
         svg.appendChild(line);
+
+        // Y軸ラベル
+        const yText = document.createElementNS(ns, 'text');
+        yText.setAttribute('x', padding.left - 10);
+        yText.setAttribute('y', y + 4);
+        yText.setAttribute('text-anchor', 'end');
+        yText.setAttribute('class', 'line-graph-text');
+        yText.textContent = val;
+        svg.appendChild(yText);
     }
 
     // グラフの点と線の座標計算
@@ -160,9 +180,9 @@ function renderAgeLineGraph(chars) {
     let areaPathStr = `M ${points[0].x} ${height - padding.bottom} `;
     points.forEach(p => { areaPathStr += `L ${p.x} ${p.y} `; });
     areaPathStr += `L ${points[points.length-1].x} ${height - padding.bottom} Z`;
-    const area = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    const area = document.createElementNS(ns, 'path');
     area.setAttribute('d', areaPathStr);
-    area.className.baseVal = 'line-graph-area';
+    area.setAttribute('class', 'line-graph-area');
     svg.appendChild(area);
 
     // 折れ線
@@ -170,36 +190,36 @@ function renderAgeLineGraph(chars) {
     for (let i = 1; i < points.length; i++) {
         linePathStr += `L ${points[i].x} ${points[i].y} `;
     }
-    const line = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    const line = document.createElementNS(ns, 'path');
     line.setAttribute('d', linePathStr);
-    line.className.baseVal = 'line-graph-line';
+    line.setAttribute('class', 'line-graph-line');
     svg.appendChild(line);
 
     // 点とラベル
     points.forEach((p, i) => {
         // ドット
-        const dot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        const dot = document.createElementNS(ns, 'circle');
         dot.setAttribute('cx', p.x);
         dot.setAttribute('cy', p.y);
-        dot.setAttribute('r', '4');
-        dot.className.baseVal = 'line-graph-point';
+        dot.setAttribute('r', '5');
+        dot.setAttribute('class', 'line-graph-point');
         svg.appendChild(dot);
 
         // X軸ラベル
-        const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        const text = document.createElementNS(ns, 'text');
         text.setAttribute('x', p.x);
-        text.setAttribute('y', height - 10);
+        text.setAttribute('y', height - 15);
         text.setAttribute('text-anchor', 'middle');
-        text.className.baseVal = 'line-graph-text';
+        text.setAttribute('class', 'line-graph-text');
         text.textContent = p.label;
         svg.appendChild(text);
 
         // 値ラベル（0より大きい時だけ）
         if (p.count > 0) {
-            const valText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+            const valText = document.createElementNS(ns, 'text');
             valText.setAttribute('x', p.x);
-            valText.setAttribute('y', p.y - 10);
-            valText.className.baseVal = 'line-graph-value';
+            valText.setAttribute('y', p.y - 12);
+            valText.setAttribute('class', 'line-graph-value');
             valText.textContent = p.count;
             svg.appendChild(valText);
         }
@@ -210,9 +230,9 @@ function renderAgeLineGraph(chars) {
     if (unknownCount > 0) {
         const unknownInfo = document.createElement('div');
         unknownInfo.style.textAlign = 'right';
-        unknownInfo.style.fontSize = '0.85rem';
+        unknownInfo.style.fontSize = '0.8rem';
         unknownInfo.style.color = 'var(--text-muted)';
-        unknownInfo.style.marginTop = '10px';
+        unknownInfo.style.padding = '5px 15px';
         unknownInfo.textContent = `※ 年齢不詳: ${unknownCount}人`;
         container.appendChild(unknownInfo);
     }
@@ -244,6 +264,7 @@ function renderGenderBandGraph(chars) {
     });
 
     const container = document.getElementById('gender-distribution');
+    if (!container) return;
     container.innerHTML = '';
 
     const graph = document.createElement('div');
@@ -257,21 +278,13 @@ function renderGenderBandGraph(chars) {
         segment.className = 'band-segment';
         segment.style.width = `${percent}%`;
         segment.style.backgroundColor = colors[name];
-        segment.style.height = '100%';
-        segment.style.display = 'flex';
-        segment.style.alignItems = 'center';
-        segment.style.justifyContent = 'center';
-        segment.style.fontSize = '0.75rem';
-        segment.style.color = '#fff';
-        segment.style.textShadow = '1px 1px 1px rgba(0,0,0,0.5)';
-        segment.textContent = count >= (total * 0.1) ? `${name}(${count})` : '';
+        segment.textContent = count >= (total * 0.08) ? `${name}(${count})` : '';
         segment.title = `${name}: ${count}人 (${percent.toFixed(1)}%)`;
         graph.appendChild(segment);
     });
 
     container.appendChild(graph);
 
-    // 凡例を追加
     const legend = document.createElement('div');
     legend.className = 'pie-legend';
     legend.style.flexDirection = 'row';
@@ -299,6 +312,7 @@ function renderStylePieChart(chars) {
     });
 
     const styleDiv = document.getElementById('style-distribution');
+    if (!styleDiv) return;
     styleDiv.innerHTML = '';
 
     const colors = { 'アタッカー': '#ff5277', 'ディフェンダー': '#4fc3f7', 'サポーター': '#81c784' };
@@ -379,6 +393,7 @@ function renderAbilityStats(chars) {
 
     const renderGroup = (containerId, labels, totals) => {
         const div = document.getElementById(containerId);
+        if (!div) return;
         div.innerHTML = '';
         if (validCount === 0) {
             div.innerHTML = '<p>有効な集計データがありません。</p>';
@@ -448,6 +463,7 @@ function renderRankings(chars) {
 
     const renderList = (containerId, counts) => {
         const div = document.getElementById(containerId);
+        if (!div) return;
         div.innerHTML = '';
         const sorted = Object.entries(counts)
             .filter(([name]) => name !== 'なし' && name !== '-' && name !== '不明')
