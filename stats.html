@@ -29,64 +29,65 @@
         </div>
 
         <div id="stats-content" style="display:none;">
-            <div class="stats-card-grid">
-                <!-- スタイル分布 -->
-                <div class="panel">
-                    <h2>スタイル分布</h2>
-                    <div id="style-distribution"></div>
+            <!-- 1. 年齢分布 (折れ線グラフ) -->
+            <section class="stats-section">
+                <div class="stats-card stats-card-full">
+                    <h2>年齢分布</h2>
+                    <div id="age-distribution" class="line-graph-container"></div>
                 </div>
+            </section>
 
-                <!-- 能力値平均・最大 -->
-                <div class="panel">
-                    <h2>能力値平均・最大値</h2>
-                    <div id="ability-averages"></div>
-                </div>
-            </div>
-
-            <div class="stats-card-grid">
-                <!-- 戦闘値平均・最大 -->
-                <div class="panel">
-                    <h2>戦闘値平均・最大値</h2>
-                    <div id="combat-averages"></div>
-                </div>
-
-                <!-- ブラッドランキング -->
-                <div class="panel">
-                    <h2>人気ブラッド TOP5</h2>
-                    <div id="blood-rankings" class="ranking-list"></div>
-                </div>
-
-                <!-- ルーツランキング -->
-                <div class="panel">
-                    <h2>人気ルーツ TOP5</h2>
-                    <div id="root-rankings" class="ranking-list"></div>
-                </div>
-            </div>
-
-            <div class="stats-card-grid">
-                <!-- 年齢分布 -->
-                <div class="panel">
-                    <h2>年齢分布 (ヒストグラム)</h2>
-                    <div id="age-distribution" class="histogram-container"></div>
-                </div>
-
-                <!-- 性別分布 -->
-                <div class="panel">
-                    <h2>性別分布 (帯グラフ)</h2>
+            <!-- 2. 性別比 (帯グラフ) -->
+            <section class="stats-section">
+                <div class="stats-card stats-card-full">
+                    <h2>性別比</h2>
                     <div id="gender-distribution" class="band-graph-container"></div>
                 </div>
+            </section>
 
-                <!-- 人気アーツランキング -->
-                <div class="panel">
-                    <h2>人気アーツ TOP5 (自動除く)</h2>
+            <!-- 3. スタイル分布 & 各種ランキング -->
+            <section class="stats-section">
+                <div class="stats-row">
+                    <div class="stats-card">
+                        <h2>スタイル分布</h2>
+                        <div id="style-distribution"></div>
+                    </div>
+                    <div class="stats-card">
+                        <h2>人気ブラッド TOP5</h2>
+                        <div id="blood-rankings" class="ranking-list"></div>
+                    </div>
+                    <div class="stats-card">
+                        <h2>人気ルーツ TOP5</h2>
+                        <div id="root-rankings" class="ranking-list"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 4. 基本能力平均 & 戦闘能力平均 -->
+            <section class="stats-section">
+                <div class="stats-row">
+                    <div class="stats-card">
+                        <h2>基本能力平均・最大値</h2>
+                        <div id="ability-averages"></div>
+                    </div>
+                    <div class="stats-card">
+                        <h2>戦闘能力平均・最大値</h2>
+                        <div id="combat-averages"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 5. 人気アーツランキング -->
+            <section class="stats-section">
+                <div class="stats-card stats-card-full">
+                    <h2>人気アーツランキング (自動除く)</h2>
                     <div id="arts-rankings" class="ranking-list"></div>
                 </div>
-            </div>
+            </section>
 
             <!-- サマリー -->
-            <div class="panel" style="margin-top:20px;">
-                <h2>サマリー</h2>
-                <p id="total-chars-msg"></p>
+            <div class="panel summary-panel" style="margin-top:40px; text-align: center; opacity: 0.8;">
+                <p id="total-chars-msg" style="font-size: 1.1rem; font-weight: bold;"></p>
             </div>
         </div>
     </div>

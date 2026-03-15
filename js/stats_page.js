@@ -81,12 +81,215 @@ function renderStats(chars) {
         return;
     }
 
-    // 各セクションの描画（引数の chars を使用することでフィルタリングに対応）
-    renderStylePieChart(chars);
-    renderAbilityStats(chars);
-    renderRankings(chars);
-    renderAgeHistogram(chars);
+    // 順序通りに描画
+    renderAgeLineGraph(chars);
     renderGenderBandGraph(chars);
+    renderStylePieChart(chars);
+    renderRankings(chars); // ブラッド、ルーツ、アーツを一括で呼び出すように内部で調整されている
+    renderAbilityStats(chars);
+}
+
+function renderAgeLineGraph(chars) {
+    const buckets = [
+        { label: '0s', min: 0, max: 9 },
+        { label: '10s', min: 10, max: 19 },
+        { label: '20s', min: 20, max: 29 },
+        { label: '30s', min: 30, max: 39 },
+        { label: '40s', min: 40, max: 49 },
+        { label: '50s', min: 50, max: 59 },
+        { label: '60s', min: 60, max: 69 },
+        { label: '70s', min: 70, max: 79 },
+        { label: '80s', min: 80, max: 89 },
+        { label: '90s', min: 90, max: 99 },
+        { label: '100s', min: 100, max: 499 },
+        { label: '500s', min: 500, max: 999 },
+        { label: '1000s', min: 1000, max: 9999 },
+        { label: 'Over', min: 10000, max: Infinity }
+    ];
+
+    const counts = buckets.map(() => 0);
+    let unknownCount = 0;
+
+    chars.forEach(c => {
+        const ageVal = getProfileValue(c, 'char-age');
+        if (!ageVal) { unknownCount++; return; }
+        const match = ageVal.match(/\d+/);
+        if (!match) { unknownCount++; return; }
+        const age = parseInt(match[0]);
+        const bIndex = buckets.findIndex(b => age >= b.min && age <= b.max);
+        if (bIndex !== -1) counts[bIndex]++;
+        else unknownCount++;
+    });
+
+    const container = document.getElementById('age-distribution');
+    container.innerHTML = '';
+
+    const width = container.clientWidth || 800;
+    const height = 250;
+    const padding = { top: 30, right: 40, bottom: 40, left: 40 };
+
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.setAttribute('viewBox', `0 0 ${width} ${height + 50}`);
+    svg.className.baseVal = 'line-graph-svg';
+
+    const maxVal = Math.max(...counts, 1);
+    const xStep = (width - padding.left - padding.right) / (buckets.length - 1);
+    
+    // 背景の補助線
+    for (let i = 0; i <= maxVal; i++) {
+        const y = padding.top + (height - padding.top - padding.bottom) * (1 - i / maxVal);
+        const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        line.setAttribute('x1', padding.left);
+        line.setAttribute('y1', y);
+        line.setAttribute('x2', width - padding.right);
+        line.setAttribute('y2', y);
+        line.setAttribute('stroke', 'var(--border-color)');
+        line.setAttribute('stroke-dasharray', '4 4');
+        line.setAttribute('opacity', '0.3');
+        svg.appendChild(line);
+    }
+
+    // グラフの点と線の座標計算
+    const points = counts.map((count, i) => {
+        const x = padding.left + i * xStep;
+        const y = padding.top + (height - padding.top - padding.bottom) * (1 - count / maxVal);
+        return { x, y, count, label: buckets[i].label };
+    });
+
+    // エリア（塗りつぶし）
+    let areaPathStr = `M ${points[0].x} ${height - padding.bottom} `;
+    points.forEach(p => { areaPathStr += `L ${p.x} ${p.y} `; });
+    areaPathStr += `L ${points[points.length-1].x} ${height - padding.bottom} Z`;
+    const area = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    area.setAttribute('d', areaPathStr);
+    area.className.baseVal = 'line-graph-area';
+    svg.appendChild(area);
+
+    // 折れ線
+    let linePathStr = `M ${points[0].x} ${points[0].y} `;
+    for (let i = 1; i < points.length; i++) {
+        linePathStr += `L ${points[i].x} ${points[i].y} `;
+    }
+    const line = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    line.setAttribute('d', linePathStr);
+    line.className.baseVal = 'line-graph-line';
+    svg.appendChild(line);
+
+    // 点とラベル
+    points.forEach((p, i) => {
+        // ドット
+        const dot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        dot.setAttribute('cx', p.x);
+        dot.setAttribute('cy', p.y);
+        dot.setAttribute('r', '4');
+        dot.className.baseVal = 'line-graph-point';
+        svg.appendChild(dot);
+
+        // X軸ラベル
+        const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        text.setAttribute('x', p.x);
+        text.setAttribute('y', height - 10);
+        text.setAttribute('text-anchor', 'middle');
+        text.className.baseVal = 'line-graph-text';
+        text.textContent = p.label;
+        svg.appendChild(text);
+
+        // 値ラベル（0より大きい時だけ）
+        if (p.count > 0) {
+            const valText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+            valText.setAttribute('x', p.x);
+            valText.setAttribute('y', p.y - 10);
+            valText.className.baseVal = 'line-graph-value';
+            valText.textContent = p.count;
+            svg.appendChild(valText);
+        }
+    });
+
+    container.appendChild(svg);
+    
+    if (unknownCount > 0) {
+        const unknownInfo = document.createElement('div');
+        unknownInfo.style.textAlign = 'right';
+        unknownInfo.style.fontSize = '0.85rem';
+        unknownInfo.style.color = 'var(--text-muted)';
+        unknownInfo.style.marginTop = '10px';
+        unknownInfo.textContent = `※ 年齢不詳: ${unknownCount}人`;
+        container.appendChild(unknownInfo);
+    }
+}
+
+function renderGenderBandGraph(chars) {
+    const counts = { '男性': 0, '女性': 0, '両性': 0, 'なし': 0, '不明': 0 };
+    const colors = {
+        '男性': '#4fc3f7',
+        '女性': '#ff5277',
+        '両性': '#a855f7',
+        'なし': '#94a3b8',
+        '不明': '#565f89'
+    };
+
+    chars.forEach(c => {
+        const genVal = (getProfileValue(c, 'char-gender') || '').trim();
+        let normalized = '不明';
+        if (counts[genVal] !== undefined) {
+            normalized = genVal;
+        } else {
+            if (genVal.match(/[男オス雄♂]|男性/)) normalized = '男性';
+            else if (genVal.match(/[女メス雌♀]|女性/)) normalized = '女性';
+            else if (genVal.match(/両性/)) normalized = '両性';
+            else if (genVal.match(/無性別|無|なし/)) normalized = 'なし';
+            else if (genVal.match(/不詳|不明/)) normalized = '不明';
+        }
+        counts[normalized]++;
+    });
+
+    const container = document.getElementById('gender-distribution');
+    container.innerHTML = '';
+
+    const graph = document.createElement('div');
+    graph.className = 'band-graph';
+    
+    const total = chars.length;
+    Object.entries(counts).forEach(([name, count]) => {
+        if (count === 0) return;
+        const percent = (count / total) * 100;
+        const segment = document.createElement('div');
+        segment.className = 'band-segment';
+        segment.style.width = `${percent}%`;
+        segment.style.backgroundColor = colors[name];
+        segment.style.height = '100%';
+        segment.style.display = 'flex';
+        segment.style.alignItems = 'center';
+        segment.style.justifyContent = 'center';
+        segment.style.fontSize = '0.75rem';
+        segment.style.color = '#fff';
+        segment.style.textShadow = '1px 1px 1px rgba(0,0,0,0.5)';
+        segment.textContent = count >= (total * 0.1) ? `${name}(${count})` : '';
+        segment.title = `${name}: ${count}人 (${percent.toFixed(1)}%)`;
+        graph.appendChild(segment);
+    });
+
+    container.appendChild(graph);
+
+    // 凡例を追加
+    const legend = document.createElement('div');
+    legend.className = 'pie-legend';
+    legend.style.flexDirection = 'row';
+    legend.style.flexWrap = 'wrap';
+    legend.style.gap = '15px';
+    legend.style.marginTop = '15px';
+
+    Object.entries(counts).forEach(([name, count]) => {
+        if (count === 0) return;
+        const item = document.createElement('div');
+        item.className = 'legend-item';
+        item.innerHTML = `
+            <div class="legend-color" style="background:${colors[name]}"></div>
+            <span>${name}: ${count}</span>
+        `;
+        legend.appendChild(item);
+    });
+    container.appendChild(legend);
 }
 
 function renderStylePieChart(chars) {
@@ -96,12 +299,11 @@ function renderStylePieChart(chars) {
     });
 
     const styleDiv = document.getElementById('style-distribution');
-    styleDiv.innerHTML = ''; // クリア
+    styleDiv.innerHTML = '';
 
     const colors = { 'アタッカー': '#ff5277', 'ディフェンダー': '#4fc3f7', 'サポーター': '#81c784' };
     const total = chars.length;
 
-    // 円グラフのグラデーション計算
     let lastPercent = 0;
     const gradientParts = [];
     Object.entries(styles).forEach(([name, count]) => {
@@ -147,7 +349,6 @@ function renderAbilityStats(chars) {
     const abilityTotals = { physical: 0, tech: 0, emotion: 0, divine: 0, society: 0 };
     const combatTotals  = { melee: 0, ranged: 0, dodge: 0, action: 0 };
     
-    // 最大値保持者の追跡
     const maxHolders = {};
     [...Object.keys(abilityLabels), ...Object.keys(combatLabels)].forEach(k => {
         maxHolders[k] = { val: -Infinity, name: '-', icon: null };
@@ -159,7 +360,6 @@ function renderAbilityStats(chars) {
         const st = d.stats || {};
         if (st.physical !== undefined) {
             validCount++;
-            // 集計と最大値チェック
             Object.keys(abilityLabels).forEach(k => {
                 const val = Number(st[k]) || 0;
                 abilityTotals[k] += val;
@@ -191,12 +391,11 @@ function renderAbilityStats(chars) {
             
             const item = document.createElement('div');
             item.className = 'avg-stat-item';
-            item.style.flexDirection = 'column';
-            item.style.alignItems = 'stretch';
             
             const mainInfo = document.createElement('div');
             mainInfo.style.display = 'flex';
             mainInfo.style.justifyContent = 'space-between';
+            mainInfo.style.alignItems = 'center';
             mainInfo.innerHTML = `<span class="avg-stat-name">${label} (平均)</span><span class="avg-stat-val">${avg}</span>`;
             item.appendChild(mainInfo);
 
@@ -208,7 +407,7 @@ function renderAbilityStats(chars) {
                     : `<div class="max-holder-icon" style="display:flex;align-items:center;justify-content:center;background:var(--btn-bg);font-size:0.6rem;">👤</div>`;
                 
                 maxInfo.innerHTML = `
-                    <span class="max-holder-label">最大値 (${holder.val}):</span>
+                    <span class="max-holder-label">最大 (${holder.val}):</span>
                     ${iconHTML}
                     <span class="max-holder-name">${escHtml(holder.name)}</span>
                 `;
@@ -229,14 +428,11 @@ function renderRankings(chars) {
     const artsCounts  = {};
 
     chars.forEach(c => {
-        // ブラッドとルーツ（純血ルール）
         const uniqueBloods = new Set([c.primaryBlood, c.secondaryBlood, c.tertiaryBlood].filter(Boolean));
         const uniqueRoots  = new Set([c.primaryRoot,  c.secondaryRoot,  c.tertiaryRoot ].filter(Boolean));
-
         uniqueBloods.forEach(b => { bloodCounts[b] = (bloodCounts[b] || 0) + 1; });
         uniqueRoots.forEach(r => { rootCounts[r]   = (rootCounts[r]   || 0) + 1; });
 
-        // アーツ（自動除く、取得人数ベース）
         const d = c.sheetData || {};
         const arts = d.arts || [];
         const uniqueArts = new Set();
@@ -278,134 +474,6 @@ function renderRankings(chars) {
     renderList('blood-rankings', bloodCounts);
     renderList('root-rankings', rootCounts);
     renderList('arts-rankings', artsCounts);
-}
-
-function renderAgeHistogram(chars) {
-    const buckets = [
-        { label: '0-9', min: 0, max: 9 },
-        { label: '10-19', min: 10, max: 19 },
-        { label: '20-29', min: 20, max: 29 },
-        { label: '30-39', min: 30, max: 39 },
-        { label: '40-49', min: 40, max: 49 },
-        { label: '50-59', min: 50, max: 59 },
-        { label: '60-69', min: 60, max: 69 },
-        { label: '70-79', min: 70, max: 79 },
-        { label: '80-89', min: 80, max: 89 },
-        { label: '90-99', min: 90, max: 99 },
-        { label: '100-499', min: 100, max: 499 },
-        { label: '500-999', min: 500, max: 999 },
-        { label: '1000-9999', min: 1000, max: 9999 },
-        { label: '10000+', min: 10000, max: Infinity },
-        { label: '年齢不詳', isUnknown: true }
-    ];
-
-    const counts = buckets.map(() => 0);
-
-    chars.forEach(c => {
-        const ageVal = getProfileValue(c, 'char-age');
-        if (!ageVal) {
-            counts[counts.length - 1]++;
-            return;
-        }
-
-        const match = ageVal.match(/\d+/);
-        if (!match) {
-            counts[counts.length - 1]++;
-            return;
-        }
-
-        const age = parseInt(match[0]);
-        const bIndex = buckets.findIndex(b => !b.isUnknown && age >= b.min && age <= b.max);
-        if (bIndex !== -1) counts[bIndex]++;
-        else counts[counts.length - 1]++;
-    });
-
-    const container = document.getElementById('age-distribution');
-    container.innerHTML = '';
-    const maxCount = Math.max(...counts, 1);
-
-    buckets.forEach((b, i) => {
-        const count = counts[i];
-        const percent = (count / maxCount) * 100;
-        const row = document.createElement('div');
-        row.className = 'histogram-row';
-        row.innerHTML = `
-            <div class="histogram-label">${b.label}</div>
-            <div class="histogram-bar-wrap">
-                <div class="histogram-bar" style="width: ${percent}%;"></div>
-            </div>
-            <div class="histogram-count">${count}</div>
-        `;
-        container.appendChild(row);
-    });
-}
-
-function renderGenderBandGraph(chars) {
-    const counts = { '男性': 0, '女性': 0, '両性': 0, 'なし': 0, '不明': 0 };
-    const colors = {
-        '男性': '#4fc3f7',
-        '女性': '#ff5277',
-        '両性': '#a855f7',
-        'なし': '#94a3b8',
-        '不明': '#565f89'
-    };
-
-    chars.forEach(c => {
-        const genVal = (getProfileValue(c, 'char-gender') || '').trim();
-        let normalized = '不明';
-
-        if (counts[genVal] !== undefined) {
-            normalized = genVal;
-        } else {
-            if (genVal.match(/[男オス雄♂]|男性/)) normalized = '男性';
-            else if (genVal.match(/[女メス雌♀]|女性/)) normalized = '女性';
-            else if (genVal.match(/両性/)) normalized = '両性';
-            else if (genVal.match(/無性別|無|なし/)) normalized = 'なし';
-            else if (genVal.match(/不詳|不明/)) normalized = '不明';
-        }
-
-        counts[normalized]++;
-    });
-
-    const container = document.getElementById('gender-distribution');
-    container.innerHTML = '';
-
-    const graph = document.createElement('div');
-    graph.className = 'band-graph';
-    
-    const total = chars.length;
-    Object.entries(counts).forEach(([name, count]) => {
-        if (count === 0) return;
-        const percent = (count / total) * 100;
-        const segment = document.createElement('div');
-        segment.className = 'band-segment';
-        segment.style.width = `${percent}%`;
-        segment.style.backgroundColor = colors[name];
-        segment.textContent = count >= (total * 0.1) ? `${name}(${count})` : ''; // ある程度広い幅の時だけテキスト表示
-        segment.title = `${name}: ${count}人 (${percent.toFixed(1)}%)`;
-        graph.appendChild(segment);
-    });
-
-    container.appendChild(graph);
-
-    // 凡例を追加
-    const legend = document.createElement('div');
-    legend.className = 'pie-legend';
-    legend.style.flexDirection = 'row';
-    legend.style.flexWrap = 'wrap';
-    legend.style.gap = '15px';
-    legend.style.marginTop = '15px';
-
-    Object.entries(counts).forEach(([name, count]) => {
-        const item = document.createElement('div');
-        item.className = 'legend-item';
-        item.innerHTML = `
-            <div class="legend-color" style="background:${colors[name]}"></div>
-            <span>${name}: ${count}</span>
-        `;
-        legend.appendChild(item);
-    });
-    container.appendChild(legend);
 }
 
 function getProfileValue(c, id) {
