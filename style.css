@@ -732,55 +732,52 @@ body.view-mode .stat-trigger {
     overflow: hidden;
 }
 
-/* Line Graph (Age) */
-.line-graph-container {
+/* Horizontal Bar Chart (Age) */
+.bar-chart-container {
     width: 100%;
-    height: 300px;
-    position: relative;
-    margin-top: 20px;
-    background: rgba(255,255,255,0.02);
-    border-radius: 8px;
+    padding: 10px 0;
+}
+.bar-chart-row {
+    display: flex;
+    align-items: center;
+    margin-bottom: 12px;
+    gap: 15px;
+}
+.bar-chart-label {
+    width: 60px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--text-muted);
+    text-align: right;
+}
+.bar-chart-track {
+    flex: 1;
+    height: 14px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 7px;
     overflow: hidden;
+    position: relative;
 }
-.line-graph-svg {
-    display: block;
-    width: 100%;
+[data-theme="light"] .bar-chart-track {
+    background: rgba(0, 0, 0, 0.05);
+}
+.bar-chart-fill {
     height: 100%;
-    overflow: visible;
+    background: linear-gradient(90deg, var(--primary-color), #ff8a80);
+    border-radius: 7px;
+    width: 0;
+    transition: width 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 0 0 10px rgba(255, 82, 119, 0.3);
 }
-.line-graph-point {
-    fill: var(--primary-color);
-    stroke: var(--bg-color);
-    stroke-width: 2px;
-    transition: r 0.2s;
-}
-.line-graph-point:hover {
-    r: 6;
-}
-.line-graph-line {
-    fill: none;
-    stroke: var(--primary-color);
-    stroke-width: 3px;
-    stroke-linecap: round;
-    stroke-linejoin: round;
-    filter: drop-shadow(0 2px 4px rgba(255, 82, 119, 0.4));
-}
-.line-graph-area {
-    fill: rgba(255, 82, 119, 0.1);
-}
-.line-graph-axis {
-    stroke: var(--border-color);
-    stroke-width: 1px;
-}
-.line-graph-text {
-    font-size: 10px;
-    fill: var(--text-muted);
-}
-.line-graph-value {
-    font-size: 12px;
+.bar-chart-count {
+    width: 40px;
+    font-size: 0.9rem;
     font-weight: bold;
-    fill: var(--text-color);
-    text-anchor: middle;
+    color: var(--primary-color);
+}
+.bar-chart-row:hover .bar-chart-fill {
+    filter: brightness(1.2);
+    box-shadow: 0 0 15px rgba(255, 82, 119, 0.5);
 }
 
 /* Redesigned Card Grid and Panels */

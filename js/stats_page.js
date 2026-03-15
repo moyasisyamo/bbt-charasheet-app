@@ -86,14 +86,14 @@ function renderStats(chars) {
     }
 
     // 順序通りに描画
-    renderAgeLineGraph(chars);
+    renderAgeBarChart(chars);
     renderGenderBandGraph(chars);
     renderStylePieChart(chars);
     renderRankings(chars);
     renderAbilityStats(chars);
 }
 
-function renderAgeLineGraph(chars) {
+function renderAgeBarChart(chars) {
     const buckets = [
         { label: '0s', min: 0, max: 9 },
         { label: '10s', min: 10, max: 19 },
@@ -128,111 +128,44 @@ function renderAgeLineGraph(chars) {
     const container = document.getElementById('age-distribution');
     if (!container) return;
     container.innerHTML = '';
-
-    // 幅を動的に取得。0ならフォールバック
-    const width = Math.max(container.clientWidth, 600);
-    const height = 250;
-    const padding = { top: 40, right: 40, bottom: 50, left: 50 };
-
-    const ns = 'http://www.w3.org/2000/svg';
-    const svg = document.createElementNS(ns, 'svg');
-    svg.setAttribute('viewBox', `0 0 ${width} ${height + 20}`);
-    svg.setAttribute('class', 'line-graph-svg');
-    svg.setAttribute('xmlns', ns);
+    
+    const wrapper = document.createElement('div');
+    wrapper.className = 'bar-chart-container';
 
     const maxVal = Math.max(...counts, 1);
-    const xStep = (width - padding.left - padding.right) / (buckets.length - 1);
-    
-    // 背景の補助線
-    const gridCount = 5;
-    for (let i = 0; i <= gridCount; i++) {
-        const val = Math.round((maxVal / gridCount) * i);
-        const y = padding.top + (height - padding.top - padding.bottom) * (1 - i / gridCount);
-        
-        const line = document.createElementNS(ns, 'line');
-        line.setAttribute('x1', padding.left);
-        line.setAttribute('y1', y);
-        line.setAttribute('x2', width - padding.right);
-        line.setAttribute('y2', y);
-        line.setAttribute('stroke', 'var(--border-color)');
-        line.setAttribute('stroke-dasharray', '4 2');
-        line.setAttribute('opacity', '0.2');
-        svg.appendChild(line);
 
-        // Y軸ラベル
-        const yText = document.createElementNS(ns, 'text');
-        yText.setAttribute('x', padding.left - 10);
-        yText.setAttribute('y', y + 4);
-        yText.setAttribute('text-anchor', 'end');
-        yText.setAttribute('class', 'line-graph-text');
-        yText.textContent = val;
-        svg.appendChild(yText);
-    }
+    buckets.forEach((b, i) => {
+        const count = counts[i];
+        const percent = (count / maxVal) * 100;
 
-    // グラフの点と線の座標計算
-    const points = counts.map((count, i) => {
-        const x = padding.left + i * xStep;
-        const y = padding.top + (height - padding.top - padding.bottom) * (1 - count / maxVal);
-        return { x, y, count, label: buckets[i].label };
+        const row = document.createElement('div');
+        row.className = 'bar-chart-row';
+        row.innerHTML = `
+            <div class="bar-chart-label">${b.label}</div>
+            <div class="bar-chart-track">
+                <div class="bar-chart-fill" style="width: 0%;" data-percent="${percent}"></div>
+            </div>
+            <div class="bar-chart-count">${count}</div>
+        `;
+        wrapper.appendChild(row);
     });
 
-    // エリア（塗りつぶし）
-    let areaPathStr = `M ${points[0].x} ${height - padding.bottom} `;
-    points.forEach(p => { areaPathStr += `L ${p.x} ${p.y} `; });
-    areaPathStr += `L ${points[points.length-1].x} ${height - padding.bottom} Z`;
-    const area = document.createElementNS(ns, 'path');
-    area.setAttribute('d', areaPathStr);
-    area.setAttribute('class', 'line-graph-area');
-    svg.appendChild(area);
+    container.appendChild(wrapper);
 
-    // 折れ線
-    let linePathStr = `M ${points[0].x} ${points[0].y} `;
-    for (let i = 1; i < points.length; i++) {
-        linePathStr += `L ${points[i].x} ${points[i].y} `;
-    }
-    const line = document.createElementNS(ns, 'path');
-    line.setAttribute('d', linePathStr);
-    line.setAttribute('class', 'line-graph-line');
-    svg.appendChild(line);
-
-    // 点とラベル
-    points.forEach((p, i) => {
-        // ドット
-        const dot = document.createElementNS(ns, 'circle');
-        dot.setAttribute('cx', p.x);
-        dot.setAttribute('cy', p.y);
-        dot.setAttribute('r', '5');
-        dot.setAttribute('class', 'line-graph-point');
-        svg.appendChild(dot);
-
-        // X軸ラベル
-        const text = document.createElementNS(ns, 'text');
-        text.setAttribute('x', p.x);
-        text.setAttribute('y', height - 15);
-        text.setAttribute('text-anchor', 'middle');
-        text.setAttribute('class', 'line-graph-text');
-        text.textContent = p.label;
-        svg.appendChild(text);
-
-        // 値ラベル（0より大きい時だけ）
-        if (p.count > 0) {
-            const valText = document.createElementNS(ns, 'text');
-            valText.setAttribute('x', p.x);
-            valText.setAttribute('y', p.y - 12);
-            valText.setAttribute('class', 'line-graph-value');
-            valText.textContent = p.count;
-            svg.appendChild(valText);
-        }
-    });
-
-    container.appendChild(svg);
+    // アニメーション用に遅延させて幅を設定
+    setTimeout(() => {
+        const fills = wrapper.querySelectorAll('.bar-chart-fill');
+        fills.forEach(f => {
+            f.style.width = f.getAttribute('data-percent') + '%';
+        });
+    }, 50);
     
     if (unknownCount > 0) {
         const unknownInfo = document.createElement('div');
         unknownInfo.style.textAlign = 'right';
         unknownInfo.style.fontSize = '0.8rem';
         unknownInfo.style.color = 'var(--text-muted)';
-        unknownInfo.style.padding = '5px 15px';
+        unknownInfo.style.padding = '10px 15px 0';
         unknownInfo.textContent = `※ 年齢不詳: ${unknownCount}人`;
         container.appendChild(unknownInfo);
     }
