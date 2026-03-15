@@ -246,21 +246,15 @@ function calculateStats() {
     let freeArtLvlPool = 5;
     if (pRootData && sRootData && pRootName !== sRootName && pRootData['ブラッド名'] === sRootData['ブラッド名']) freeArtLvlPool = 3;
 
-    let isNextCopied = false;
     acquiredArts.forEach(a => {
         const root  = a._rt || a['ルーツ'];
         const type  = a['種別'] || '';
         let   lvl   = parseInt(a._currentLevel); if (isNaN(lvl)) lvl = 1;
         const extra = Math.max(0, lvl - 1);
-        const isCopy   = type.includes('コピー');
-        const isCopied = isNextCopied;
 
-        if (!isCopied) {
-            if      (type.includes('自動'))                          artsXP += extra * 5;
-            else if (type.includes('選択') && !usedSelectRoots[root]) { usedSelectRoots[root] = true; artsXP += extra * 5; }
-            else    rawArtLevels += lvl;
-        }
-        isNextCopied = isCopy;
+        if      (type.includes('自動'))                          artsXP += extra * 5;
+        else if (type.includes('選択') && !usedSelectRoots[root]) { usedSelectRoots[root] = true; artsXP += extra * 5; }
+        else    rawArtLevels += lvl;
     });
     artsXP += Math.max(0, rawArtLevels - freeArtLvlPool) * 5;
 
