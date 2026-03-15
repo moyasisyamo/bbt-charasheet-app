@@ -14,7 +14,7 @@
         .lobby-title span { font-size:1rem; }
         .lobby-controls { display:flex; gap:12px; align-items:center; }
 
-        .filter-bar { padding:12px 24px; display:flex; gap:10px; align-items:center; flex-wrap:wrap; border-bottom:1px solid var(--border-color); background:var(--panel-bg); margin-top: 10px; border-radius: 8px; margin-left: 24px; margin-right: 24px; }
+        .filter-bar { padding:12px 24px; display:flex; gap:10px; align-items:center; flex-wrap:wrap; border-bottom:1px solid var(--border-color); background:var(--panel-bg); }
         .filter-bar input[type="text"] { flex:1; min-width:200px; padding:7px 12px; border-radius:6px; border:1px solid var(--border-color); background:var(--input-bg); color:var(--text-color); font-size:0.9rem; }
         .active-filter-tag { display:inline-flex; align-items:center; gap:4px; background:rgba(255,51,102,0.15); border:1px solid #ff3366; color:#ff3366; border-radius:20px; padding:3px 10px; font-size:0.8rem; cursor:pointer; }
         .active-filter-tag:hover { background:rgba(255,51,102,0.3); }
@@ -104,8 +104,6 @@
                 <button id="delete-mode-btn" class="btn warning" style="padding:8px 12px; font-weight:bold;">🗑 削除モード切替</button>
             </div>
         </header>
-
-        <div class="filter-bar">
 
     <!-- Firebase未設定パネル（初期は非表示） -->
     <div id="firebase-setup-panel" class="firebase-setup-panel" style="display:none;">
