@@ -54,7 +54,7 @@ function renderArtsTable() {
             <td>${art['判定値'] || '-'}</td>
             <td><small>${art['対象'] || '-'}/${art['射程'] || '-'}</small></td>
             ${costCellHTML}
-            <td><small style="font-size:0.8rem;">${art['効果'] || '-'}</small></td>
+            <td><small style="font-size:0.9rem;">${art['効果'] || '-'}</small></td>
             <td>
                 <button class="btn move-up-btn edit-only"   style="padding:2px 5px;margin-bottom:2px;">↑</button>
                 <button class="btn move-down-btn edit-only" style="padding:2px 5px;margin-bottom:2px;">↓</button>
@@ -243,7 +243,7 @@ function initArtsDictionary() {
                 <td style="white-space:nowrap;"><small>${art['判定値'] || '-'}</small></td>
                 <td style="white-space:nowrap;"><small>${art['対象'] || '-'}/${art['射程'] || '-'}</small></td>
                 <td style="text-align:center;"><small>${art['コスト']}</small></td>
-                <td><small style="font-size:0.8rem; line-height:1.2; display:block;">${art['効果']}</small></td>
+                <td><small style="font-size:0.9rem; line-height:1.2; display:block;">${art['効果']}</small></td>
                 <td><button class="btn primary add-art-btn" style="padding:4px 8px;font-size:0.75rem;white-space:nowrap;">追加</button></td>
             `;
             row.querySelector('.add-art-btn').addEventListener('click', () => {

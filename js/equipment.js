@@ -94,7 +94,7 @@ function initEquipDictionary() {
                     <td style="text-align:center;"><small>${item['行動値']}</small></td>
                     <td style="text-align:center;"><small>${item['攻撃力']}</small></td>
                     <td style="text-align:center;"><small>${item['射程']}</small></td>
-                    <td><small style="font-size:0.8rem; line-height:1.2; display:block;">${item['効果']}</small></td>
+                    <td><small style="font-size:0.9rem; line-height:1.3; display:block;">${item['効果']}</small></td>
                     <td><button class="btn primary add-equip-btn" style="padding:4px 8px;font-size:0.75rem;white-space:nowrap;">追加</button></td>
                 `;
             } else if (currentDictType === 'armor') {
@@ -104,7 +104,7 @@ function initEquipDictionary() {
                     <td style="text-align:center;"><small>${item['ドッジ']}</small></td>
                     <td style="text-align:center;"><small>${item['行動値']}</small></td>
                     <td style="white-space:nowrap;"><small>G:${item['G値']||0}/A:${item['A値']||0}</small></td>
-                    <td><small style="font-size:0.8rem; line-height:1.2; display:block;">${item['効果']}</small></td>
+                    <td><small style="font-size:0.9rem; line-height:1.3; display:block;">${item['効果']}</small></td>
                     <td><button class="btn primary add-equip-btn" style="padding:4px 8px;font-size:0.75rem;white-space:nowrap;">追加</button></td>
                 `;
             } else if (currentDictType === 'items') {
@@ -114,7 +114,7 @@ function initEquipDictionary() {
                     <td><small>${item['種別']}</small></td>
                     <td style="white-space:nowrap;"><small>${item['タイミング']}</small></td>
                     <td style="white-space:nowrap;"><small>${item['対象']}/${item['射程']}</small></td>
-                    <td><small style="font-size:0.8rem; line-height:1.2; display:block;">${item['効果']}</small></td>
+                    <td><small style="font-size:0.9rem; line-height:1.3; display:block;">${item['効果']}</small></td>
                     <td><button class="btn primary add-equip-btn" style="padding:4px 8px;font-size:0.75rem;white-space:nowrap;">追加</button></td>
                 `;
             }

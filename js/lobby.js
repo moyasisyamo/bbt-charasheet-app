@@ -28,6 +28,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         themeBtn.textContent = next === 'dark' ? '☀️ ライトモード' : '🌙 ダークモード';
     });
 
+    // 統計ページ
+    document.getElementById('stats-page-btn').addEventListener('click', () => {
+        window.location.href = 'stats.html';
+    });
+
     // 新規キャラクター
     document.getElementById('new-char-btn').addEventListener('click', () => {
         window.location.href = 'sheet.html';
