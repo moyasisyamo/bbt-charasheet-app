@@ -8,11 +8,14 @@
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
 </head>
 <body>
+    <!-- 固定ナビゲーションボタン -->
+    <a href="index.html" class="nav-btn nav-btn-left" title="ホーム" id="back-to-lobby">🏠</a>
+    <button id="theme-toggle" class="nav-btn nav-btn-right" title="テーマ切り替え">🌓</button>
+
     <div class="app-container">
         <header style="border-bottom: none; margin-bottom: 20px;">
             <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
                 <div style="display:flex; flex-direction:column; gap:6px;">
-                    <a href="index.html" style="color:var(--text-muted); font-size:0.85rem; text-decoration:none;" id="back-to-lobby">← キャラクター一覧に戻る</a>
                     <h1 style="color: #ff3366; text-shadow: 1px 1px 2px #000; font-size: 1.8rem; margin: 0; line-height: 1.2;">BEASTBIND TRINITY<br><span style="font-size: 1.2rem;">キャラクターシート</span></h1>
                 </div>
                 <div class="header-controls" style="display: flex; gap: 15px; align-items: center;">
@@ -27,7 +30,6 @@
                     <button id="toggle-edit-mode-btn" class="btn warning" style="background:#f59e0b; color:#fff; border:none; padding:8px 12px; border-radius:4px; font-weight:bold; cursor:pointer;">🔒 閲覧モード<br><span style="font-size:0.75rem;">(編集ロック)</span></button>
                     <button id="save-firebase-btn" class="btn primary edit-only" style="background:#4caf50; color:#fff; border:none; padding:8px 12px; border-radius:4px; font-weight:bold; cursor:pointer;">☁ 保存<br><span style="font-size:0.75rem;">(クラウド)</span></button>
                     <button id="export-cocofolia-btn" class="btn primary" style="background:#ff5277; color:#fff; border:none; padding:8px 12px; border-radius:4px; font-weight:bold; cursor:pointer;">🎲 コマ出力<br><span style="font-size:0.75rem;">(ココフォリア)</span></button>
-                    <button id="theme-toggle" class="btn" style="background:#444b6e; color:#fff; border:none; padding:8px 12px; border-radius:4px; font-weight:bold; cursor:pointer;">🌙 ダークモード</button>
                 </div>
             </div>
         </header>
@@ -726,7 +728,6 @@
 [data-theme="light"] .vmo-btn { background: rgba(0,0,0,0.07); color: #223; border-color: rgba(0,0,0,0.15); }
 [data-theme="light"] .vmo-btn:hover { background: rgba(0,0,0,0.14); color: #000; }
 .vmo-beast-on  { background: rgba(200,60,60,0.3) !important; border-color: #cc4455 !important; color: #ff8899 !important; }
-.vmo-beast-off { }
 
 /* メインボディ */
 .vmo-body {
