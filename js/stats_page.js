@@ -4,6 +4,11 @@
  */
 
 let allChars = [];
+let lastAggregatedData = {
+    blood: {},
+    root: {},
+    arts: {}
+};
 
 document.addEventListener('DOMContentLoaded', async () => {
     // テーマ初期化
@@ -19,6 +24,16 @@ document.addEventListener('DOMContentLoaded', async () => {
             document.documentElement.setAttribute('data-theme', next);
             localStorage.setItem('bbt-theme', next);
         });
+    }
+
+    // モーダル閉じるイベント
+    const modal = document.getElementById('ranking-modal');
+    const closeBtn = document.getElementById('modal-close');
+    if (modal && closeBtn) {
+        closeBtn.onclick = () => modal.style.display = 'none';
+        modal.onclick = (e) => {
+            if (e.target === modal) modal.style.display = 'none';
+        };
     }
 
     // Firebase 初期化
@@ -392,14 +407,20 @@ function renderRankings(chars) {
         uniqueArts.forEach(a => { artsCounts[a] = (artsCounts[a] || 0) + 1; });
     });
 
-    const renderList = (containerId, counts) => {
+    // 次回ポップアップ用に記録
+    lastAggregatedData.blood = bloodCounts;
+    lastAggregatedData.root = rootCounts;
+    lastAggregatedData.arts = artsCounts;
+
+    const renderList = (containerId, counts, typeName) => {
         const div = document.getElementById(containerId);
         if (!div) return;
         div.innerHTML = '';
-        const sorted = Object.entries(counts)
-            .filter(([name]) => name !== 'なし' && name !== '-' && name !== '不明')
-            .sort((a, b) => b[1] - a[1])
-            .slice(0, 5);
+        
+        const validEntries = Object.entries(counts)
+            .filter(([name]) => name !== 'なし' && name !== '-' && name !== '不明');
+        
+        const sorted = [...validEntries].sort((a, b) => b[1] - a[1]).slice(0, 5);
 
         if (sorted.length === 0) {
             div.innerHTML = '<p style="padding:10px;color:var(--text-muted);">データなし</p>';
@@ -416,11 +437,59 @@ function renderRankings(chars) {
             `;
             div.appendChild(item);
         });
+
+        if (validEntries.length > 5) {
+            const btnWrap = document.createElement('div');
+            btnWrap.style.textAlign = 'right';
+            btnWrap.style.marginTop = '10px';
+            const btn = document.createElement('button');
+            btn.className = 'btn';
+            btn.style.fontSize = '0.75rem';
+            btn.style.padding = '4px 8px';
+            btn.textContent = 'すべて見る ≫';
+            btn.onclick = () => showRankingModal(typeName, counts);
+            btnWrap.appendChild(btn);
+            div.appendChild(btnWrap);
+        }
     };
 
-    renderList('blood-rankings', bloodCounts);
-    renderList('root-rankings', rootCounts);
-    renderList('arts-rankings', artsCounts);
+    renderList('blood-rankings', bloodCounts, '人気ブラッド');
+    renderList('root-rankings', rootCounts, '人気ルーツ');
+    renderList('arts-rankings', artsCounts, '人気アーツ');
+}
+
+/** ランキング全件表示モーダル */
+function showRankingModal(title, counts) {
+    const modal = document.getElementById('ranking-modal');
+    const titleEl = document.getElementById('modal-title');
+    const listEl = document.getElementById('modal-ranking-list');
+    
+    if (!modal || !titleEl || !listEl) return;
+
+    titleEl.textContent = `${title} 全ランキング`;
+    listEl.innerHTML = '';
+
+    const sorted = Object.entries(counts)
+        .filter(([name]) => name !== 'なし' && name !== '-' && name !== '不明')
+        .sort((a, b) => b[1] - a[1]);
+
+    const wrapper = document.createElement('div');
+    wrapper.className = 'ranking-list';
+    
+    sorted.forEach(([name, count], i) => {
+        const item = document.createElement('div');
+        item.className = 'ranking-item';
+        item.style.padding = '12px';
+        item.innerHTML = `
+            <div class="ranking-rank">${i + 1}</div>
+            <div class="ranking-name" style="font-size: 1rem;">${escHtml(name)}</div>
+            <div class="ranking-count" style="font-size: 0.9rem;">${count}人</div>
+        `;
+        wrapper.appendChild(item);
+    });
+
+    listEl.appendChild(wrapper);
+    modal.style.display = 'flex';
 }
 
 function getProfileValue(c, id) {
