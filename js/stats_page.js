@@ -42,7 +42,7 @@ function renderStats(chars) {
     // 2. 能力値・戦闘値の集計（平均と最大値）
     renderAbilityStats(chars);
 
-    // 3. ブラッド/ルーツランキング
+    // 3. 各種ランキング（ブラッド、ルーツ、アーツ）
     renderRankings(chars);
 
     // 4. 年齢・性別分布
@@ -183,21 +183,35 @@ function renderAbilityStats(chars) {
 function renderRankings(chars) {
     const bloodCounts = {};
     const rootCounts  = {};
+    const artsCounts  = {};
 
     chars.forEach(c => {
-        // 純血ルール: プライマリとセカンダリが同じなら1回。
+        // ブラッドとルーツ（純血ルール）
         const uniqueBloods = new Set([c.primaryBlood, c.secondaryBlood, c.tertiaryBlood].filter(Boolean));
         const uniqueRoots  = new Set([c.primaryRoot,  c.secondaryRoot,  c.tertiaryRoot ].filter(Boolean));
 
         uniqueBloods.forEach(b => { bloodCounts[b] = (bloodCounts[b] || 0) + 1; });
         uniqueRoots.forEach(r => { rootCounts[r]   = (rootCounts[r]   || 0) + 1; });
+
+        // アーツ（自動除く、取得人数ベース）
+        const d = c.sheetData || {};
+        const arts = d.arts || [];
+        const uniqueArts = new Set();
+        arts.forEach(a => {
+            const name = a['アーツ名'];
+            const type = a['種別'] || '';
+            if (name && !type.includes('自動')) {
+                uniqueArts.add(name);
+            }
+        });
+        uniqueArts.forEach(a => { artsCounts[a] = (artsCounts[a] || 0) + 1; });
     });
 
     const renderList = (containerId, counts) => {
         const div = document.getElementById(containerId);
         div.innerHTML = '';
         const sorted = Object.entries(counts)
-            .filter(([name]) => name !== 'なし' && name !== '-')
+            .filter(([name]) => name !== 'なし' && name !== '-' && name !== '不明')
             .sort((a, b) => b[1] - a[1])
             .slice(0, 5);
 
@@ -220,6 +234,7 @@ function renderRankings(chars) {
 
     renderList('blood-rankings', bloodCounts);
     renderList('root-rankings', rootCounts);
+    renderList('arts-rankings', artsCounts);
 }
 
 function renderAgeHistogram(chars) {
@@ -283,24 +298,30 @@ function renderAgeHistogram(chars) {
 }
 
 function renderGenderBandGraph(chars) {
-    const counts = { '男性': 0, '女性': 0, '両性': 0, '無性別': 0, '性別不詳': 0 };
+    const counts = { '男性': 0, '女性': 0, '両性': 0, 'なし': 0, '不明': 0 };
     const colors = {
         '男性': '#4fc3f7',
         '女性': '#ff5277',
         '両性': '#a855f7',
-        '無性別': '#94a3b8',
-        '性別不詳': '#565f89'
+        'なし': '#94a3b8',
+        '不明': '#565f89'
     };
 
     chars.forEach(c => {
         const genVal = (getProfileValue(c, 'char-gender') || '').trim();
-        let normalized = '性別不詳';
+        let normalized = '不明';
 
-        if (genVal.match(/[男オス雄♂]|男性/)) normalized = '男性';
-        else if (genVal.match(/[女メス雌♀]|女性/)) normalized = '女性';
-        else if (genVal.match(/両性/)) normalized = '両性';
-        else if (genVal.match(/無性別|無|なし/)) normalized = '無性別';
-        else if (genVal.match(/不詳|不明/)) normalized = '性別不詳';
+        // 新しい選択肢に完全一致する場合
+        if (counts[genVal] !== undefined) {
+            normalized = genVal;
+        } else {
+            // 旧データの後方互換性ロジック
+            if (genVal.match(/[男オス雄♂]|男性/)) normalized = '男性';
+            else if (genVal.match(/[女メス雌♀]|女性/)) normalized = '女性';
+            else if (genVal.match(/両性/)) normalized = '両性';
+            else if (genVal.match(/無性別|無|なし/)) normalized = 'なし';
+            else if (genVal.match(/不詳|不明/)) normalized = '不明';
+        }
 
         counts[normalized]++;
     });
