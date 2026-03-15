@@ -893,18 +893,6 @@ function buildAndShowViewOverlay() {
         loreSection.style.display = 'none';
     }
 
-    // -- テーマボタン設定 --
-    var vmoThemeBtn = g('vmo-theme-btn');
-    if (vmoThemeBtn) {
-        var curTheme = document.documentElement.getAttribute('data-theme') || 'dark';
-        vmoThemeBtn.textContent = curTheme === 'dark' ? '\u2600\ufe0f ライト' : '\ud83c\udf19 ダーク';
-        vmoThemeBtn.onclick = function() {
-            var mainThemeBtn = g('theme-toggle');
-            if (mainThemeBtn) mainThemeBtn.click();
-            var next = document.documentElement.getAttribute('data-theme') || 'dark';
-            vmoThemeBtn.textContent = next === 'dark' ? '\u2600\ufe0f ライト' : '\ud83c\udf19 ダーク';
-        };
-    }
 
     // -- 編集ボタン（パスワード認証）--
     var vmoEditBtn = g('vmo-edit-btn');
