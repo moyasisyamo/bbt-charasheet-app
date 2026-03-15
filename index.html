@@ -88,23 +88,25 @@
     </style>
 </head>
 <body>
-<div class="app-container" style="padding:0;">
+    <div class="app-container" style="padding:0;">
 
-    <!-- 固定ナビゲーションボタン -->
-    <a href="index.html" class="nav-btn nav-btn-left" title="ホーム">🏠</a>
-    <button id="theme-toggle" class="nav-btn nav-btn-right" title="テーマ切り替え">🌓</button>
+        <!-- ヘッダー -->
+        <header class="lobby-header">
+            <div class="title-group">
+                <a href="index.html" class="home-link">BEASTBIND TRINITY キャラクター管理</a>
+                <div class="lobby-title">
+                    <h1>BEASTBIND TRINITY<br><span>キャラクター一覧</span></h1>
+                </div>
+            </div>
+            <div class="lobby-controls">
+                <button id="new-char-btn" class="btn primary" style="padding:8px 12px; font-weight:bold;">✨ 新規作成</button>
+                <button id="stats-page-btn" class="btn exception-btn" style="padding:8px 12px; font-weight:bold;">📊 統計</button>
+                <button id="theme-toggle" class="btn" style="padding:8px 12px; font-weight:bold;">🌙 ダークモード</button>
+                <button id="delete-mode-btn" class="btn warning" style="padding:8px 12px; font-weight:bold;">🗑 削除モード切替</button>
+            </div>
+        </header>
 
-    <!-- ヘッダー -->
-    <header class="lobby-header">
-        <div class="lobby-title">
-            <h1>BEASTBIND TRINITY<br><span>キャラクター一覧</span></h1>
-        </div>
-        <div class="lobby-controls">
-            <button id="new-char-btn" class="btn primary" style="padding:8px 12px; font-weight:bold;">✨ 新規作成</button>
-            <button id="stats-page-btn" class="btn exception-btn" style="padding:8px 12px; font-weight:bold;">📊 統計</button>
-            <button id="delete-mode-btn" class="btn warning" style="padding:8px 12px; font-weight:bold;">🗑 削除モード切替</button>
-        </div>
-    </header>
+        <div class="filter-bar">
 
     <!-- Firebase未設定パネル（初期は非表示） -->
     <div id="firebase-setup-panel" class="firebase-setup-panel" style="display:none;">

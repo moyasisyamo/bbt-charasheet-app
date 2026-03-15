@@ -59,8 +59,24 @@ header {
     margin-bottom: 30px;
     padding-bottom: 10px;
     border-bottom: 2px solid var(--border-color);
-    position: relative;
-    min-height: 80px;
+}
+
+.title-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.home-link {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.home-link:hover {
+    color: var(--primary-color);
+    text-decoration: underline;
 }
 
 h1 {
@@ -123,36 +139,6 @@ input:focus, select:focus {
     outline: none;
     border-color: var(--primary-color);
 }
-
-/* Global Navigation Buttons */
-.nav-btn {
-    position: fixed;
-    top: 20px;
-    z-index: 1000;
-    width: 44px;
-    height: 44px;
-    border-radius: 50%;
-    background: var(--btn-bg);
-    color: var(--btn-text);
-    border: 1px solid var(--border-color);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-    font-size: 1.2rem;
-    text-decoration: none;
-}
-.nav-btn:hover {
-    background: var(--primary-color);
-    color: white;
-    transform: scale(1.1);
-    box-shadow: 0 6px 15px rgba(122, 162, 247, 0.4);
-    border-color: var(--primary-color);
-}
-.nav-btn-left { left: 20px; }
-.nav-btn-right { right: 20px; }
 
 /* Existing components */
 .btn {

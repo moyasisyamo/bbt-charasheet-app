@@ -42,7 +42,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // ---- グローバル状態 ----
         window.charData    = { mods: {}, image: null, image2: null, faceIcon: null };
         window.isBeastMode = false;
-        window.isEditMode  = true;
+        window.isEditMode  = false;
         window.currentCharId = new URLSearchParams(location.search).get('id') || null;
 
         // ---- テーマ切り替え ----
@@ -50,12 +50,16 @@ document.addEventListener('DOMContentLoaded', () => {
         // 初期テーマを localStorage から復元
         const savedTheme = localStorage.getItem('bbt-theme') || 'dark';
         document.documentElement.setAttribute('data-theme', savedTheme);
-        themeBtn.addEventListener('click', () => {
-            const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-            const next = isDark ? 'light' : 'dark';
-            document.documentElement.setAttribute('data-theme', next);
-            localStorage.setItem('bbt-theme', next);
-        });
+        if (themeBtn) {
+            themeBtn.textContent = savedTheme === 'dark' ? '☀️ ライトモード' : '🌙 ダークモード';
+            themeBtn.addEventListener('click', () => {
+                const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+                const next = isDark ? 'light' : 'dark';
+                document.documentElement.setAttribute('data-theme', next);
+                localStorage.setItem('bbt-theme', next);
+                themeBtn.textContent = next === 'dark' ? '☀️ ライトモード' : '🌙 ダークモード';
+            });
+        }
 
         // ---- 編集モード切り替え ----
         const toggleEditBtn   = document.getElementById('toggle-edit-mode-btn');
@@ -111,6 +115,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 buildAndShowViewOverlay();
             }
         };
+
+        // 初期状態で閲覧モードを適用（新規作成時は編集モード）
+        setEditMode(window.currentCharId ? false : true);
 
         toggleEditBtn.addEventListener('click', () => {
             if (window.isEditMode) {

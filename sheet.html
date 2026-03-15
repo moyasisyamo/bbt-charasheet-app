@@ -8,17 +8,15 @@
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <!-- 固定ナビゲーションボタン -->
-    <a href="index.html" class="nav-btn nav-btn-left" title="ホーム" id="back-to-lobby">🏠</a>
-    <button id="theme-toggle" class="nav-btn nav-btn-right" title="テーマ切り替え">🌓</button>
-
     <div class="app-container">
         <header style="border-bottom: none; margin-bottom: 20px;">
             <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-                <div style="display:flex; flex-direction:column; gap:6px;">
+                <div class="title-group">
+                    <a href="index.html" class="home-link">← キャラクター一覧に戻る</a>
                     <h1 style="color: #ff3366; text-shadow: 1px 1px 2px #000; font-size: 1.8rem; margin: 0; line-height: 1.2;">BEASTBIND TRINITY<br><span style="font-size: 1.2rem;">キャラクターシート</span></h1>
                 </div>
                 <div class="header-controls" style="display: flex; gap: 15px; align-items: center;">
+                    <button id="theme-toggle" class="btn" style="background:#444b6e; color:#fff; border:none; padding:8px 12px; border-radius:4px; font-weight:bold; cursor:pointer;">🌙 ダークモード</button>
                     <div style="display: flex; align-items: center; gap: 5px;">
                         <span style="font-size: 0.9rem;">編集用パスワード</span>
                         <input type="password" id="char-password" class="edit-only" style="width: 120px; padding: 5px; background: var(--input-bg); border: 1px solid var(--border-color); color: var(--text-color);">
