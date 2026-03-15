@@ -57,7 +57,7 @@ header {
     justify-content: space-between;
     align-items: center;
     margin-bottom: 30px;
-    padding: 0 60px 10px 60px; /* Space for fixed nav buttons */
+    padding-bottom: 10px;
     border-bottom: 2px solid var(--border-color);
     position: relative;
     min-height: 80px;

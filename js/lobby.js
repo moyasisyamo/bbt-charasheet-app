@@ -20,12 +20,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     const html     = document.documentElement;
     const saved    = localStorage.getItem('bbt-theme') || 'dark';
     html.setAttribute('data-theme', saved);
-    themeBtn.textContent = saved === 'dark' ? '☀️ ライトモード' : '🌙 ダークモード';
     themeBtn.addEventListener('click', () => {
         const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
         html.setAttribute('data-theme', next);
         localStorage.setItem('bbt-theme', next);
-        themeBtn.textContent = next === 'dark' ? '☀️ ライトモード' : '🌙 ダークモード';
     });
 
     // 統計ページ

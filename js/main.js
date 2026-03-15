@@ -50,13 +50,11 @@ document.addEventListener('DOMContentLoaded', () => {
         // 初期テーマを localStorage から復元
         const savedTheme = localStorage.getItem('bbt-theme') || 'dark';
         document.documentElement.setAttribute('data-theme', savedTheme);
-        themeBtn.textContent = savedTheme === 'dark' ? '☀️ ライトモード' : '🌙 ダークモード';
         themeBtn.addEventListener('click', () => {
             const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
             const next = isDark ? 'light' : 'dark';
             document.documentElement.setAttribute('data-theme', next);
             localStorage.setItem('bbt-theme', next);
-            themeBtn.textContent = next === 'dark' ? '☀️ ライトモード' : '🌙 ダークモード';
         });
 
         // ---- 編集モード切り替え ----
