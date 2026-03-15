@@ -49,16 +49,19 @@ document.addEventListener('DOMContentLoaded', async () => {
         allChars = await window.bbFirebase.loadAll();
         initFilter(allChars);
 
-        // 魔獣化ステータスカウント切り替えボタン
-        const beastToggleBtn = document.getElementById('toggle-beast-stats');
-        if (beastToggleBtn) {
-            beastToggleBtn.addEventListener('click', () => {
+        // 魔獣化ステータスカウント切り替えボタン（複数対応・同期）
+        const beastToggleBtns = document.querySelectorAll('.beast-toggle-stats');
+        beastToggleBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
                 isBeastStatsMode = !isBeastStatsMode;
-                beastToggleBtn.textContent = isBeastStatsMode ? '🐾 魔獣モード' : '🐾 通常モード';
-                beastToggleBtn.classList.toggle('btn-primary', isBeastStatsMode);
+                // すべてのボタンの表示を同期
+                beastToggleBtns.forEach(b => {
+                    b.textContent = isBeastStatsMode ? '🐾 魔獣モード' : '🐾 通常モード';
+                    b.classList.toggle('btn-primary', isBeastStatsMode);
+                });
                 renderStats(allChars);
             });
-        }
+        });
         
         // レイアウト確定を待ってからレンダリング
         setTimeout(() => {
