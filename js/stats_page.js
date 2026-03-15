@@ -3,10 +3,23 @@
  * キャラクター全員のデータを取得し、統計を表示する。
  */
 
+let allChars = [];
+
 document.addEventListener('DOMContentLoaded', async () => {
-    // テーマ同期
-    const saved = localStorage.getItem('bbt-theme') || 'dark';
-    document.documentElement.setAttribute('data-theme', saved);
+    // テーマ初期化
+    const savedTheme = localStorage.getItem('bbt-theme') || 'dark';
+    document.documentElement.setAttribute('data-theme', savedTheme);
+
+    // テーマ切り替えイベント
+    const themeBtn = document.getElementById('theme-toggle');
+    if (themeBtn) {
+        themeBtn.addEventListener('click', () => {
+            const current = document.documentElement.getAttribute('data-theme');
+            const next = current === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', next);
+            localStorage.setItem('bbt-theme', next);
+        });
+    }
 
     // Firebase 初期化
     const fbReady = window.bbFirebase.init();
@@ -16,12 +29,43 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     try {
-        const allChars = await window.bbFirebase.loadAll();
+        allChars = await window.bbFirebase.loadAll();
+        initFilter(allChars);
         renderStats(allChars);
     } catch (e) {
         document.getElementById('loading-msg').innerHTML = `<p style="color:red;">エラー: ${e.message}</p>`;
     }
 });
+
+/** フィルターの初期化（プレイヤー一覧の生成） */
+function initFilter(chars) {
+    const filter = document.getElementById('player-filter');
+    if (!filter) return;
+
+    const players = new Set();
+    chars.forEach(c => {
+        if (c.playerName) players.add(c.playerName.trim());
+    });
+
+    const sortedPlayers = Array.from(players).sort();
+    sortedPlayers.forEach(p => {
+        if (!p) return;
+        const opt = document.createElement('option');
+        opt.value = p;
+        opt.textContent = p;
+        filter.appendChild(opt);
+    });
+
+    filter.addEventListener('change', () => {
+        const val = filter.value;
+        if (val === 'all') {
+            renderStats(allChars);
+        } else {
+            const filtered = allChars.filter(c => c.playerName && c.playerName.trim() === val);
+            renderStats(filtered);
+        }
+    });
+}
 
 function renderStats(chars) {
     const loading = document.getElementById('loading-msg');
@@ -29,23 +73,18 @@ function renderStats(chars) {
     loading.style.display = 'none';
     content.style.display = 'block';
 
+    const totalMsg = document.getElementById('total-chars-msg');
+    if (totalMsg) totalMsg.textContent = `登録キャラクター数: ${chars.length} 人`;
+
     if (chars.length === 0) {
-        content.innerHTML = '<div class="panel">表示するキャラクターデータがありません。</div>';
+        content.innerHTML = '<div class="panel" style="text-align:center; padding:40px;">表示するキャラクターデータがありません。</div>';
         return;
     }
 
-    document.getElementById('total-chars-msg').textContent = `登録キャラクター数: ${chars.length} 人`;
-
-    // 1. スタイル分布（円グラフ）
+    // 各セクションの描画（引数の chars を使用することでフィルタリングに対応）
     renderStylePieChart(chars);
-
-    // 2. 能力値・戦闘値の集計（平均と最大値）
     renderAbilityStats(chars);
-
-    // 3. 各種ランキング（ブラッド、ルーツ、アーツ）
     renderRankings(chars);
-
-    // 4. 年齢・性別分布
     renderAgeHistogram(chars);
     renderGenderBandGraph(chars);
 }
@@ -77,7 +116,11 @@ function renderStylePieChart(chars) {
     
     const chart = document.createElement('div');
     chart.className = 'pie-chart';
-    chart.style.background = `conic-gradient(${gradientParts.join(', ')})`;
+    if (gradientParts.length > 0) {
+        chart.style.background = `conic-gradient(${gradientParts.join(', ')})`;
+    } else {
+        chart.style.background = 'var(--btn-bg)';
+    }
     container.appendChild(chart);
 
     const legend = document.createElement('div');
@@ -311,11 +354,9 @@ function renderGenderBandGraph(chars) {
         const genVal = (getProfileValue(c, 'char-gender') || '').trim();
         let normalized = '不明';
 
-        // 新しい選択肢に完全一致する場合
         if (counts[genVal] !== undefined) {
             normalized = genVal;
         } else {
-            // 旧データの後方互換性ロジック
             if (genVal.match(/[男オス雄♂]|男性/)) normalized = '男性';
             else if (genVal.match(/[女メス雌♀]|女性/)) normalized = '女性';
             else if (genVal.match(/両性/)) normalized = '両性';
@@ -340,7 +381,7 @@ function renderGenderBandGraph(chars) {
         segment.className = 'band-segment';
         segment.style.width = `${percent}%`;
         segment.style.backgroundColor = colors[name];
-        segment.textContent = count >= 1 ? `${name}(${count})` : '';
+        segment.textContent = count >= (total * 0.1) ? `${name}(${count})` : ''; // ある程度広い幅の時だけテキスト表示
         segment.title = `${name}: ${count}人 (${percent.toFixed(1)}%)`;
         graph.appendChild(segment);
     });
