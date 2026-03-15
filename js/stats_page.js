@@ -10,6 +10,8 @@ let lastAggregatedData = {
     arts: {}
 };
 
+let isBeastStatsMode = false;
+
 document.addEventListener('DOMContentLoaded', async () => {
     // テーマ初期化
     const savedTheme = localStorage.getItem('bbt-theme') || 'dark';
@@ -46,6 +48,17 @@ document.addEventListener('DOMContentLoaded', async () => {
     try {
         allChars = await window.bbFirebase.loadAll();
         initFilter(allChars);
+
+        // 魔獣化ステータスカウント切り替えボタン
+        const beastToggleBtn = document.getElementById('toggle-beast-stats');
+        if (beastToggleBtn) {
+            beastToggleBtn.addEventListener('click', () => {
+                isBeastStatsMode = !isBeastStatsMode;
+                beastToggleBtn.textContent = isBeastStatsMode ? '🐾 魔獣モード' : '🐾 通常モード';
+                beastToggleBtn.classList.toggle('btn-primary', isBeastStatsMode);
+                renderStats(allChars);
+            });
+        }
         
         // レイアウト確定を待ってからレンダリング
         setTimeout(() => {
@@ -317,7 +330,15 @@ function renderAbilityStats(chars) {
     let validCount = 0;
     chars.forEach(c => {
         const d = c.sheetData || {};
-        const st = d.stats || {};
+        
+        // 魔獣化フラグに応じてデータソースを切り替え
+        let st = d.stats || {}; // fallback
+        if (isBeastStatsMode && d.statsBeast) {
+            st = d.statsBeast;
+        } else if (!isBeastStatsMode && d.statsNormal) {
+            st = d.statsNormal;
+        }
+
         if (st.physical !== undefined) {
             validCount++;
             Object.keys(abilityLabels).forEach(k => {
