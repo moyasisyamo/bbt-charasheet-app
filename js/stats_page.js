@@ -86,29 +86,29 @@ function renderStats(chars) {
     }
 
     // 順序通りに描画
-    renderAgeBarChart(chars);
+    renderAgeVerticalBarChart(chars);
     renderGenderBandGraph(chars);
     renderStylePieChart(chars);
     renderRankings(chars);
     renderAbilityStats(chars);
 }
 
-function renderAgeBarChart(chars) {
+function renderAgeVerticalBarChart(chars) {
     const buckets = [
-        { label: '0s', min: 0, max: 9 },
-        { label: '10s', min: 10, max: 19 },
-        { label: '20s', min: 20, max: 29 },
-        { label: '30s', min: 30, max: 39 },
-        { label: '40s', min: 40, max: 49 },
-        { label: '50s', min: 50, max: 59 },
-        { label: '60s', min: 60, max: 69 },
-        { label: '70s', min: 70, max: 79 },
-        { label: '80s', min: 80, max: 89 },
-        { label: '90s', min: 90, max: 99 },
-        { label: '100s', min: 100, max: 499 },
-        { label: '500s', min: 500, max: 999 },
-        { label: '1000s', min: 1000, max: 9999 },
-        { label: 'Over', min: 10000, max: Infinity }
+        { label: '0-9歳', min: 0, max: 9 },
+        { label: '10-19歳', min: 10, max: 19 },
+        { label: '20-29歳', min: 20, max: 29 },
+        { label: '30-39歳', min: 30, max: 39 },
+        { label: '40-49歳', min: 40, max: 49 },
+        { label: '50-59歳', min: 50, max: 59 },
+        { label: '60-69歳', min: 60, max: 69 },
+        { label: '70-79歳', min: 70, max: 79 },
+        { label: '80-89歳', min: 80, max: 89 },
+        { label: '90-99歳', min: 90, max: 99 },
+        { label: '100-499歳', min: 100, max: 499 },
+        { label: '500-999歳', min: 500, max: 999 },
+        { label: '1000-9999歳', min: 1000, max: 9999 },
+        { label: '10000歳-', min: 10000, max: Infinity }
     ];
 
     const counts = buckets.map(() => 0);
@@ -130,7 +130,7 @@ function renderAgeBarChart(chars) {
     container.innerHTML = '';
     
     const wrapper = document.createElement('div');
-    wrapper.className = 'bar-chart-container';
+    wrapper.className = 'bar-chart-v-container';
 
     const maxVal = Math.max(...counts, 1);
 
@@ -138,25 +138,23 @@ function renderAgeBarChart(chars) {
         const count = counts[i];
         const percent = (count / maxVal) * 100;
 
-        const row = document.createElement('div');
-        row.className = 'bar-chart-row';
-        row.innerHTML = `
-            <div class="bar-chart-label">${b.label}</div>
-            <div class="bar-chart-track">
-                <div class="bar-chart-fill" style="width: 0%;" data-percent="${percent}"></div>
-            </div>
-            <div class="bar-chart-count">${count}</div>
+        const col = document.createElement('div');
+        col.className = 'bar-chart-v-col';
+        col.innerHTML = `
+            <div class="bar-chart-v-count">${count > 0 ? count : ''}</div>
+            <div class="bar-chart-v-fill" style="height: 0%;" data-height="${percent}"></div>
+            <div class="bar-chart-v-label">${b.label}</div>
         `;
-        wrapper.appendChild(row);
+        wrapper.appendChild(col);
     });
 
     container.appendChild(wrapper);
 
-    // アニメーション用に遅延させて幅を設定
+    // アニメーション用に遅延させて高さを設定
     setTimeout(() => {
-        const fills = wrapper.querySelectorAll('.bar-chart-fill');
+        const fills = wrapper.querySelectorAll('.bar-chart-v-fill');
         fills.forEach(f => {
-            f.style.width = f.getAttribute('data-percent') + '%';
+            f.style.height = f.getAttribute('data-height') + '%';
         });
     }, 50);
     
@@ -165,7 +163,7 @@ function renderAgeBarChart(chars) {
         unknownInfo.style.textAlign = 'right';
         unknownInfo.style.fontSize = '0.8rem';
         unknownInfo.style.color = 'var(--text-muted)';
-        unknownInfo.style.padding = '10px 15px 0';
+        unknownInfo.style.padding = '20px 15px 0';
         unknownInfo.textContent = `※ 年齢不詳: ${unknownCount}人`;
         container.appendChild(unknownInfo);
     }

@@ -732,52 +732,59 @@ body.view-mode .stat-trigger {
     overflow: hidden;
 }
 
-/* Horizontal Bar Chart (Age) */
-.bar-chart-container {
+/* Vertical Bar Chart (Age) */
+.bar-chart-v-container {
     width: 100%;
-    padding: 10px 0;
-}
-.bar-chart-row {
+    height: 240px;
     display: flex;
-    align-items: center;
-    margin-bottom: 12px;
-    gap: 15px;
+    align-items: flex-end;
+    justify-content: space-between;
+    padding: 30px 10px 40px 10px;
+    gap: 4px;
+    position: relative;
+    box-sizing: border-box;
 }
-.bar-chart-label {
-    width: 60px;
-    font-size: 0.85rem;
-    font-weight: 500;
-    color: var(--text-muted);
-    text-align: right;
-}
-.bar-chart-track {
+.bar-chart-v-col {
     flex: 1;
-    height: 14px;
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 7px;
-    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    height: 100%;
     position: relative;
 }
-[data-theme="light"] .bar-chart-track {
-    background: rgba(0, 0, 0, 0.05);
+.bar-chart-v-fill {
+    width: 100%;
+    max-width: 30px;
+    background: linear-gradient(0deg, var(--primary-color), #ff8a80);
+    border-radius: 4px 4px 0 0;
+    height: 0;
+    transition: height 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 0 -2px 10px rgba(255, 82, 119, 0.2);
+    position: relative;
 }
-.bar-chart-fill {
-    height: 100%;
-    background: linear-gradient(90deg, var(--primary-color), #ff8a80);
-    border-radius: 7px;
-    width: 0;
-    transition: width 0.8s cubic-bezier(0.16, 1, 0.3, 1);
-    box-shadow: 0 0 10px rgba(255, 82, 119, 0.3);
-}
-.bar-chart-count {
-    width: 40px;
-    font-size: 0.9rem;
+.bar-chart-v-count {
+    font-size: 0.75rem;
     font-weight: bold;
     color: var(--primary-color);
+    margin-bottom: 4px;
+    position: absolute;
+    top: -20px;
+    width: 100%;
+    text-align: center;
 }
-.bar-chart-row:hover .bar-chart-fill {
+.bar-chart-v-label {
+    position: absolute;
+    bottom: -32px;
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    white-space: nowrap;
+    transform: rotate(-30deg);
+    transform-origin: top center;
+}
+.bar-chart-v-col:hover .bar-chart-v-fill {
     filter: brightness(1.2);
-    box-shadow: 0 0 15px rgba(255, 82, 119, 0.5);
+    box-shadow: 0 -2px 15px rgba(255, 82, 119, 0.4);
 }
 
 /* Redesigned Card Grid and Panels */
