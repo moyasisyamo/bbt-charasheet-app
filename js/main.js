@@ -426,6 +426,28 @@ document.addEventListener('DOMContentLoaded', () => {
         if (window.currentCharId && typeof window.bbFirebase !== 'undefined' && window.bbFirebase.isReady()) {
             window.bbFirebase.load(window.currentCharId).then(data => {
                 if (data.sheetData) restoreSheetState(data.sheetData);
+                
+                // 動的にタイトルとOGPを更新（ベストエフォート）
+                if (data.name) {
+                    const style = data.style || '';
+                    const pRoot = data.primaryRoot || '';
+                    const fullTitle = `${data.name} (${style}/${pRoot}) - BBTキャラシート`;
+                    document.title = fullTitle;
+
+                    // OGP Meta更新関数
+                    const updateMeta = (prop, content) => {
+                        let el = document.querySelector(`meta[property="${prop}"]`);
+                        if (!el) {
+                            el = document.createElement('meta');
+                            el.setAttribute('property', prop);
+                            document.head.appendChild(el);
+                        }
+                        el.setAttribute('content', content);
+                    };
+                    updateMeta('og:title', fullTitle);
+                    updateMeta('og:description', `BBTキャラクターシート: ${data.name}`);
+                }
+
                 // ロビーから来た場合は閲覧モードで開く（パスワードチェック不要）
                 // ※「編集したい場合は編集モードボタンを押してパスワードを入力」というUX
                 setEditMode(false);
