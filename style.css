@@ -561,10 +561,32 @@ body.view-mode .stat-trigger {
 }
 /* The specific category badges are now handled by variables in .cat-xxx classes above */
 
-#dictionary-table td small, #equip-dict-tbody td small, 
 #arts-table td small, #weapons-table td small, #armor-table td small, #items-table td small {
     line-height: 1.3;
     font-size: 0.9rem;
+}
+
+/* アーツテーブル幅調整 */
+#arts-table th:nth-child(1), #arts-table td:nth-child(1) { width: 25%; } /* アーツ名 */
+#arts-table th:nth-child(2), #arts-table td:nth-child(2) { width: 100px; } /* レベル */
+#arts-table th:nth-child(7), #arts-table td:nth-child(7) { width: 70px; } /* コスト */
+#arts-table th:nth-child(9), #arts-table td:nth-child(9) { width: 120px; } /* 操作 */
+
+.art-level-input {
+    width: 45px !important;
+    padding: 2px 4px !important;
+}
+
+.art-note-area {
+    width: 100%;
+    margin-top: 8px;
+    padding: 8px;
+    font-size: 0.85rem;
+    border: 1px dashed var(--border-color);
+    background: rgba(0,0,0,0.1);
+    color: var(--text-color);
+    border-radius: 4px;
+    resize: vertical;
 }
 
 .modal-body {

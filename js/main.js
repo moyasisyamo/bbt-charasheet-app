@@ -289,7 +289,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
             cp += `\n//アーツメモ欄\n`;
             acquiredArts.forEach(a => {
-                cp += `[${a['アーツ名']}] (${a['タイミング']}/${a['判定値']}/${a['対象']}/${a['射程']}/コスト:${a['コスト']}) ${a['効果']}\n`;
+                const costLabel = a._overrideCost !== undefined ? a._overrideCost : (a['コスト'] || '-');
+                const note = a._note ? ` 【補足：${a._note}】` : '';
+                cp += `[${a['アーツ名']}] (${a['タイミング']}/${a['判定値']}/${a['対象']}/${a['射程']}/コスト:${costLabel}) ${a['効果']}${note}\n`;
             });
 
             const currentHumanity = getV('stat-humanity');

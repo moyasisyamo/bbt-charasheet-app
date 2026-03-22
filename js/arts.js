@@ -25,6 +25,7 @@ function renderArtsTable() {
 
     acquiredArts.forEach((art, index) => {
         const isCopied = isNextCopied;
+        const isBeast  = art['アーツ名'] === '魔獣化';
         const type     = art['種別'] || '';
         const row      = document.createElement('tr');
 
@@ -33,19 +34,37 @@ function renderArtsTable() {
 
         const lvVal = art._currentLevel !== undefined ? art._currentLevel : 1;
 
+        // コスト編集可能なセル（コピーアーツまたは魔獣化）
         let costCellHTML = `<td>${art['コスト'] || '-'}</td>`;
-        if (isCopied) {
-            const cv = art._overrideCost !== undefined ? art._overrideCost : (art['コスト'] || '0');
+        if (isCopied || isBeast) {
+            let defaultCost = art['コスト'] || '0';
+            if (isBeast && art._overrideCost === undefined) {
+                // 魔獣化の初期値は1（updateAutoArtsでも設定するがここでも念のため）
+                defaultCost = '1';
+            }
+            const cv = art._overrideCost !== undefined ? art._overrideCost : defaultCost;
             costCellHTML = `<td>
-                <input type="text" class="copied-art-cost edit-only-input" value="${cv}" style="width:50px;padding:5px;">
+                <input type="text" class="copied-art-cost edit-only-input" value="${cv}" style="width:40px;padding:2px 5px;">
                 <span class="view-only-text copied-art-cost-view">${cv}</span>
             </td>`;
         }
 
+        // 補足エリアの表示状態
+        const noteVisible = art._noteVisible ? 'block' : 'none';
+        const noteContent = art._note || '';
+
         row.innerHTML = `
-            <td>${nameHTML}</td>
+            <td>
+                ${nameHTML}
+                <div class="art-note-container" style="display:${noteVisible};">
+                    <textarea class="art-note-area edit-only" placeholder="補足情報を入力...">${noteContent}</textarea>
+                    <div class="view-only-text" style="font-size:0.8rem; color:var(--text-muted); padding:4px; border-left:2px solid var(--primary-color); background:rgba(0,0,0,0.05); margin-top:5px;">
+                        ${noteContent.replace(/\n/g, '<br>')}
+                    </div>
+                </div>
+            </td>
             <td style="white-space:nowrap;">
-                <input type="number" class="art-level-input edit-only-input" value="${lvVal}" min="0" style="width:60px;padding:5px;">
+                <input type="number" class="art-level-input edit-only-input" value="${lvVal}" min="0">
                 / ${art['最大Lv'] || '?'}
                 <span class="view-only-text">${lvVal} / ${art['最大Lv'] || '?'}</span>
             </td>
@@ -56,9 +75,14 @@ function renderArtsTable() {
             ${costCellHTML}
             <td><small style="font-size:0.9rem;">${art['効果'] || '-'}</small></td>
             <td>
-                <button class="btn move-up-btn edit-only"   style="padding:2px 5px;margin-bottom:2px;">↑</button>
-                <button class="btn move-down-btn edit-only" style="padding:2px 5px;margin-bottom:2px;">↓</button>
-                <button class="btn delete-btn edit-only"    style="padding:2px 5px;background:#e02424;color:white;">✕</button>
+                <div style="display:flex; flex-direction:column; gap:2px;">
+                    <div style="display:flex; gap:2px;">
+                        <button class="btn move-up-btn edit-only"   style="padding:2px 5px; flex:1;">↑</button>
+                        <button class="btn move-down-btn edit-only" style="padding:2px 5px; flex:1;">↓</button>
+                    </div>
+                    <button class="btn toggle-note-btn edit-only" style="padding:2px 5px; font-size:0.75rem; background:var(--primary-color); color:white;">補足</button>
+                    <button class="btn delete-btn edit-only"    style="padding:2px 5px; background:#e02424; color:white;">✕ 削除</button>
+                </div>
             </td>
         `;
 
@@ -66,15 +90,35 @@ function renderArtsTable() {
         const viewTxt  = row.querySelector('.view-only-text');
         lvlInput.addEventListener('input', e => {
             art._currentLevel = Math.max(0, parseInt(e.target.value) || 0);
-            viewTxt.textContent = art._currentLevel;
+            viewTxt.textContent = `${art._currentLevel} / ${art['最大Lv'] || '?'}`;
             calculateStats();
         });
 
-        if (isCopied) {
+        // コスト編集
+        if (isCopied || isBeast) {
             const costIn  = row.querySelector('.copied-art-cost');
             const costVw  = row.querySelector('.copied-art-cost-view');
-            costIn.addEventListener('input', e => { art._overrideCost = e.target.value; costVw.textContent = e.target.value || '-'; });
-            row.style.backgroundColor = 'rgba(255,235,59,0.05)';
+            costIn.addEventListener('input', e => {
+                art._overrideCost = e.target.value;
+                costVw.textContent = e.target.value || '-';
+                calculateStats(); // コスト変更でXP計算などが走るため
+            });
+            if (isCopied) row.style.backgroundColor = 'rgba(255,235,59,0.05)';
+        }
+
+        // 補足トグル
+        row.querySelector('.toggle-note-btn').addEventListener('click', () => {
+            art._noteVisible = !art._noteVisible;
+            renderArtsTable();
+        });
+
+        // 補足入力
+        const noteArea = row.querySelector('.art-note-area');
+        if (noteArea) {
+            noteArea.addEventListener('input', e => {
+                art._note = e.target.value;
+                // view-onlyテキストの更新は再描画で行う
+            });
         }
 
         row.querySelector('.move-up-btn').addEventListener('click', () => {
@@ -84,7 +128,9 @@ function renderArtsTable() {
             if (index < acquiredArts.length-1) { [acquiredArts[index], acquiredArts[index+1]] = [acquiredArts[index+1], acquiredArts[index]]; renderArtsTable(); calculateStats(); }
         });
         row.querySelector('.delete-btn').addEventListener('click', () => {
-            acquiredArts.splice(index, 1); renderArtsTable(); calculateStats();
+            if (confirm(`「${art['アーツ名']}」を削除しますか？`)) {
+                acquiredArts.splice(index, 1); renderArtsTable(); calculateStats();
+            }
         });
 
         document.querySelector('#arts-table tbody').appendChild(row);
@@ -139,6 +185,7 @@ function updateAutoArts(pRoot, sRoot, tRoot, style) {
         const req = commonList.find(a => a['アーツ名'] === name);
         if (req && !acquiredArts.some(a => a['アーツ名'] === name)) {
             const newArt = { ...req, _originCat: '共通アーツ', _rt: req['ルーツ'] || '共通アーツ', _currentLevel: 1 };
+            if (name === '魔獣化') newArt._overrideCost = '1';
             addArtToTable(newArt, true, true); // 無限再帰防止のため skipCalc=true
         }
     });
