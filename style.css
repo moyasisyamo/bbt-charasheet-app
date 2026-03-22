@@ -567,7 +567,7 @@ body.view-mode .stat-trigger {
 }
 
 /* アーツテーブル幅調整 */
-#arts-table th:nth-child(1), #arts-table td:nth-child(1) { width: 25%; } /* アーツ名 */
+#arts-table th:nth-child(1), #arts-table td:nth-child(1) { width: 18%; } /* アーツ名 */
 #arts-table th:nth-child(2), #arts-table td:nth-child(2) { width: 100px; } /* レベル */
 #arts-table th:nth-child(7), #arts-table td:nth-child(7) { width: 70px; } /* コスト */
 #arts-table th:nth-child(9), #arts-table td:nth-child(9) { width: 120px; } /* 操作 */
