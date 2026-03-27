@@ -91,6 +91,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             if (edit) {
+                document.body.style.overflow = '';
                 toggleEditBtn.innerHTML = '🔒 閲覧モード<br><span style="font-size:0.75rem;">(編集ロック)</span>';
                 toggleEditBtn.classList.replace('primary', 'warning');
                 const ov = document.getElementById('view-mode-overlay');
@@ -987,13 +988,11 @@ function buildAndShowViewOverlay() {
         vmoEditBtn.onclick = function() {
             var passwordInput = document.getElementById('char-password');
             if (!passwordInput || !passwordInput.value) {
-                document.body.style.overflow = '';
                 setEditMode(true);
                 return;
             }
             var pass = prompt('編集モードにするためのパスワードを入力してください:');
             if (pass === passwordInput.value) {
-                document.body.style.overflow = '';
                 setEditMode(true);
             } else if (pass !== null) {
                 alert('パスワードが違います。');
