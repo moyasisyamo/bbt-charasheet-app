@@ -451,9 +451,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     updateMeta('og:description', `BBTキャラクターシート: ${data.name}`);
                 }
 
-                // ロビーから来た場合は閲覧モードで開く（パスワードチェック不要）
-                // ※「編集したい場合は編集モードボタンを押してパスワードを入力」というUX
-                setEditMode(false);
+                // URLパラメータに edit=true があれば編集モード、なければ閲覧モード
+                const isEditParam = new URLSearchParams(location.search).get('edit') === 'true';
+                setEditMode(isEditParam);
             }).catch(err => console.warn('キャラ読み込みエラー:', err));
         }
 
