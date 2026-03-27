@@ -454,7 +454,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 // URLパラメータに edit=true があればパスワードを確認してから編集モードへ
                 const isEditParam = new URLSearchParams(location.search).get('edit') === 'true';
                 if (isEditParam) {
-                    const savedPass = document.getElementById('char-password')?.value;
+                    // DOMから取得するのではなく、ロードされたデータから直接パスワードを取得する
+                    const savedPass = (data.sheetData && data.sheetData.password) || data.password || '';
                     if (savedPass) {
                         const pass = prompt('編集モードにするためのパスワードを入力してください:');
                         if (pass === savedPass) {
@@ -464,7 +465,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             setEditMode(false);
                         }
                     } else {
-                        // パスワード未設定ならそのまま編集モード（新規作成直後など）
+                        // パスワード未設定ならそのまま編集モード（新規作成中など）
                         setEditMode(true);
                     }
                 } else {
