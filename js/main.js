@@ -451,9 +451,25 @@ document.addEventListener('DOMContentLoaded', () => {
                     updateMeta('og:description', `BBTキャラクターシート: ${data.name}`);
                 }
 
-                // URLパラメータに edit=true があれば編集モード、なければ閲覧モード
+                // URLパラメータに edit=true があればパスワードを確認してから編集モードへ
                 const isEditParam = new URLSearchParams(location.search).get('edit') === 'true';
-                setEditMode(isEditParam);
+                if (isEditParam) {
+                    const savedPass = document.getElementById('char-password')?.value;
+                    if (savedPass) {
+                        const pass = prompt('編集モードにするためのパスワードを入力してください:');
+                        if (pass === savedPass) {
+                            setEditMode(true);
+                        } else {
+                            if (pass !== null) alert('パスワードが違います。');
+                            setEditMode(false);
+                        }
+                    } else {
+                        // パスワード未設定ならそのまま編集モード（新規作成直後など）
+                        setEditMode(true);
+                    }
+                } else {
+                    setEditMode(false);
+                }
             }).catch(err => console.warn('キャラ読み込みエラー:', err));
         }
 
