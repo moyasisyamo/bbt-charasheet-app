@@ -146,7 +146,7 @@
                         <!-- 顔アイコン + プレイヤー名 -->
                         <div style="display:flex; gap:12px; align-items:flex-start; margin-bottom:20px;">
                             <div style="display:flex; flex-direction:column; align-items:center; gap:4px;">
-                                <label style="font-size:0.75rem; color:var(--text-muted); text-align:center;">顔アイコン</label>
+                                <label style="font-size:0.75rem; color:var(--text-muted); text-align:center;">顔アイコン<br><span style="font-size:0.65rem;">最大: 48&times;48</span></label>
                                 <div id="face-icon-container" class="edit-only" style="width:54px;height:54px;border-radius:50%;border:2px dashed var(--border-color);display:flex;align-items:center;justify-content:center;cursor:pointer;overflow:hidden;background:var(--input-bg);position:relative;" title="クリックして顔アイコンを設定">
                                     <span id="face-icon-placeholder" style="font-size:1.6rem;">👤</span>
                                     <img id="face-icon-preview" style="display:none;width:54px;height:54px;object-fit:cover;position:absolute;inset:0;" alt="顔アイコン">
@@ -301,7 +301,7 @@
                             </div>
                             <div class="edit-only" style="font-size: 0.7rem; color: var(--text-muted); line-height: 1.4; padding-top: 10px; border-top: 1px dotted var(--border-color); margin-top: 10px;">
                                 ※通常時と魔獣化時、それぞれに数値を記入してください。<br>
-                                ※装備は行動補正だけ自動反映されます。それ以外は手動で入力してください。
+                                ※装備は防具と武器の行動補正だけ自動反映されます。それ以外は手動で入力してください。
                             </div>
                         </div>
                     </div>
@@ -360,6 +360,12 @@
                     <h2 style="margin: 0;">取得アーツ <span style="font-size: 0.9rem; font-weight: normal; color: var(--text-muted);" id="arts-xp-display">（経験点：0消費）</span></h2>
                     <div class="edit-only" style="display: flex; align-items: center; gap: 8px;">
                         <label for="arts-xp-adj" style="font-size: 0.8rem;">経験点補正:</label>
+                        <div class="tooltip-container">
+                            <span class="tooltip-icon">?</span>
+                            <div class="tooltip-content" style="width: 200px;">
+                                コピーや何らかの効果で取得したアーツなどで余分に消費された経験点はここで補正してください。
+                            </div>
+                        </div>
                         <input type="number" id="arts-xp-adj" value="0" class="stat-trigger edit-only-input" style="width: 70px; padding: 4px 8px; background: var(--input-bg); border: 1px solid var(--border-color); color: var(--text-color); border-radius: 4px;">
                     </div>
                 </div>
@@ -394,6 +400,12 @@
                     <h2 style="margin: 0;">所持品・装備 <span style="font-size: 0.9rem; font-weight: normal; color: var(--text-muted);" id="equip-xp-display">（経験点：0消費）</span></h2>
                     <div class="edit-only" style="display: flex; align-items: center; gap: 8px;">
                         <label for="equip-xp-adj" style="font-size: 0.8rem;">経験点補正:</label>
+                        <div class="tooltip-container">
+                            <span class="tooltip-icon">?</span>
+                            <div class="tooltip-content" style="width: 200px;">
+                                アーツや何らかの効果で取得した所持品などで余分に消費された経験点はここで補正してください。
+                            </div>
+                        </div>
                         <input type="number" id="equip-xp-adj" value="0" class="stat-trigger edit-only-input" style="width: 70px; padding: 4px 8px; background: var(--input-bg); border: 1px solid var(--border-color); color: var(--text-color); border-radius: 4px;">
                     </div>
                 </div>
@@ -404,8 +416,7 @@
                     <table id="weapons-table">
                         <thead>
                             <tr>
-                                <th style="width: 15%;">相当品名</th>
-                                <th>武器名</th>
+                                <th style="width: 20%;">武器名</th>
                                 <th>購入</th>
                                 <th>種別</th>
                                 <th>命中</th>
@@ -430,8 +441,7 @@
                     <table id="armor-table">
                         <thead>
                             <tr>
-                                <th style="width: 15%;">相当品名</th>
-                                <th>防具名</th>
+                                <th style="width: 20%;">防具名</th>
                                 <th title="通常時に装備するかどうか">通常時</th>
                                 <th title="魔獣化時に装備するかどうか">魔獣化</th>
                                 <th>購入</th>
@@ -455,8 +465,7 @@
                     <table id="items-table">
                         <thead>
                             <tr>
-                                <th style="width: 15%;">相当品名</th>
-                                <th>道具名</th>
+                                <th style="width: 20%;">道具名</th>
                                 <th style="width: 50px;">個数</th>
                                 <th>購入</th>
                                 <th>種別</th>

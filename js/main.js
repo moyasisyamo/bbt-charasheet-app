@@ -345,6 +345,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 const img = new Image();
                 const url = URL.createObjectURL(file);
                 img.onload = () => {
+                    if (img.width > 48 || img.height > 48) {
+                        alert(`顔アイコンのサイズが大きすぎます（${img.width}x${img.height}）。\n48x48ピクセル以下の画像を選択してください。`);
+                        URL.revokeObjectURL(url);
+                        faceUpload.value = '';
+                        return;
+                    }
                     const SIZE = 54;
                     const canvas = document.createElement('canvas');
                     canvas.width = SIZE; canvas.height = SIZE;
@@ -644,9 +650,12 @@ function restoreSheetState(state) {
     renderArtsTable();
 
     // 装備復元
-    ['weapons','armor','items'].forEach(type => {
-        (state[type] || []).forEach(item => addEquipToTable(item, type === 'weapons' ? 'weapons' : type === 'armor' ? 'armor' : 'items'));
-    });
+    window.acquiredWeapons = (state.weapons || []).map(w => ({...w}));
+    window.acquiredArmor   = (state.armor   || []).map(a => ({...a}));
+    window.acquiredItems   = (state.items   || []).map(i => ({...i}));
+    if (typeof renderWeaponsTable === 'function') renderWeaponsTable();
+    if (typeof renderArmorTable === 'function')   renderArmorTable();
+    if (typeof renderItemsTable === 'function')   renderItemsTable();
 
     // パスワード
     if (state.password) {

@@ -51,8 +51,6 @@ function initEquipDictionary() {
             hash = rt.charCodeAt(i) + ((hash << 5) - hash);
         }
         const h = Math.abs(hash % 360);
-        // ダークモード/非ダークモードの両方で読みやすいように、彩度と輝度を調整
-        // 背景は透明度を低く、ボーダーで境界を際立たせる
         return `--marker-color: hsl(${h}, 70%, 50%); ` +
                `--badge-override-bg: hsla(${h}, 70%, 50%, 0.15); ` +
                `--badge-override-text: hsl(${h}, 80%, 70%); ` +
@@ -127,20 +125,20 @@ function initEquipDictionary() {
     }
 }
 
-// ---- 装備をテーブルに追加 ----
-function addEquipToTable(item, type) {
-    let tbody, arr;
-    const row    = document.createElement('tr');
-    const val    = item._equivalentName || '';
-    const eqInput = `<input type="text" class="edit-only-input" placeholder="名前を自由に入力" style="width:100%;" value="${val}"><div class="view-only-text">${val || '-'}</div>`;
-    const cItem  = { ...item, _equivalentName: val };
-
-    if (type === 'weapons') {
-        tbody = document.querySelector('#weapons-table tbody');
-        arr   = acquiredWeapons;
+// ---- テーブル全体を再描画（武器） ----
+function renderWeaponsTable() {
+    const tbody = document.querySelector('#weapons-table tbody');
+    if (!tbody) return;
+    tbody.innerHTML = '';
+    acquiredWeapons.forEach((item, index) => {
+        const row = document.createElement('tr');
+        const eqInput = `<input type="text" class="edit-only-input eq-name-input" placeholder="相当品名を入力" style="width:100%;margin-top:4px;" value="${item._equivalentName || ''}"><div class="view-only-text">${item._equivalentName || '-'}</div>`;
+        
         row.innerHTML = `
-            <td>${eqInput}</td>
-            <td><strong>${item['装備名']}</strong><br><small>${item['ルーツ'] || '-'}</small></td>
+            <td>
+                <strong>${item['装備名']}</strong><br><small>${item['ルーツ'] || '-'}</small><br>
+                ${eqInput}
+            </td>
             <td>${item['購入']}</td>
             <td><small>${item['種別']}</small></td>
             <td>${item['命中']}</td>
@@ -149,78 +147,173 @@ function addEquipToTable(item, type) {
             <td><small>G:${item['G値']||0} A:${item['A値']||0}</small></td>
             <td><small>${item['射程']}</small></td>
             <td><small>${item['効果']}</small></td>
-            <td><button class="btn delete-btn edit-only" style="padding:2px 5px;background:#e02424;color:white;">✕</button></td>
+            <td>
+                <div style="display:flex; flex-direction:column; gap:2px;">
+                    <div style="display:flex; gap:2px;">
+                        <button class="btn move-up-btn edit-only"   style="padding:2px 5px; flex:1;">↑</button>
+                        <button class="btn move-down-btn edit-only" style="padding:2px 5px; flex:1;">↓</button>
+                    </div>
+                    <button class="btn delete-btn edit-only" style="padding:2px 5px;background:#e02424;color:white;">✕ 削除</button>
+                </div>
+            </td>
         `;
+
+        const inputEl = row.querySelector('.eq-name-input');
+        inputEl.addEventListener('input', () => { item._equivalentName = inputEl.value; row.querySelector('.view-only-text').textContent = inputEl.value || '-'; });
+        
+        row.querySelector('.move-up-btn').addEventListener('click', () => {
+            if (index > 0) { [acquiredWeapons[index], acquiredWeapons[index-1]] = [acquiredWeapons[index-1], acquiredWeapons[index]]; renderWeaponsTable(); calculateStats(); }
+        });
+        row.querySelector('.move-down-btn').addEventListener('click', () => {
+            if (index < acquiredWeapons.length-1) { [acquiredWeapons[index], acquiredWeapons[index+1]] = [acquiredWeapons[index+1], acquiredWeapons[index]]; renderWeaponsTable(); calculateStats(); }
+        });
+        row.querySelector('.delete-btn').addEventListener('click', () => {
+            if (confirm(`「${item['装備名']}」を削除しますか？`)) { acquiredWeapons.splice(index, 1); renderWeaponsTable(); calculateStats(); }
+        });
+        tbody.appendChild(row);
+    });
+    if (typeof setEditMode === 'function') setEditMode(window.isEditMode);
+}
+
+// ---- テーブル全体を再描画（防具） ----
+function renderArmorTable() {
+    const tbody = document.querySelector('#armor-table tbody');
+    if (!tbody) return;
+    tbody.innerHTML = '';
+    acquiredArmor.forEach((item, index) => {
+        const row = document.createElement('tr');
+        const eqInput = `<input type="text" class="edit-only-input eq-name-input" placeholder="相当品名を入力" style="width:100%;margin-top:4px;" value="${item._equivalentName || ''}"><div class="view-only-text">${item._equivalentName || '-'}</div>`;
+        
+        row.innerHTML = `
+            <td>
+                <strong>${item['装備名']}</strong><br><small>${item['ルーツ'] || '-'}</small><br>
+                ${eqInput}
+            </td>
+            <td style="text-align:center;"><input type="radio" name="normal-armor" class="normal-equip-radio" ${item._normalEquip ? 'checked' : ''}></td>
+            <td style="text-align:center;"><input type="radio" name="beast-armor"  class="beast-equip-radio"  ${item._beastEquip ? 'checked' : ''}></td>
+            <td>${item['購入']}</td>
+            <td>${item['ドッジ']}</td>
+            <td>${item['行動値']}</td>
+            <td><small>G:${item['G値']||0} A:${item['A値']||0}</small></td>
+            <td><small>${item['効果']}</small></td>
+            <td>
+                <div style="display:flex; flex-direction:column; gap:2px;">
+                    <div style="display:flex; gap:2px;">
+                        <button class="btn move-up-btn edit-only"   style="padding:2px 5px; flex:1;">↑</button>
+                        <button class="btn move-down-btn edit-only" style="padding:2px 5px; flex:1;">↓</button>
+                    </div>
+                    <button class="btn delete-btn edit-only" style="padding:2px 5px;background:#e02424;color:white;">✕ 削除</button>
+                </div>
+            </td>
+        `;
+
+        const inputEl = row.querySelector('.eq-name-input');
+        inputEl.addEventListener('input', () => { item._equivalentName = inputEl.value; row.querySelector('.view-only-text').textContent = inputEl.value || '-'; });
+
+        row.querySelector('.normal-equip-radio').addEventListener('change', e => {
+            acquiredArmor.forEach(a => a._normalEquip = false);
+            item._normalEquip = e.target.checked;
+            calculateStats();
+        });
+        row.querySelector('.beast-equip-radio').addEventListener('change', e => {
+            acquiredArmor.forEach(a => a._beastEquip = false);
+            item._beastEquip = e.target.checked;
+            calculateStats();
+        });
+
+        row.querySelector('.move-up-btn').addEventListener('click', () => {
+            if (index > 0) { [acquiredArmor[index], acquiredArmor[index-1]] = [acquiredArmor[index-1], acquiredArmor[index]]; renderArmorTable(); calculateStats(); }
+        });
+        row.querySelector('.move-down-btn').addEventListener('click', () => {
+            if (index < acquiredArmor.length-1) { [acquiredArmor[index], acquiredArmor[index+1]] = [acquiredArmor[index+1], acquiredArmor[index]]; renderArmorTable(); calculateStats(); }
+        });
+        row.querySelector('.delete-btn').addEventListener('click', () => {
+            if (confirm(`「${item['装備名']}」を削除しますか？`)) { acquiredArmor.splice(index, 1); renderArmorTable(); calculateStats(); }
+        });
+        tbody.appendChild(row);
+    });
+    if (typeof setEditMode === 'function') setEditMode(window.isEditMode);
+}
+
+// ---- テーブル全体を再描画（道具） ----
+function renderItemsTable() {
+    const tbody = document.querySelector('#items-table tbody');
+    if (!tbody) return;
+    tbody.innerHTML = '';
+    acquiredItems.forEach((item, index) => {
+        const row = document.createElement('tr');
+        const eqInput = `<input type="text" class="edit-only-input eq-name-input" placeholder="相当品名を入力" style="width:100%;margin-top:4px;" value="${item._equivalentName || ''}"><div class="view-only-text">${item._equivalentName || '-'}</div>`;
+        const qty = item._quantity !== undefined ? item._quantity : 1;
+
+        row.innerHTML = `
+            <td>
+                <strong>${item['装備名']}</strong><br><small>${item['ルーツ'] || '-'}</small><br>
+                ${eqInput}
+            </td>
+            <td><input type="number" class="item-quantity-input edit-only-input" value="${qty}" min="0" style="width:50px;"><span class="view-only-text">${qty}</span></td>
+            <td>${item['購入']}</td>
+            <td><small>${item['種別']}</small></td>
+            <td><small>${item['タイミング']}</small></td>
+            <td><small>${item['対象']}/${item['射程']}</small></td>
+            <td><small>${item['効果']}</small></td>
+            <td>
+                <div style="display:flex; flex-direction:column; gap:2px;">
+                    <div style="display:flex; gap:2px;">
+                        <button class="btn move-up-btn edit-only"   style="padding:2px 5px; flex:1;">↑</button>
+                        <button class="btn move-down-btn edit-only" style="padding:2px 5px; flex:1;">↓</button>
+                    </div>
+                    <button class="btn delete-btn edit-only" style="padding:2px 5px;background:#e02424;color:white;">✕ 削除</button>
+                </div>
+            </td>
+        `;
+
+        const inputEl = row.querySelector('.eq-name-input');
+        inputEl.addEventListener('input', () => { item._equivalentName = inputEl.value; row.querySelector('.view-only-text').textContent = inputEl.value || '-'; });
+
+        const qtyEl = row.querySelector('.item-quantity-input');
+        qtyEl.addEventListener('input', e => {
+            item._quantity = Math.max(0, parseInt(e.target.value) || 0);
+            const views = row.querySelectorAll('.view-only-text');
+            if (views[1]) views[1].textContent = item._quantity;
+            calculateStats();
+        });
+
+        row.querySelector('.move-up-btn').addEventListener('click', () => {
+            if (index > 0) { [acquiredItems[index], acquiredItems[index-1]] = [acquiredItems[index-1], acquiredItems[index]]; renderItemsTable(); calculateStats(); }
+        });
+        row.querySelector('.move-down-btn').addEventListener('click', () => {
+            if (index < acquiredItems.length-1) { [acquiredItems[index], acquiredItems[index+1]] = [acquiredItems[index+1], acquiredItems[index]]; renderItemsTable(); calculateStats(); }
+        });
+        row.querySelector('.delete-btn').addEventListener('click', () => {
+            if (confirm(`「${item['装備名']}」を削除しますか？`)) { acquiredItems.splice(index, 1); renderItemsTable(); calculateStats(); }
+        });
+        tbody.appendChild(row);
+    });
+    if (typeof setEditMode === 'function') setEditMode(window.isEditMode);
+}
+
+// ---- 装備をテーブルに追加 ----
+function addEquipToTable(item, type) {
+    const cItem = { ...item, _equivalentName: item._equivalentName || '' };
+    if (type === 'weapons') {
+        acquiredWeapons.push(cItem);
+        renderWeaponsTable();
     } else if (type === 'armor') {
-        tbody = document.querySelector('#armor-table tbody');
-        arr   = acquiredArmor;
         cItem._normalEquip = item._normalEquip || false;
         cItem._beastEquip  = item._beastEquip || false;
-        row.innerHTML = `
-            <td>${eqInput}</td>
-            <td><strong>${cItem['装備名']}</strong><br><small>${cItem['ルーツ'] || '-'}</small></td>
-            <td><input type="checkbox" class="normal-equip-check" ${cItem._normalEquip ? 'checked' : ''}></td>
-            <td><input type="checkbox" class="beast-equip-check" ${cItem._beastEquip ? 'checked' : ''}></td>
-            <td>${cItem['購入']}</td>
-            <td>${cItem['ドッジ']}</td>
-            <td>${cItem['行動値']}</td>
-            <td><small>G:${cItem['G値']||0} A:${cItem['A値']||0}</small></td>
-            <td><small>${cItem['効果']}</small></td>
-            <td><button class="btn delete-btn edit-only" style="padding:2px 5px;background:#e02424;color:white;">✕</button></td>
-        `;
-        row.querySelector('.normal-equip-check').addEventListener('change', e => {
-            if (e.target.checked) {
-                document.querySelectorAll('.normal-equip-check').forEach(c => { if (c !== e.target) c.checked = false; });
-                acquiredArmor.forEach(a => a._normalEquip = false);
-            }
-            cItem._normalEquip = e.target.checked;
-            calculateStats();
-        });
-        row.querySelector('.beast-equip-check').addEventListener('change', e => {
-            if (e.target.checked) {
-                document.querySelectorAll('.beast-equip-check').forEach(c => { if (c !== e.target) c.checked = false; });
-                acquiredArmor.forEach(a => a._beastEquip = false);
-            }
-            cItem._beastEquip = e.target.checked;
-            calculateStats();
-        });
+        acquiredArmor.push(cItem);
+        renderArmorTable();
     } else if (type === 'items') {
-        tbody = document.querySelector('#items-table tbody');
-        arr   = acquiredItems;
         cItem._quantity = item._quantity !== undefined ? item._quantity : 1;
-        row.innerHTML = `
-            <td>${eqInput}</td>
-            <td><strong>${cItem['装備名']}</strong><br><small>${cItem['ルーツ'] || '-'}</small></td>
-            <td><input type="number" class="item-quantity-input" value="${cItem._quantity}" min="0" style="width:50px;"></td>
-            <td>${cItem['購入']}</td>
-            <td><small>${cItem['種別']}</small></td>
-            <td><small>${cItem['タイミング']}</small></td>
-            <td><small>${cItem['対象']}/${cItem['射程']}</small></td>
-            <td><small>${cItem['効果']}</small></td>
-            <td><button class="btn delete-btn edit-only" style="padding:2px 5px;background:#e02424;color:white;">✕</button></td>
-        `;
-        row.querySelector('.item-quantity-input').addEventListener('input', e => {
-            cItem._quantity = Math.max(0, parseInt(e.target.value) || 0);
-            calculateStats();
-        });
+        acquiredItems.push(cItem);
+        renderItemsTable();
     }
-
-    const inputEl = row.querySelector('.edit-only-input');
-    const viewEl  = row.querySelector('.view-only-text');
-    inputEl.addEventListener('input', () => { viewEl.textContent = inputEl.value || '-'; cItem._equivalentName = inputEl.value; });
-
-    row.querySelector('.delete-btn').addEventListener('click', () => {
-        row.remove();
-        const idx = arr.indexOf(cItem);
-        if (idx > -1) arr.splice(idx, 1);
-        calculateStats();
-    });
-
-    tbody.appendChild(row);
-    arr.push(cItem);
     calculateStats();
 }
 
 // グローバル公開
 window.addEquipToTable      = addEquipToTable;
+window.renderWeaponsTable   = renderWeaponsTable;
+window.renderArmorTable     = renderArmorTable;
+window.renderItemsTable     = renderItemsTable;
 window.initEquipDictionary  = initEquipDictionary;
