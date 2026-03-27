@@ -59,18 +59,28 @@ document.addEventListener('DOMContentLoaded', async () => {
                     b.textContent = isBeastStatsMode ? '🐾 魔獣モード' : '🐾 通常モード';
                     b.classList.toggle('btn-primary', isBeastStatsMode);
                 });
-                renderStats(allChars);
+                renderStats(getFilteredChars());
             });
         });
         
         // レイアウト確定を待ってからレンダリング
         setTimeout(() => {
-            renderStats(allChars);
+            renderStats(getFilteredChars());
         }, 100);
     } catch (e) {
         document.getElementById('loading-msg').innerHTML = `<p style="color:red;">エラー: ${e.message}</p>`;
     }
 });
+
+/** 現在のフィルター設定に基づいたキャラクターリストを返す */
+function getFilteredChars() {
+    const filter = document.getElementById('player-filter');
+    if (!filter || filter.value === 'all') {
+        return allChars;
+    }
+    const val = filter.value;
+    return allChars.filter(c => c.playerName && c.playerName.trim() === val);
+}
 
 /** フィルターの初期化（プレイヤー一覧の生成） */
 function initFilter(chars) {
@@ -92,13 +102,7 @@ function initFilter(chars) {
     });
 
     filter.addEventListener('change', () => {
-        const val = filter.value;
-        if (val === 'all') {
-            renderStats(allChars);
-        } else {
-            const filtered = allChars.filter(c => c.playerName && c.playerName.trim() === val);
-            renderStats(filtered);
-        }
+        renderStats(getFilteredChars());
     });
 }
 
