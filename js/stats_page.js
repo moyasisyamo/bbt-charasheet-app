@@ -46,7 +46,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     try {
-        allChars = await window.bbFirebase.loadAll();
+        const rawChars = await window.bbFirebase.loadAll();
+        allChars = rawChars.filter(c => !c.isTemp);
         initFilter(allChars);
 
         // 魔獣化ステータスカウント切り替えボタン（複数対応・同期）

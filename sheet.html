@@ -41,6 +41,18 @@
                 <div style="display: grid; grid-template-columns: 2.5fr 1fr; gap: 20px;">
                     <!-- Left Side (Text Inputs) -->
                     <div class="profile-input-grid" style="display: flex; flex-direction: column; gap: 8px;">
+                        <div class="form-group edit-only" style="flex-direction:row; align-items:center; gap:10px; margin-bottom:10px;">
+                            <label style="margin:0; cursor:pointer; display:flex; align-items:center;">
+                                <input type="checkbox" id="is-temp-reg" class="edit-only-input">
+                                <span style="font-weight:bold; color:var(--primary-color);">仮登録にする</span>
+                            </label>
+                            <div class="tooltip-container">
+                                <span class="tooltip-icon">?</span>
+                                <div class="tooltip-content">
+                                    キャラクターを仮登録したい場合はチェックしてください。仮登録のキャラクターは一覧に表示されず、統計データにも反映されません。
+                                </div>
+                            </div>
+                        </div>
                         <div style="display: flex; gap: 8px;">
                             <div class="form-group" style="flex: 1;">
                                 <label for="char-name">人の名</label>

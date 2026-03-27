@@ -10,6 +10,7 @@ let sortField = 'updatedAt';
 let sortDir   = 'desc';
 let activeFilters = {}; // { type: 'style'|'player'|'blood'|'root', value: '...' }[]
 let isDeleteMode = false;
+let activeTab = 'registered';
 
 const STYLE_ABBR  = { 'アタッカー':'ATK', 'ディフェンダー':'DEF', 'サポーター':'SUP' };
 const STYLE_CLASS = { 'ATK':'style-atk', 'DEF':'style-def', 'SUP':'style-sup' };
@@ -50,6 +51,24 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
+    // タブ切り替えイベント
+    const tabReg = document.getElementById('tab-registered');
+    const tabTemp = document.getElementById('tab-temporary');
+    if (tabReg && tabTemp) {
+        tabReg.addEventListener('click', () => {
+            activeTab = 'registered';
+            tabReg.classList.add('active');
+            tabTemp.classList.remove('active');
+            applyFiltersAndSort();
+        });
+        tabTemp.addEventListener('click', () => {
+            activeTab = 'temporary';
+            tabTemp.classList.add('active');
+            tabReg.classList.remove('active');
+            applyFiltersAndSort();
+        });
+    }
+
     // Firebase 初期化
     const fbReady = window.bbFirebase.init();
     if (!fbReady) {
@@ -71,10 +90,20 @@ document.addEventListener('DOMContentLoaded', async () => {
 async function loadCharacters() {
     try {
         allChars = await window.bbFirebase.loadAll();
+        updateTabCounts();
         applyFiltersAndSort();
     } catch (e) {
         showEmptyState('読み込みエラー: ' + e.message, true);
     }
+}
+
+function updateTabCounts() {
+    const regCount = allChars.filter(c => !c.isTemp).length;
+    const tempCount = allChars.filter(c => c.isTemp).length;
+    const regEl = document.getElementById('count-registered');
+    const tempEl = document.getElementById('count-temporary');
+    if (regEl) regEl.textContent = regCount;
+    if (tempEl) tempEl.textContent = tempCount;
 }
 
 // ---- テーブル描画 ----
@@ -82,6 +111,11 @@ function applyFiltersAndSort() {
     const query = (document.getElementById('search-input')?.value || '').toLowerCase();
 
     filteredChars = allChars.filter(c => {
+        // タブフィルタ
+        const charIsTemp = !!c.isTemp;
+        if (activeTab === 'registered' && charIsTemp) return false;
+        if (activeTab === 'temporary'  && !charIsTemp) return false;
+
         // テキスト検索
         if (query) {
             const hay = `${c.name||''} ${c.playerName||''}`.toLowerCase();
@@ -125,7 +159,11 @@ function renderTable() {
     const tbody = document.getElementById('char-list-body');
     tbody.innerHTML = '';
     if (filteredChars.length === 0) {
-        showEmptyState(allChars.length === 0 ? 'キャラクターがまだいません。「新規作成」から登録しましょう！' : 'フィルター条件に一致するキャラクターがいません。');
+        if (activeTab === 'temporary') {
+            showEmptyState('仮登録中のキャラクターはありません。');
+        } else {
+            showEmptyState(allChars.filter(c => !c.isTemp).length === 0 ? 'キャラクターがまだいません。「新規作成」から登録しましょう！' : 'フィルター条件に一致するキャラクターがいません。');
+        }
         return;
     }
     filteredChars.forEach(c => tbody.appendChild(buildRow(c)));
@@ -193,7 +231,11 @@ function buildRow(c) {
                 }
             }
         } else {
-            window.location.href = `sheet.html?id=${c.id}`;
+            if (activeTab === 'temporary') {
+                window.location.href = `sheet.html?id=${c.id}&edit=true`;
+            } else {
+                window.location.href = `sheet.html?id=${c.id}`;
+            }
         }
     });
     tr.querySelectorAll('.style-badge[data-style]').forEach(el => {

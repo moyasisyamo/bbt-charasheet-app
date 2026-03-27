@@ -68,7 +68,7 @@ document.addEventListener('DOMContentLoaded', () => {
             document.querySelectorAll('.edit-only, .edit-only-input').forEach(el => el.style.display = edit ? '' : 'none');
             document.querySelectorAll('.view-only-text').forEach(el => el.style.display = edit ? 'none' : '');
             document.querySelectorAll(
-                'input:not(.edit-only-input):not(#char-password):not(#arts-search-input):not(#equip-search-input):not([type="checkbox"]),' +
+                'input:not(.edit-only-input):not(#char-password):not(#arts-search-input):not(#equip-search-input):not([type="checkbox"]):not(#is-temp-reg),' +
                 'select:not(#arts-filter-category)'
             ).forEach(el => { el.disabled = !edit; el.classList.toggle('locked-input', !edit); });
             document.querySelectorAll('.btn:not(#toggle-edit-mode-btn):not(#theme-toggle):not(#export-cocofolia-btn)').forEach(btn => btn.style.display = edit ? '' : 'none');
@@ -402,6 +402,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         tertiaryBlood: BBTData.getRoot(tRoot)?.['\u30d6\u30e9\u30c3\u30c9\u540d'] || '',
                         xpUsed:        parseInt(document.getElementById('total-xp-used').textContent) || 0,
                         faceIcon:      charData.faceIcon || null,
+                        isTemp:        document.getElementById('is-temp-reg').checked
                     };
                     const sheetData = getSheetState();
                     const newId = await window.bbFirebase.save(window.currentCharId, summary, sheetData);
@@ -541,6 +542,7 @@ function getSheetState() {
         stats: statsNormal, // デフォルト表示用に通常時を保存
         statsNormal,
         statsBeast,
+        isTemp: document.getElementById('is-temp-reg').checked,
         password: document.getElementById('char-password')?.value || '',
     };
     return JSON.parse(JSON.stringify(rawState));
@@ -633,6 +635,12 @@ function restoreSheetState(state) {
     if (state.password) {
         const pw = document.getElementById('char-password');
         if (pw) pw.value = state.password;
+    }
+
+    // 仮登録
+    if (state.isTemp !== undefined) {
+        const isTempCB = document.getElementById('is-temp-reg');
+        if (isTempCB) isTempCB.checked = !!state.isTemp;
     }
 
     calculateStats();
