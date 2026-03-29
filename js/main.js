@@ -290,10 +290,12 @@ document.addEventListener('DOMContentLoaded', () => {
             cp += `2BB+{回避値}%{人間性} 判定[回避]\n`;
             cp += `2BB+{行動値}%{人間性} 判定[行動]\n\n`;
 
+            // --- 武器メモ欄 ---
             cp += `//武器メモ欄\n`;
-            acquiredWeapons.forEach(w => {
+            (window.acquiredWeapons || []).forEach(w => {
                 const name = w._equivalentName || w['装備名'];
-                cp += `(${w['攻撃力']}) ${name}(${w['射程']})\n`;
+                const atk = (w['攻撃力'] || '').toString().replace(/【/g, '{').replace(/】/g, '}');
+                cp += `(${atk}) ${name}(${w['射程']})\n`;
             });
 
             cp += `\n//アーツメモ欄\n`;
@@ -420,7 +422,8 @@ document.addEventListener('DOMContentLoaded', () => {
                         isTemp: document.getElementById('is-temp-reg').checked
                     };
                     const sheetData = getSheetState();
-                    const newId = await window.bbFirebase.save(window.currentCharId, summary, sheetData);
+                    const skipTimestamp = document.getElementById('no-timestamp-update')?.checked || false;
+                    const newId = await window.bbFirebase.save(window.currentCharId, summary, sheetData, { skipTimestamp });
                     if (!window.currentCharId) {
                         window.currentCharId = newId;
                         history.replaceState({}, '', `?id=${newId}`);
@@ -466,26 +469,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     updateMeta('og:description', `BBTキャラクターシート: ${data.name}`);
                 }
 
-                // URLパラメータに edit=true があればパスワードを確認してから編集モードへ
-                const isEditParam = new URLSearchParams(location.search).get('edit') === 'true';
-                if (isEditParam) {
-                    // DOMから取得するのではなく、ロードされたデータから直接パスワードを取得する
-                    const savedPass = (data.sheetData && data.sheetData.password) || data.password || '';
-                    if (savedPass) {
-                        const pass = prompt('編集モードにするためのパスワードを入力してください:');
-                        if (pass === savedPass) {
-                            setEditMode(true);
-                        } else {
-                            if (pass !== null) alert('パスワードが違います。');
-                            setEditMode(false);
-                        }
-                    } else {
-                        // パスワード未設定ならそのまま編集モード（新規作成中など）
-                        setEditMode(true);
-                    }
-                } else {
-                    setEditMode(false);
-                }
+                // URLに edit=true があった場合の後処理（現在は閲覧モード固定なのでパラメータを見る必要なし）
+                setEditMode(false);
             }).catch(err => console.warn('キャラ読み込みエラー:', err));
         }
 

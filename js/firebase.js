@@ -35,22 +35,27 @@ function sanitizeForFirestore(val) {
 }
 
 /** キャラクターをFirestoreに保存する */
-async function bbFirebaseSave(charId, summary, sheetData) {
+async function bbFirebaseSave(charId, summary, sheetData, options = {}) {
     if (!_firebaseReady) throw new Error('Firebase未設定');
-    // undefined を null に変換してから timestamp を付与
+    // undefined を null に変換してから必要に応じて timestamp を付与
     const sanitized = sanitizeForFirestore({ ...summary, sheetData });
     const doc = {
         ...sanitized,
-        updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
     };
+    if (!options.skipTimestamp) {
+        doc.updatedAt = firebase.firestore.FieldValue.serverTimestamp();
+    }
+
     if (charId) {
         await _db.collection('characters').doc(charId).set(doc, { merge: true });
         return charId;
     } else {
-        const ref = await _db.collection('characters').add({
-            ...doc,
-            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-        });
+        doc.createdAt = firebase.firestore.FieldValue.serverTimestamp();
+        // 新規作成時は必ず更新日時も入れる
+        if (options.skipTimestamp) {
+            doc.updatedAt = firebase.firestore.FieldValue.serverTimestamp();
+        }
+        const ref = await _db.collection('characters').add(doc);
         return ref.id;
     }
 }
