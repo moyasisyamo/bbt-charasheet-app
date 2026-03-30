@@ -41,6 +41,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // ---- グローバル状態 ----
         window.charData = { mods: {}, image: null, image2: null, faceIcon: null };
+        // pendingFiles: Storageにアップロードする未保存のFileオブジェクトを保持
+        window.pendingFiles = { image: null, image2: null, faceIcon: null };
         window.isBeastMode = false;
         window.isEditMode = false;
         window.currentCharId = new URLSearchParams(location.search).get('id') || null;
@@ -213,8 +215,9 @@ document.addEventListener('DOMContentLoaded', () => {
         initArtsDictionary();
         initEquipDictionary();
 
-        // ---- 画像アップロード ----
+        // ---- 画像アップロード（Cloud Storage対応） ----
         initImageUpload('char-image-placeholder', 'char-image-upload', 'clear-image-btn', 'char-image-preview', 'image');
+        initImageUpload('char-image2-placeholder', 'char-image2-upload', 'clear-image2-btn', 'char-image2-preview', 'image2');
 
         function initImageUpload(placeholderId, uploadId, clearId, previewId, key) {
             const p = document.getElementById(placeholderId);
@@ -227,14 +230,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 const file = e.target.files[0];
                 if (!file) return;
 
-                // 容量制限チェック (720KB)
-                const MAX_SIZE = 720 * 1024;
-                if (file.size > MAX_SIZE) {
-                    alert(`ファイルサイズが大きすぎます (${(file.size / 1024).toFixed(1)}KB)。\n720KB以下の画像を選択してください。`);
-                    u.value = '';
-                    return;
-                }
+                // Fileオブジェクトを保持（保存時にStorageへアップロード）
+                window.pendingFiles[key] = file;
 
+                // ローカルプレビュー表示
                 const reader = new FileReader();
                 reader.onload = ev => {
                     charData[key] = ev.target.result;
@@ -246,6 +245,7 @@ document.addEventListener('DOMContentLoaded', () => {
             b.addEventListener('click', e => {
                 e.stopPropagation();
                 charData[key] = null;
+                window.pendingFiles[key] = null;
                 v.src = ''; v.style.display = 'none';
                 p.style.display = 'flex'; b.style.display = 'none';
                 u.value = '';
@@ -375,6 +375,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     facePlaceholder.style.display = 'none';
                     faceClearBtn.style.display = '';
                     if (faceView) { faceView.src = charData.faceIcon; }
+                    // Storage用にBlobを保持
+                    canvas.toBlob(blob => {
+                        if (blob) window.pendingFiles.faceIcon = blob;
+                    }, 'image/jpeg', 0.9);
                     URL.revokeObjectURL(url);
                 };
                 img.src = url;
@@ -382,6 +386,7 @@ document.addEventListener('DOMContentLoaded', () => {
             faceClearBtn.addEventListener('click', e => {
                 e.stopPropagation();
                 charData.faceIcon = null;
+                window.pendingFiles.faceIcon = null;
                 facePreview.src = ''; facePreview.style.display = 'none';
                 facePlaceholder.style.display = '';
                 faceClearBtn.style.display = 'none';
@@ -404,6 +409,29 @@ document.addEventListener('DOMContentLoaded', () => {
                 saveBtn.textContent = '保存中...';
                 saveBtn.disabled = true;
                 try {
+                    // 新規の場合はIDを先に生成（Storage保存にIDが必要なため）
+                    if (!window.currentCharId) {
+                        window.currentCharId = window.bbFirebase.generateId();
+                        history.replaceState({}, '', `?id=${window.currentCharId}`);
+                    }
+                    const charId = window.currentCharId;
+
+                    // ---- Cloud Storage への画像アップロード ----
+                    const hasStorage = window.bbFirebase.hasStorage();
+                    const imageKeys = ['image', 'image2', 'faceIcon'];
+                    for (const key of imageKeys) {
+                        if (hasStorage && window.pendingFiles[key]) {
+                            // 新しいファイルをアップロード
+                            const url = await window.bbFirebase.uploadImage(charId, window.pendingFiles[key], key);
+                            charData[key] = url; // URLに差し替え
+                            window.pendingFiles[key] = null;
+                        }
+                        // 画像が削除された場合：Storage上のファイルも削除
+                        if (hasStorage && charData[key] === null) {
+                            await window.bbFirebase.deleteImage(charId, key);
+                        }
+                    }
+
                     const pRoot = document.getElementById('primary-root').value;
                     const sRoot = document.getElementById('secondary-root').value;
                     const tRoot = document.getElementById('tertiary-root').value;
@@ -423,11 +451,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     };
                     const sheetData = getSheetState();
                     const skipTimestamp = document.getElementById('no-timestamp-update')?.checked || false;
-                    const newId = await window.bbFirebase.save(window.currentCharId, summary, sheetData, { skipTimestamp });
-                    if (!window.currentCharId) {
-                        window.currentCharId = newId;
-                        history.replaceState({}, '', `?id=${newId}`);
-                    }
+                    await window.bbFirebase.save(charId, summary, sheetData, { skipTimestamp });
                     saveBtn.innerHTML = '\u2714 \u4fdd\u5b58\u6e08<br><span style="font-size:0.75rem;">(\u30af\u30e9\u30a6\u30c9)</span>';
                     saveBtn.style.background = '#388e3c';
                     setTimeout(() => {
@@ -555,7 +579,7 @@ function getSheetState() {
         weapons: acquiredWeapons.map(w => ({ ...w })),
         armor: acquiredArmor.map(a => ({ ...a })),
         items: acquiredItems.map(i => ({ ...i })),
-        images: { image: charData.image, faceIcon: charData.faceIcon },
+        images: { image: charData.image, image2: charData.image2, faceIcon: charData.faceIcon },
         stats: statsNormal, // デフォルト表示用に通常時を保存
         statsNormal,
         statsBeast,
@@ -613,7 +637,7 @@ function restoreSheetState(state) {
         });
     }
 
-    // 画像
+    // 画像（URL or Base64 どちらにも対応）
     if (state.images) {
         if (state.images.faceIcon) {
             charData.faceIcon = state.images.faceIcon;
@@ -635,6 +659,16 @@ function restoreSheetState(state) {
             if (pv) { pv.src = charData.image; pv.style.display = 'block'; }
             if (pl) pl.style.display = 'none';
             if (cl) cl.style.display = 'block';
+        }
+        // 魔獣化イラスト
+        if (state.images.image2) {
+            charData.image2 = state.images.image2;
+            const pv2 = document.getElementById('char-image2-preview');
+            const pl2 = document.getElementById('char-image2-placeholder');
+            const cl2 = document.getElementById('clear-image2-btn');
+            if (pv2) { pv2.src = charData.image2; pv2.style.display = 'block'; }
+            if (pl2) pl2.style.display = 'none';
+            if (cl2) cl2.style.display = 'block';
         }
     }
 
@@ -715,10 +749,10 @@ function buildAndShowViewOverlay() {
     const xpVal = g('vmo-xp-val');
     if (xpVal) xpVal.textContent = gTxt('total-xp-used') || '0';
 
-    // -- キャラ画像 --
+    // -- キャラ画像（魔獣化時はimage2を優先） --
     const artEl = g('vmo-char-art');
     if (artEl) {
-        const src = charData.image;
+        const src = (window.isBeastMode && charData.image2) ? charData.image2 : charData.image;
         artEl.src = src || '';
         artEl.style.display = src ? 'block' : 'none';
     }

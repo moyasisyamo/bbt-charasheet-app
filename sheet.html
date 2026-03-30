@@ -172,11 +172,18 @@
                             <div class="char-illustration box" style="flex: 1; border: 1px dashed var(--border-color); display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; border-radius: 4px; padding: 10px; text-align: center; color: var(--text-muted); cursor: pointer;">
                                 <img id="char-image-preview" src="" alt="キャラクターイラスト" style="display: none; width: 100%; height: auto; border-radius: 4px;">
                                 <div id="char-image-placeholder" class="placeholder-content" style="font-size: 0.9rem;">
-                                    キャラクターイラスト設定<br>
-                                    <span style="font-size: 0.7rem; color: #ff5277;">(最大 720KB)</span>
+                                    キャラクターイラスト設定
                                 </div>
                                 <input type="file" id="char-image-upload" accept="image/*" style="display: none;" class="edit-only">
                                 <button id="clear-image-btn" class="btn warning edit-only" style="width: 100%; margin-top: 5px; display: none; font-size: 0.75rem; padding: 4px;">画像削除</button>
+                            </div>
+                            <div class="char-illustration box" style="flex: 1; border: 1px dashed var(--border-color); display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; border-radius: 4px; padding: 10px; text-align: center; color: var(--text-muted); cursor: pointer;">
+                                <img id="char-image2-preview" src="" alt="魔獣化イラスト" style="display: none; width: 100%; height: auto; border-radius: 4px;">
+                                <div id="char-image2-placeholder" class="placeholder-content" style="font-size: 0.9rem;">
+                                    🐺 魔獣化イラスト設定
+                                </div>
+                                <input type="file" id="char-image2-upload" accept="image/*" style="display: none;" class="edit-only">
+                                <button id="clear-image2-btn" class="btn warning edit-only" style="width: 100%; margin-top: 5px; display: none; font-size: 0.75rem; padding: 4px;">画像削除</button>
                             </div>
                         </div>
                     </div>
@@ -959,6 +966,7 @@
 
     <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.14.0/firebase-storage-compat.js"></script>
     <button id="theme-toggle-fixed" class="theme-toggle-fixed" title="テーマ切り替え">🌓</button>
     <script src="js/firebase-config.js?v=2"></script>
     <script src="js/firebase.js"></script>
