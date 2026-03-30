@@ -312,7 +312,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     name: charName,
                     memo: memo,
                     initiative: getV('stat-action'),
-                    externalUrl: '',
+                    externalUrl: window.currentCharId ? (location.origin + location.pathname + '?id=' + window.currentCharId) : location.href,
                     status: [
                         { label: 'FP', value: getV('stat-fp'), max: getV('stat-fp') },
                         { label: '人間性', value: currentHumanity, max: currentHumanity },
