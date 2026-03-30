@@ -256,46 +256,66 @@
                         <div class="manual-adjustments-box" style="border: 1px dashed var(--border-color); border-radius: 8px; padding: 15px; margin-top: 10px; position: relative;">
                             <div style="position: absolute; bottom: -10px; right: 10px; background: var(--panel-bg); padding: 0 5px; font-size: 0.8rem; color: var(--text-muted);">手動補正 <span id="adj-state-label">(通常)</span></div>
                             
-                            <!-- Normal Adjustments -->
+                             <!-- Normal Adjustments -->
                             <div id="normal-adj-grid" style="display: block;">
-                                <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px; margin-bottom: 10px;">
+                                <!-- Row 1: Basic Stats -->
+                                <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px; margin-bottom: 5px;">
                                     <div class="form-group"><label style="font-size:0.75rem; text-align:center;">肉体</label><input type="number" id="mod-body-normal" value="0" class="stat-trigger edit-only-input manual-adj-input normal-adj-input"></div>
                                     <div class="form-group"><label style="font-size:0.75rem; text-align:center;">技術</label><input type="number" id="mod-tech-normal" value="0" class="stat-trigger edit-only-input manual-adj-input normal-adj-input"></div>
                                     <div class="form-group"><label style="font-size:0.75rem; text-align:center;">感情</label><input type="number" id="mod-emo-normal" value="0" class="stat-trigger edit-only-input manual-adj-input normal-adj-input"></div>
                                     <div class="form-group"><label style="font-size:0.75rem; text-align:center;">加護</label><input type="number" id="mod-div-normal" value="0" class="stat-trigger edit-only-input manual-adj-input normal-adj-input"></div>
                                     <div class="form-group"><label style="font-size:0.75rem; text-align:center;">社会</label><input type="number" id="mod-soc-normal" value="0" class="stat-trigger edit-only-input manual-adj-input normal-adj-input"></div>
                                 </div>
-                                <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; width: 80%;">
+                                <!-- Row 2: Armor Adjustment (A) -->
+                                <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px; margin-bottom: 5px;">
+                                    <div class="form-group"><label style="font-size:0.75rem; text-align:center;">肉体A</label><input type="number" id="mod-armor-phys-normal" value="0" class="stat-trigger edit-only-input manual-adj-input normal-adj-input"></div>
+                                    <div class="form-group"><label style="font-size:0.75rem; text-align:center;">技術A</label><input type="number" id="mod-armor-tech-normal" value="0" class="stat-trigger edit-only-input manual-adj-input normal-adj-input"></div>
+                                    <div class="form-group"><label style="font-size:0.75rem; text-align:center;">感情A</label><input type="number" id="mod-armor-emo-normal" value="0" class="stat-trigger edit-only-input manual-adj-input normal-adj-input"></div>
+                                    <div class="form-group"><label style="font-size:0.75rem; text-align:center;">加護A</label><input type="number" id="mod-armor-div-normal" value="0" class="stat-trigger edit-only-input manual-adj-input normal-adj-input"></div>
+                                    <div class="form-group"><label style="font-size:0.75rem; text-align:center;">社会A</label><input type="number" id="mod-armor-soc-normal" value="0" class="stat-trigger edit-only-input manual-adj-input normal-adj-input"></div>
+                                </div>
+                                <!-- Row 3: Combat Stats & FP -->
+                                <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px; margin-bottom: 5px;">
                                     <div class="form-group"><label style="font-size:0.75rem; text-align:center;">白兵</label><input type="number" id="mod-melee-normal" value="0" class="stat-trigger edit-only-input manual-adj-input normal-adj-input"></div>
                                     <div class="form-group"><label style="font-size:0.75rem; text-align:center;">射撃</label><input type="number" id="mod-ranged-normal" value="0" class="stat-trigger edit-only-input manual-adj-input normal-adj-input"></div>
                                     <div class="form-group"><label style="font-size:0.75rem; text-align:center;">回避</label><input type="number" id="mod-dodge-normal" value="0" class="stat-trigger edit-only-input manual-adj-input normal-adj-input"></div>
                                     <div class="form-group"><label style="font-size:0.75rem; text-align:center;">行動</label><input type="number" id="mod-action-normal" value="0" class="stat-trigger edit-only-input manual-adj-input normal-adj-input"></div>
-                                </div>
-                                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; width: 60%; margin-top: 10px;">
-                                    <div class="form-group"><label style="font-size:0.75rem; text-align:center;">アーマー</label><input type="number" id="mod-armor-normal" value="0" class="stat-trigger edit-only-input manual-adj-input normal-adj-input"></div>
                                     <div class="form-group"><label style="font-size:0.75rem; text-align:center;">FP</label><input type="number" id="mod-fp-normal" value="0" class="stat-trigger edit-only-input manual-adj-input normal-adj-input"></div>
+                                </div>
+                                <!-- Row 4: Humanity -->
+                                <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px;">
                                     <div class="form-group"><label style="font-size:0.75rem; text-align:center;">人間性</label><input type="number" id="mod-humanity-normal" value="0" class="stat-trigger edit-only-input manual-adj-input normal-adj-input"></div>
                                 </div>
                             </div>
 
-                            <!-- Beast Adjustments -->
+                             <!-- Beast Adjustments -->
                             <div id="beast-adj-grid" style="display: none;">
-                                <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px; margin-bottom: 10px;">
+                                <!-- Row 1: Basic Stats -->
+                                <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px; margin-bottom: 5px;">
                                     <div class="form-group"><label style="font-size:0.75rem; text-align:center;">肉体</label><input type="number" id="mod-body-beast" value="0" class="stat-trigger edit-only-input manual-adj-input beast-adj-input"></div>
                                     <div class="form-group"><label style="font-size:0.75rem; text-align:center;">技術</label><input type="number" id="mod-tech-beast" value="0" class="stat-trigger edit-only-input manual-adj-input beast-adj-input"></div>
                                     <div class="form-group"><label style="font-size:0.75rem; text-align:center;">感情</label><input type="number" id="mod-emo-beast" value="0" class="stat-trigger edit-only-input manual-adj-input beast-adj-input"></div>
                                     <div class="form-group"><label style="font-size:0.75rem; text-align:center;">加護</label><input type="number" id="mod-div-beast" value="0" class="stat-trigger edit-only-input manual-adj-input beast-adj-input"></div>
                                     <div class="form-group"><label style="font-size:0.75rem; text-align:center;">社会</label><input type="number" id="mod-soc-beast" value="0" class="stat-trigger edit-only-input manual-adj-input beast-adj-input"></div>
                                 </div>
-                                <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; width: 80%;">
+                                <!-- Row 2: Armor Adjustment (A) -->
+                                <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px; margin-bottom: 5px;">
+                                    <div class="form-group"><label style="font-size:0.75rem; text-align:center;">肉体A</label><input type="number" id="mod-armor-phys-beast" value="0" class="stat-trigger edit-only-input manual-adj-input beast-adj-input"></div>
+                                    <div class="form-group"><label style="font-size:0.75rem; text-align:center;">技術A</label><input type="number" id="mod-armor-tech-beast" value="0" class="stat-trigger edit-only-input manual-adj-input beast-adj-input"></div>
+                                    <div class="form-group"><label style="font-size:0.75rem; text-align:center;">感情A</label><input type="number" id="mod-armor-emo-beast" value="0" class="stat-trigger edit-only-input manual-adj-input beast-adj-input"></div>
+                                    <div class="form-group"><label style="font-size:0.75rem; text-align:center;">加護A</label><input type="number" id="mod-armor-div-beast" value="0" class="stat-trigger edit-only-input manual-adj-input beast-adj-input"></div>
+                                    <div class="form-group"><label style="font-size:0.75rem; text-align:center;">社会A</label><input type="number" id="mod-armor-soc-beast" value="0" class="stat-trigger edit-only-input manual-adj-input beast-adj-input"></div>
+                                </div>
+                                <!-- Row 3: Combat Stats & FP -->
+                                <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px; margin-bottom: 5px;">
                                     <div class="form-group"><label style="font-size:0.75rem; text-align:center;">白兵</label><input type="number" id="mod-melee-beast" value="0" class="stat-trigger edit-only-input manual-adj-input beast-adj-input"></div>
                                     <div class="form-group"><label style="font-size:0.75rem; text-align:center;">射撃</label><input type="number" id="mod-ranged-beast" value="0" class="stat-trigger edit-only-input manual-adj-input beast-adj-input"></div>
                                     <div class="form-group"><label style="font-size:0.75rem; text-align:center;">回避</label><input type="number" id="mod-dodge-beast" value="0" class="stat-trigger edit-only-input manual-adj-input beast-adj-input"></div>
                                     <div class="form-group"><label style="font-size:0.75rem; text-align:center;">行動</label><input type="number" id="mod-action-beast" value="0" class="stat-trigger edit-only-input manual-adj-input beast-adj-input"></div>
-                                </div>
-                                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; width: 60%; margin-top: 10px;">
-                                    <div class="form-group"><label style="font-size:0.75rem; text-align:center;">アーマー</label><input type="number" id="mod-armor-beast" value="0" class="stat-trigger edit-only-input manual-adj-input beast-adj-input"></div>
                                     <div class="form-group"><label style="font-size:0.75rem; text-align:center;">FP</label><input type="number" id="mod-fp-beast" value="0" class="stat-trigger edit-only-input manual-adj-input beast-adj-input"></div>
+                                </div>
+                                <!-- Row 4: Humanity -->
+                                <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px;">
                                     <div class="form-group"><label style="font-size:0.75rem; text-align:center;">人間性</label><input type="number" id="mod-humanity-beast" value="0" class="stat-trigger edit-only-input manual-adj-input beast-adj-input"></div>
                                 </div>
                             </div>

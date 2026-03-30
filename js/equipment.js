@@ -189,8 +189,8 @@ function renderArmorTable() {
                 <strong>${item['装備名']}</strong><br><small>${item['ルーツ'] || '-'}</small><br>
                 ${eqInput}
             </td>
-            <td style="text-align:center;"><input type="radio" name="normal-armor" class="normal-equip-radio" ${item._normalEquip ? 'checked' : ''}></td>
-            <td style="text-align:center;"><input type="radio" name="beast-armor"  class="beast-equip-radio"  ${item._beastEquip ? 'checked' : ''}></td>
+            <td style="text-align:center;"><input type="checkbox" class="normal-equip-check" ${item._normalEquip ? 'checked' : ''}></td>
+            <td style="text-align:center;"><input type="checkbox" class="beast-equip-check"  ${item._beastEquip ? 'checked' : ''}></td>
             <td>${item['購入']}</td>
             <td>${item['ドッジ']}</td>
             <td>${item['行動値']}</td>
@@ -210,14 +210,20 @@ function renderArmorTable() {
         const inputEl = row.querySelector('.eq-name-input');
         inputEl.addEventListener('input', () => { item._equivalentName = inputEl.value; row.querySelector('.view-only-text').textContent = inputEl.value || '-'; });
 
-        row.querySelector('.normal-equip-radio').addEventListener('change', e => {
+        row.querySelector('.normal-equip-check').addEventListener('change', e => {
+            const isChecked = e.target.checked;
+            // 他の防具の通常時装備を解除
             acquiredArmor.forEach(a => a._normalEquip = false);
-            item._normalEquip = e.target.checked;
+            item._normalEquip = isChecked;
+            renderArmorTable();
             calculateStats();
         });
-        row.querySelector('.beast-equip-radio').addEventListener('change', e => {
+        row.querySelector('.beast-equip-check').addEventListener('change', e => {
+            const isChecked = e.target.checked;
+            // 他の防具の魔獣化時装備を解除
             acquiredArmor.forEach(a => a._beastEquip = false);
-            item._beastEquip = e.target.checked;
+            item._beastEquip = isChecked;
+            renderArmorTable();
             calculateStats();
         });
 

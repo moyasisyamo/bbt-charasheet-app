@@ -516,7 +516,9 @@ function getSheetState() {
     });
 
     const mods = {};
-    ['body', 'tech', 'emo', 'div', 'soc', 'melee', 'ranged', 'dodge', 'action', 'armor', 'fp', 'humanity'].forEach(stat => {
+    ['body', 'tech', 'emo', 'div', 'soc', 'melee', 'ranged', 'dodge', 'action', 
+     'armor-phys', 'armor-tech', 'armor-emo', 'armor-div', 'armor-soc',
+     'fp', 'humanity'].forEach(stat => {
         ['normal', 'beast'].forEach(mode => {
             const el = document.getElementById(`mod-${stat}-${mode}`);
             if (el) mods[`${stat}-${mode}`] = el.value;

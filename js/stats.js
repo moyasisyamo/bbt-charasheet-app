@@ -98,7 +98,11 @@ function calculateStats() {
     charData.mods.ranged   = getAdj('ranged');
     charData.mods.dodge    = getAdj('dodge');
     charData.mods.action   = getAdj('action');
-    charData.mods.armor    = getAdj('armor');
+    charData.mods.armorPhys = getAdj('armor-phys');
+    charData.mods.armorTech = getAdj('armor-tech');
+    charData.mods.armorEmo  = getAdj('armor-emo');
+    charData.mods.armorDiv  = getAdj('armor-div');
+    charData.mods.armorSoc  = getAdj('armor-soc');
     charData.mods.fp       = getAdj('fp');
     charData.mods.humanity = getAdj('humanity');
 
@@ -143,7 +147,7 @@ function calculateStats() {
     document.getElementById('stat-ranged').textContent = cStats.ranged;
 
     // ---- 装備による防具修正 ----
-    let activeDodgeMod = 0, activeActionMod = 0, activeArmorA = charData.mods.armor || 0;
+    let activeDodgeMod = 0, activeActionMod = 0, equipArmorA = 0;
 
     function parseEqCost(str) {
         if (!str) return 0;
@@ -166,7 +170,7 @@ function calculateStats() {
         if ((window.isBeastMode && armor._beastEquip) || (!window.isBeastMode && armor._normalEquip)) {
             activeDodgeMod  += Number(armor['ドッジ'])   || 0;
             activeActionMod += Number(armor['行動値'])    || 0;
-            activeArmorA    += Number(armor['A値'])       || 0;
+            equipArmorA     += Number(armor['A値'])       || 0;
         }
     });
     acquiredItems.forEach(i => equipCost += parseEqCost(i['購入']) * (i._quantity !== undefined ? parseInt(i._quantity) : 1));
@@ -231,11 +235,11 @@ function calculateStats() {
     document.getElementById('stat-type').textContent      = stats.type.length > 0 ? stats.type.join(' / ') : '-';
 
     // ---- アーマー値表示 ----
-    document.getElementById('armor-phys').textContent = Math.floor(stats.physical / 2) + activeArmorA;
-    document.getElementById('armor-tech').textContent = Math.floor(stats.tech     / 2) + activeArmorA;
-    document.getElementById('armor-emo').textContent  = Math.floor(stats.emotion  / 2) + activeArmorA;
-    document.getElementById('armor-div').textContent  = Math.floor(stats.divine   / 2) + activeArmorA;
-    document.getElementById('armor-soc').textContent  = Math.floor(stats.society  / 2) + activeArmorA;
+    document.getElementById('armor-phys').textContent = Math.floor(stats.physical / 2) + equipArmorA + (charData.mods.armorPhys || 0);
+    document.getElementById('armor-tech').textContent = Math.floor(stats.tech     / 2) + equipArmorA + (charData.mods.armorTech || 0);
+    document.getElementById('armor-emo').textContent  = Math.floor(stats.emotion  / 2) + equipArmorA + (charData.mods.armorEmo  || 0);
+    document.getElementById('armor-div').textContent  = Math.floor(stats.divine   / 2) + equipArmorA + (charData.mods.armorDiv  || 0);
+    document.getElementById('armor-soc').textContent  = Math.floor(stats.society  / 2) + equipArmorA + (charData.mods.armorSoc  || 0);
 
     // ---- 自動取得アーツ更新 ----
     updateAutoArts(pRootName, sRootName, tRootName, styleName);
