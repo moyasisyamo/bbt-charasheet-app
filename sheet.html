@@ -513,8 +513,8 @@
                 <button id="close-arts-dictionary" class="btn exception-btn">✕ 閉じる</button>
             </div>
             
-            <div class="arts-filters form-grid" style="margin-bottom: 20px;">
-                <div class="form-group">
+            <div class="arts-filters" style="display: flex; gap: 15px; margin-bottom: 20px; flex-wrap: wrap;">
+                <div class="form-group" style="flex: 1;">
                     <label>フィルター</label>
                     <select id="arts-filter-category">
                         <option value="all">すべて</option>
@@ -523,9 +523,9 @@
                         <option value="attacker">アタッカー</option>
                     </select>
                 </div>
-                <div class="form-group">
+                <div class="form-group" style="flex: 3;">
                     <label>検索</label>
-                    <input type="text" id="arts-search-input" placeholder="アーツ名や効果で検索...">
+                    <input type="text" id="arts-search-input" placeholder="アーツ名、対象/射程、判定値など (スペース区切りで複数検索可)">
                 </div>
             </div>
 

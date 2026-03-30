@@ -168,8 +168,12 @@ function updateAutoArts(pRoot, sRoot, tRoot, style) {
         (rootsMap[cat] || []).forEach(art => {
             if (art['種別'] && art['種別'].includes('自動') && !acquiredArts.some(a => a['アーツ名'] === art['アーツ名'])) {
                 let matchRoot = true;
+                const normalize = s => s ? s.replace(/\.$/, '') : '';
+                const nArtRoot = normalize(art['ルーツ']);
+                const nValidRoots = validRoots.map(normalize);
+
                 if (art['ルーツ'] && art['ルーツ'] !== cat && !['基本','イレギュラー','共通アーツ'].includes(art['ルーツ'])) {
-                    if (!validRoots.includes(art['ルーツ'])) matchRoot = false;
+                    if (!nValidRoots.includes(nArtRoot)) matchRoot = false;
                 }
                 if (matchRoot) {
                     const newArt = { ...art, _originCat: cat, _rt: art['ルーツ'] || cat, _currentLevel: 1 };
@@ -242,16 +246,22 @@ function initArtsDictionary() {
                 const rt = art['ルーツ'] || cat;
                 let matchFilter = true;
 
+                const normalize = s => s ? s.replace(/\.$/, '') : '';
+                const nRt = normalize(rt);
+                const nCat = normalize(cat);
+                const nValidRoots = validRoots.map(normalize);
+                const nValidBloods = validBloods.map(normalize);
+
                 if (filter === 'current') {
                     if (styleCats.includes(cat) && cat !== cStyle && cStyle) {
                         matchFilter = false;
                     } else {
                         const isStyle  = cat === cStyle || rt === cStyle;
-                        const isRoot   = validRoots.includes(rt)  || validRoots.includes(cat);
-                        const isBlood  = validBloods.includes(rt) || validBloods.includes(cat);
+                        const isRoot   = nValidRoots.includes(nRt)  || nValidRoots.includes(nCat);
+                        const isBlood  = nValidBloods.includes(nRt) || nValidBloods.includes(nCat);
                         const isCommon = rt === '基本アーツ' || cat === '共通アーツ' || rt === '基本';
                         let validBloodRoot = true;
-                        if (validBloods.includes(cat) && rt !== cat && !validRoots.includes(rt)) validBloodRoot = false;
+                        if (nValidBloods.includes(nCat) && nRt !== nCat && !nValidRoots.includes(nRt)) validBloodRoot = false;
                         matchFilter = (isStyle || isRoot || isBlood || isCommon) && validBloodRoot;
                     }
                 } else if (filter !== 'all') {
@@ -259,8 +269,20 @@ function initArtsDictionary() {
                 }
 
                 if (!matchFilter) return;
-                const txt = `${art['アーツ名']} ${art['効果']} ${rt}`.toLowerCase();
-                if (query && !txt.includes(query)) return;
+                
+                const queries = query.split(/[\s　]+/).filter(q => q);
+                const txt = `${art['アーツ名']} ${art['効果']} ${rt} ${art['種別'] || ''} ${art['対象'] || ''}/${art['射程'] || ''} ${art['判定値'] || ''} ${art['タイミング'] || ''}`.toLowerCase();
+                
+                let isMatch = true;
+                for (const q of queries) {
+                    if (!txt.includes(q)) {
+                        isMatch = false;
+                        break;
+                    }
+                }
+
+                if (queries.length > 0 && !isMatch) return;
+                
                 resultSet.push({ ...art, _cat: cat, _rt: rt });
             });
         });
