@@ -111,6 +111,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 const playerEl = document.getElementById('player-name');
                 const vPlayer = document.getElementById('view-player-name');
                 if (playerEl && vPlayer) vPlayer.textContent = playerEl.value || '-';
+                
+                const memoEl = document.getElementById('arts-combination-memo');
+                const vMemo = document.getElementById('arts-combination-memo-view');
+                if (memoEl && vMemo) vMemo.innerHTML = (memoEl.value || '-').replace(/\n/g, '<br>');
+
                 const faceView = document.getElementById('face-icon-view');
                 if (faceView && charData.faceIcon) { faceView.src = charData.faceIcon; faceView.style.display = 'block'; }
                 buildAndShowViewOverlay();
@@ -298,7 +303,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 cp += `(${atk}) ${name}(${w['射程']})\n`;
             });
 
-            cp += `\n//アーツメモ欄\n`;
+            cp += `\n//アーツ組み合わせメモ\n`;
+            cp += (gVal('arts-combination-memo') || '') + `\n\n`;
+
+            cp += `//アーツメモ欄\n`;
             acquiredArts.forEach(a => {
                 const costLabel = a._overrideCost !== undefined ? a._overrideCost : (a['コスト'] || '-');
                 const note = a._note ? ` 【補足：${a._note}】` : '';
@@ -336,9 +344,24 @@ document.addEventListener('DOMContentLoaded', () => {
             };
 
             navigator.clipboard.writeText(JSON.stringify(cc))
-                .then(() => alert('ココフォリア用のコマデータをクリップボードにコピーしました！'))
                 .catch(() => alert('コピーに失敗しました。'));
         });
+
+        // ---- データDLボタン ----
+        const dlBtn = document.getElementById('download-json-btn');
+        if (dlBtn) {
+            dlBtn.addEventListener('click', () => {
+                const state = getSheetState();
+                const json = JSON.stringify(state, null, 2);
+                const blob = new Blob([json], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `BBT_${state.summary?.name || 'character'}_${new Date().getTime()}.json`;
+                a.click();
+                URL.revokeObjectURL(url);
+            });
+        }
 
         // ---- 顔アイコン処理 ----
         const faceContainer = document.getElementById('face-icon-container');
@@ -582,11 +605,16 @@ function getSheetState() {
         armor: acquiredArmor.map(a => ({ ...a })),
         items: acquiredItems.map(i => ({ ...i })),
         images: { image: charData.image, image2: charData.image2, faceIcon: charData.faceIcon },
+        artsCombinationMemo: document.getElementById('arts-combination-memo')?.value || '',
         stats: statsNormal, // デフォルト表示用に通常時を保存
         statsNormal,
         statsBeast,
         isTemp: document.getElementById('is-temp-reg').checked,
         password: document.getElementById('char-password')?.value || '',
+        summary: {
+            name: document.getElementById('char-name')?.value || '名無し',
+            playerName: document.getElementById('player-name')?.value || '',
+        }
     };
     return JSON.parse(JSON.stringify(rawState));
 }
@@ -690,6 +718,14 @@ function restoreSheetState(state) {
     if (state.password) {
         const pw = document.getElementById('char-password');
         if (pw) pw.value = state.password;
+    }
+
+    // アーツ組み合わせメモ
+    if (state.artsCombinationMemo !== undefined) {
+        const memoEl = document.getElementById('arts-combination-memo');
+        const vMemo = document.getElementById('arts-combination-memo-view');
+        if (memoEl) memoEl.value = state.artsCombinationMemo;
+        if (vMemo) vMemo.innerHTML = (state.artsCombinationMemo || '-').replace(/\n/g, '<br>');
     }
 
     // 仮登録

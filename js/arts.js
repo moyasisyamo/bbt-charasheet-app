@@ -26,6 +26,7 @@ function renderArtsTable() {
     acquiredArts.forEach((art, index) => {
         const isCopied = isNextCopied;
         const isBeast  = art['アーツ名'] === '魔獣化';
+        const isArena  = art['アーツ名'] === 'アレナ展開';
         const type     = art['種別'] || '';
         const row      = document.createElement('tr');
 
@@ -34,9 +35,9 @@ function renderArtsTable() {
 
         const lvVal = art._currentLevel !== undefined ? art._currentLevel : 1;
 
-        // コスト編集可能なセル（コピーアーツまたは魔獣化）
+        // コスト編集可能なセル（コピーアーツ、魔獣化、またはアレナ展開）
         let costCellHTML = `<td>${art['コスト'] || '-'}</td>`;
-        if (isCopied || isBeast) {
+        if (isCopied || isBeast || isArena) {
             let defaultCost = art['コスト'] || '0';
             if (isBeast && art._overrideCost === undefined) {
                 // 魔獣化の初期値は1（updateAutoArtsでも設定するがここでも念のため）
@@ -95,7 +96,7 @@ function renderArtsTable() {
         });
 
         // コスト編集
-        if (isCopied || isBeast) {
+        if (isCopied || isBeast || isArena) {
             const costIn  = row.querySelector('.copied-art-cost');
             const costVw  = row.querySelector('.copied-art-cost-view');
             costIn.addEventListener('input', e => {

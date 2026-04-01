@@ -31,6 +31,7 @@
                     <button id="toggle-edit-mode-btn" class="btn warning" style="background:#f59e0b; color:#fff; border:none; padding:8px 12px; border-radius:4px; font-weight:bold; cursor:pointer;">🔒 閲覧モード<br><span style="font-size:0.75rem;">(編集ロック)</span></button>
                     <button id="save-firebase-btn" class="btn primary edit-only" style="background:#4caf50; color:#fff; border:none; padding:8px 12px; border-radius:4px; font-weight:bold; cursor:pointer;">☁ 保存<br><span style="font-size:0.75rem;">(クラウド)</span></button>
                     <button id="export-cocofolia-btn" class="btn primary" style="background:#ff5277; color:#fff; border:none; padding:8px 12px; border-radius:4px; font-weight:bold; cursor:pointer;">🎲 コマ出力<br><span style="font-size:0.75rem;">(ココフォリア)</span></button>
+                    <button id="download-json-btn" class="btn" style="background:#4b5563; color:#fff; border:none; padding:8px 12px; border-radius:4px; font-weight:bold; cursor:pointer;">📥 データDL<br><span style="font-size:0.75rem;">(JSON)</span></button>
                 </div>
             </div>
         </header>
@@ -409,6 +410,13 @@
                         </tbody>
                     </table>
                 </div>
+
+                <!-- Arts Combination Memo -->
+                <div class="panel edit-only" style="margin-top: 15px; border-top: 1px dashed var(--border-color); padding-top: 20px;">
+                    <h3 style="font-size: 1rem; margin-bottom: 10px; color: var(--primary-color);">アーツ組み合わせメモ</h3>
+                    <textarea id="arts-combination-memo" class="profile-input" style="width: 100%; height: 100px; resize: vertical;" placeholder="よく使うアーツの組み合わせやコンボ、判定値などをメモできます。"></textarea>
+                </div>
+                <div class="view-only-text" id="arts-combination-memo-view" style="margin-top: 10px; font-size: 0.9rem; padding: 10px; background: rgba(0,0,0,0.05); border-left: 3px solid var(--primary-color); white-space: pre-wrap;"></div>
                 <div class="arts-controls" style="margin-top: 15px;">
                     <button id="open-arts-dictionary-btn" class="btn primary">📚 アーツ辞書から追加</button>
                 </div>
@@ -560,10 +568,14 @@
                 <button id="close-equip-dictionary" class="btn exception-btn">✕ 閉じる</button>
             </div>
             
-            <div class="arts-filters form-grid" style="margin-bottom: 20px;">
-                <div class="form-group">
+            <div class="arts-filters" style="display: flex; gap: 15px; margin-bottom: 20px; flex-wrap: wrap;">
+                <div class="form-group" style="flex: 2;">
                     <label>検索</label>
-                    <input type="text" id="equip-search-input" placeholder="名前や効果で検索...">
+                    <input type="text" id="equip-search-input" placeholder="名前や効果で検索... (スペース区切りで複数検索可)">
+                </div>
+                <div class="form-group" style="flex: 1; min-width: 120px;">
+                    <label>常備化コスト以下</label>
+                    <input type="number" id="equip-filter-cost" placeholder="数値入力" min="0">
                 </div>
             </div>
 

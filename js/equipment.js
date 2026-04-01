@@ -24,12 +24,18 @@ function initEquipDictionary() {
     document.getElementById('open-armor-dict-btn').addEventListener('click',  () => openEquipDict('armor',   '防具辞典'));
     document.getElementById('open-item-dict-btn').addEventListener('click',   () => openEquipDict('items',   '道具辞典'));
     document.getElementById('close-equip-dictionary').addEventListener('click', () => { modal.style.display = 'none'; });
+    
+    const costInput = document.getElementById('equip-filter-cost');
     searchInput.addEventListener('input', renderEquipDictionary);
+    if (costInput) {
+        costInput.addEventListener('input', renderEquipDictionary);
+    }
 
     function openEquipDict(type, title) {
         currentDictType = type;
         titleEl.textContent = title;
         searchInput.value = '';
+        if (costInput) costInput.value = '';
 
         if (type === 'weapons') {
             theadEl.innerHTML = `<tr><th class="dict-header-marker" style="width:180px;">装備名</th><th style="width:60px;">購入</th><th style="width:70px;">種別</th><th style="width:40px;">命中</th><th style="width:40px;">行動</th><th style="width:40px;">攻撃</th><th style="width:50px;">射程</th><th>効果</th><th>操作</th></tr>`;
@@ -58,16 +64,29 @@ function initEquipDictionary() {
     }
 
     function renderEquipDictionary() {
-        const query    = searchInput.value.toLowerCase();
+        const query = searchInput.value.toLowerCase();
+        const costLimit = costInput ? parseInt(costInput.value) : NaN;
         tbodyEl.innerHTML = '';
         const dataList = BBTEquipData[currentDictType] || [];
 
         dataList.filter(item => {
+            // 常備化コストによるフィルタ
+            if (!isNaN(costLimit)) {
+                const buyStr = item['購入'] || '';
+                const parts = buyStr.split('/');
+                const cost = parseInt(parts[1] || parts[0]); // x/y の y、または x のみ
+                if (isNaN(cost) || cost > costLimit) return false;
+            }
+
             if (!query) return true;
+            const queries = query.split(/[\s　]+/).filter(q => q);
             const name   = (item['装備名'] || '').toLowerCase();
             const type   = (item['種別']   || '').toLowerCase();
             const effect = (item['効果']   || '').toLowerCase();
-            return name.includes(query) || type.includes(query) || effect.includes(query);
+            const rt     = (item['ルーツ'] || '').toLowerCase();
+            const txt = `${name} ${type} ${effect} ${rt}`;
+
+            return queries.every(q => txt.includes(q));
         }).forEach(item => {
             const row = document.createElement('tr');
             const rt = item['ルーツ'] || '-';

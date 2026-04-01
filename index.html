@@ -153,7 +153,7 @@ const FIREBASE_CONFIG = {
                     <th class="sortable" data-field="style">スタイル<span class="sort-arrow"></span></th>
                     <th id="th-roots" style="cursor:pointer;">ブラッド／ルーツ ▾</th>
                     <th class="sortable" data-field="xpUsed">経験点<span class="sort-arrow"></span></th>
-                    <th class="sortable" data-field="playerName">プレイヤー名<span class="sort-arrow"></span></th>
+                    <th id="th-player-name" style="cursor:pointer;">プレイヤー名 ▾</th>
                     <th class="sortable" data-field="updatedAt">最終更新日<span class="sort-arrow"></span></th>
                 </tr>
             </thead>
@@ -173,6 +173,18 @@ const FIREBASE_CONFIG = {
             <div class="popup-list" id="roots-list"></div>
             <div class="popup-footer">
                 <button class="btn" id="roots-popup-close" style="padding:6px 16px;">閉じる</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- プレイヤー絞り込みポップアップ -->
+    <div id="player-popup" class="popup-overlay" style="display:none;">
+        <div class="popup-box">
+            <h3>プレイヤー名で絞り込み</h3>
+            <input type="text" id="player-search" placeholder="プレイヤー名を検索...">
+            <div class="popup-list" id="player-list"></div>
+            <div class="popup-footer">
+                <button class="btn" id="player-popup-close" style="padding:6px 16px;">閉じる</button>
             </div>
         </div>
     </div>

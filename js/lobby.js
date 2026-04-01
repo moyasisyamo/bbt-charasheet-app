@@ -82,6 +82,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     setupSort();
     setupSearch();
     setupRootsPopup();
+    setupPlayerPopup();
 
     document.getElementById('clear-filters-btn').addEventListener('click', clearAllFilters);
 });
@@ -359,6 +360,50 @@ function setupRootsPopup() {
     });
 
     document.getElementById('roots-popup-close').addEventListener('click', () => { popup.style.display = 'none'; });
+    popup.addEventListener('click', e => { if (e.target === popup) popup.style.display = 'none'; });
+}
+
+// ---- プレイヤー名ポップアップ ----
+function setupPlayerPopup() {
+    const popup    = document.getElementById('player-popup');
+    const listEl   = document.getElementById('player-list');
+    const searchEl = document.getElementById('player-search');
+
+    document.getElementById('th-player-name').addEventListener('click', () => {
+        // 全キャラのプレイヤー名を収集
+        const playerSet = new Set();
+        allChars.forEach(c => { if(c.playerName) playerSet.add(c.playerName); });
+        
+        const sortedPlayers = [...playerSet].sort();
+        renderPopupList(sortedPlayers.map(p => ({ label: p, value: p })));
+        
+        searchEl.value = '';
+        popup.style.display = 'flex';
+        searchEl.focus();
+    });
+
+    let currentItems = [];
+    function renderPopupList(items) {
+        currentItems = items;
+        listEl.innerHTML = '';
+        items.forEach(item => {
+            const el = document.createElement('div');
+            el.className = 'popup-item';
+            el.innerHTML = `<div>${escHtml(item.label)}</div>`;
+            el.addEventListener('click', () => {
+                addFilter('player', item.value);
+                popup.style.display = 'none';
+            });
+            listEl.appendChild(el);
+        });
+    }
+
+    searchEl.addEventListener('input', () => {
+        const q = searchEl.value.toLowerCase();
+        renderPopupList(currentItems.filter(i => i.label.toLowerCase().includes(q)));
+    });
+
+    document.getElementById('player-popup-close').addEventListener('click', () => { popup.style.display = 'none'; });
     popup.addEventListener('click', e => { if (e.target === popup) popup.style.display = 'none'; });
 }
 
