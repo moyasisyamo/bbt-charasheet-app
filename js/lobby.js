@@ -194,13 +194,15 @@ function buildRow(c) {
             <span class="root-link"  data-root="${escHtml(p.r||'')}">${escHtml(p.r||'-')}</span>
         </div>`).join('');
 
+    const targetUrl = activeTab === 'temporary' ? `sheet.html?id=${c.id}&edit=true` : `sheet.html?id=${c.id}`;
+
     const tr = document.createElement('tr');
     tr.innerHTML = `
         <td>
-            <div class="name-cell" data-id="${c.id}">
+            <a href="${targetUrl}" class="name-cell" data-id="${c.id}" style="text-decoration:none; color:inherit;">
                 ${iconHTML}
                 <span class="char-name-text">${escHtml(c.name || '名無し')}</span>
-            </div>
+            </a>
         </td>
         <td><span class="style-badge ${cls}" data-style="${escHtml(c.style||'')}">${abbr}</span></td>
         <td class="roots-cell">${rootsHTML}</td>
@@ -210,8 +212,9 @@ function buildRow(c) {
     `;
 
     // イベントバインド
-    tr.querySelector('.name-cell').addEventListener('click', async () => {
+    tr.querySelector('.name-cell').addEventListener('click', async (e) => {
         if (isDeleteMode) {
+            e.preventDefault();
             const pass = prompt(`「${c.name || '名無し'}」を削除しますか？\n実行するにはこのキャラクターの編集パスワード、または管理者パスワードを入力してください:`);
             if (pass !== null) {
                 const charPass = (c.sheetData && c.sheetData.password) || c.password || ''; 
@@ -223,19 +226,13 @@ function buildRow(c) {
                             await window.bbFirebase.delete(c.id);
                             alert('削除しました。');
                             loadCharacters();
-                        } catch (e) {
-                            alert('削除に失敗しました: ' + e.message);
+                        } catch (err) {
+                            alert('削除に失敗しました: ' + err.message);
                         }
                     }
                 } else {
                     alert('パスワードが違います。');
                 }
-            }
-        } else {
-            if (activeTab === 'temporary') {
-                window.location.href = `sheet.html?id=${c.id}&edit=true`;
-            } else {
-                window.location.href = `sheet.html?id=${c.id}`;
             }
         }
     });
